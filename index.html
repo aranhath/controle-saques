@@ -142,14 +142,14 @@
   </div>
 
   <script>
-    // Configuração do Firebase (Cole Suas Chaves Aqui)
+    // Configuração do Firebase com as tuas credenciais reais
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY_AQUI",
-      authDomain: "SEU_PROJETO.firebaseapp.com",
-      projectId: "SEU_PROJETO_ID",
-      storageBucket: "SEU_PROJETO.appspot.com",
-      messagingSenderId: "SEU_SENDER_ID",
-      appId: "SEU_APP_ID"
+      apiKey: "AIzaSyCLAL7KqBer3lbxtiZmB7UFM0ti9KJRUN4",
+      authDomain: "controle-saque.firebaseapp.com",
+      projectId: "controle-saque",
+      storageBucket: "controle-saque.firebasestorage.app",
+      messagingSenderId: "448674045514",
+      appId: "1:448674045514:web:c87fa8834e60ea540850b3"
     };
 
     // Inicializar Firebase
@@ -222,7 +222,7 @@
         comissaoPessoa,
         lucroBrutoSeu,
         lucroLiquidoSeu,
-        pago: false, // Inicia como pendente
+        pago: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
