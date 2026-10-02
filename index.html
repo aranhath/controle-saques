@@ -52,7 +52,7 @@
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <button onclick="togglePainelConfig()" class="bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded font-medium transition flex items-center gap-1.5">
-          <span>⚙️️</span> Regras de Lucro
+          <span>⚙</span> Regras de Lucro
         </button>
         <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition">📥 Exportar Backup</button>
         <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 cursor-pointer transition">
@@ -64,25 +64,32 @@
       </div>
     </header>
 
-    <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO (Sutil / Oculto por padrão) -->
-    <section id="painelConfigRegras" class="hidden bg-slate-800/90 border border-emerald-500/30 rounded-xl p-5 shadow-2xl space-y-4">
+    <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
+    <section id="painelConfigRegras" class="hidden bg-slate-800/95 border border-emerald-500/40 rounded-xl p-5 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
         <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Ajustar Regras do Seu Lucro Bruto</h3>
-        <button onclick="togglePainelConfig()" class="text-slate-400 hover:text-slate-200 text-xs">✕ Fechar</button>
+        <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-3 py-1 rounded text-xs transition flex items-center gap-1">
+          ✕ Fechar
+        </button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
         <div>
-          <label class="block text-slate-400 mb-1">Valor Limite para Saque Pequeno (R$)</label>
+          <label class="block text-slate-400 mb-1">Valor Limite Saque Pequeno (R$)</label>
           <input type="number" id="cfgLimiteValor" value="50" step="1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
 
-        <div>
+        <!-- Custom Dropdown para o Modo Abaixo do Limite -->
+        <div class="relative">
           <label class="block text-slate-400 mb-1">Modo até o Valor Limite</label>
-          <select id="cfgModoAbaixo" onchange="atualizarInterfaceConfig()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
-            <option value="fixo">Valor Fixo (R$)</option>
-            <option value="porcentagem">Porcentagem (%)</option>
-          </select>
+          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200 text-left flex justify-between items-center focus:outline-none hover:border-slate-600">
+            <span id="labelDropdownModo">Valor Fixo (R$)</span>
+            <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded shadow-xl z-50 divide-y divide-slate-700/50">
+            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-2.5 hover:bg-slate-700 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
+            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-2.5 hover:bg-slate-700 cursor-pointer text-slate-200">Porcentagem (%)</div>
+          </div>
         </div>
 
         <div id="boxCfgValorAbaixo">
@@ -91,7 +98,7 @@
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">Lucro em Saques Acima do Limite (%)</label>
+          <label class="block text-slate-400 mb-1">Lucro Acima do Limite (%)</label>
           <input type="number" id="cfgPctAcima" value="10" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
       </div>
@@ -228,10 +235,9 @@
     let pessoaSelecionadaFiltro = '';
     let unsubscribeSnapshot = null;
 
-    // Regras de Lucro Padrão do Usuário
     let regrasLucro = {
       limiteValor: 50,
-      modoAbaixo: 'fixo', // 'fixo' ou 'porcentagem'
+      modoAbaixo: 'fixo',
       valAbaixo: 5,
       pctAcima: 10
     };
@@ -242,14 +248,24 @@
 
     resetDataParaHoje();
 
-    // Alternar visibilidade do painel sutil de regras
     function togglePainelConfig() {
       const p = document.getElementById('painelConfigRegras');
       p.classList.toggle('hidden');
     }
 
+    function toggleDropdownModo() {
+      document.getElementById('menuDropdownModo').classList.toggle('hidden');
+    }
+
+    function selecionarModoAbaixo(valor, texto) {
+      regrasLucro.modoAbaixo = valor;
+      document.getElementById('labelDropdownModo').textContent = texto;
+      document.getElementById('menuDropdownModo').classList.add('hidden');
+      atualizarInterfaceConfig();
+    }
+
     function atualizarInterfaceConfig() {
-      const modo = document.getElementById('cfgModoAbaixo').value;
+      const modo = regrasLucro.modoAbaixo;
       const limite = document.getElementById('cfgLimiteValor').value || 50;
       const lbl = document.getElementById('lblCfgValorAbaixo');
 
@@ -268,7 +284,7 @@
           regrasLucro = { ...regrasLucro, ...docRef.data() };
         }
         document.getElementById('cfgLimiteValor').value = regrasLucro.limiteValor;
-        document.getElementById('cfgModoAbaixo').value = regrasLucro.modoAbaixo;
+        document.getElementById('labelDropdownModo').textContent = regrasLucro.modoAbaixo === 'fixo' ? 'Valor Fixo (R$)' : 'Porcentagem (%)';
         document.getElementById('cfgValAbaixo').value = regrasLucro.valAbaixo;
         document.getElementById('cfgPctAcima').value = regrasLucro.pctAcima;
         atualizarInterfaceConfig();
@@ -279,16 +295,32 @@
 
     async function salvarConfigRegras() {
       if (!currentUser) return;
-      regrasLucro = {
-        limiteValor: parseFloat(document.getElementById('cfgLimiteValor').value) || 50,
-        modoAbaixo: document.getElementById('cfgModoAbaixo').value,
-        valAbaixo: parseFloat(document.getElementById('cfgValAbaixo').value) || 0,
-        pctAcima: parseFloat(document.getElementById('cfgPctAcima').value) || 0
-      };
+      regrasLucro.limiteValor = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
+      regrasLucro.valAbaixo = parseFloat(document.getElementById('cfgValAbaixo').value) || 0;
+      regrasLucro.pctAcima = parseFloat(document.getElementById('cfgPctAcima').value) || 0;
 
       await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
       alert('Regras de lucro salvas com sucesso!');
       togglePainelConfig();
+    }
+
+    // MIGRAR DADOS ANTIGOS DA COLEÇÃO GERAL '/saques' PARA O USUÁRIO LOGADO
+    async function migrarDadosAntigosSeExistem() {
+      if (!currentUser) return;
+      try {
+        const snapshotGeral = await db.collection('saques').get();
+        if (!snapshotGeral.empty) {
+          const batch = db.batch();
+          snapshotGeral.docs.forEach(doc => {
+            const docRefNovo = db.collection('users').doc(currentUser.uid).collection('saques').doc(doc.id);
+            batch.set(docRefNovo, doc.data());
+          });
+          await batch.commit();
+          console.log(`${snapshotGeral.size} registros antigos recuperados e migrados com sucesso!`);
+        }
+      } catch (err) {
+        console.warn('Busca de registros antigos finalizada.');
+      }
     }
 
     const percentualInput = document.getElementById('percentualComissao');
@@ -350,6 +382,11 @@
       if (menuDropdown && !menuDropdown.contains(e.target) && !btnDropdown.contains(e.target)) {
         menuDropdown.classList.add('hidden');
       }
+      const menuModo = document.getElementById('menuDropdownModo');
+      const btnModo = document.getElementById('btnDropdownModo');
+      if (menuModo && !menuModo.contains(e.target) && !btnModo.contains(e.target)) {
+        menuModo.classList.add('hidden');
+      }
     });
 
     auth.onAuthStateChanged(async user => {
@@ -364,6 +401,7 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
+        await migrarDadosAntigosSeExistem(); // Recupera dados automaticamente
         await carregarRegrasUsuario();
         carregarDados();
       } else {
@@ -405,7 +443,6 @@
         });
     }
 
-    // Calcular Lucro Bruto baseado nas regras configuradas
     function calcularLucroBrutoSeu(valor) {
       const { limiteValor, modoAbaixo, valAbaixo, pctAcima } = regrasLucro;
 
