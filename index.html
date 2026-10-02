@@ -51,6 +51,9 @@
         <p class="text-slate-400 text-sm">Dados sincronizados em tempo real na nuvem</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
+        <button onclick="togglePainelConfig()" class="bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded font-medium transition flex items-center gap-1.5">
+          <span>⚙️️</span> Regras de Lucro
+        </button>
         <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition">📥 Exportar Backup</button>
         <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 cursor-pointer transition">
           📤 Importar Backup
@@ -60,6 +63,43 @@
         <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-1.5 rounded font-medium transition">Sair</button>
       </div>
     </header>
+
+    <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO (Sutil / Oculto por padrão) -->
+    <section id="painelConfigRegras" class="hidden bg-slate-800/90 border border-emerald-500/30 rounded-xl p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Ajustar Regras do Seu Lucro Bruto</h3>
+        <button onclick="togglePainelConfig()" class="text-slate-400 hover:text-slate-200 text-xs">✕ Fechar</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Valor Limite para Saque Pequeno (R$)</label>
+          <input type="number" id="cfgLimiteValor" value="50" step="1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Modo até o Valor Limite</label>
+          <select id="cfgModoAbaixo" onchange="atualizarInterfaceConfig()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <option value="fixo">Valor Fixo (R$)</option>
+            <option value="porcentagem">Porcentagem (%)</option>
+          </select>
+        </div>
+
+        <div id="boxCfgValorAbaixo">
+          <label id="lblCfgValorAbaixo" class="block text-slate-400 mb-1">Lucro Fixo até R$ 50 (R$)</label>
+          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Lucro em Saques Acima do Limite (%)</label>
+          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="salvarConfigRegras()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded text-xs transition">Salvar Regras</button>
+      </div>
+    </section>
 
     <!-- Formulário de Lançamento -->
     <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
@@ -188,11 +228,68 @@
     let pessoaSelecionadaFiltro = '';
     let unsubscribeSnapshot = null;
 
+    // Regras de Lucro Padrão do Usuário
+    let regrasLucro = {
+      limiteValor: 50,
+      modoAbaixo: 'fixo', // 'fixo' ou 'porcentagem'
+      valAbaixo: 5,
+      pctAcima: 10
+    };
+
     function resetDataParaHoje() {
       document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
     }
 
     resetDataParaHoje();
+
+    // Alternar visibilidade do painel sutil de regras
+    function togglePainelConfig() {
+      const p = document.getElementById('painelConfigRegras');
+      p.classList.toggle('hidden');
+    }
+
+    function atualizarInterfaceConfig() {
+      const modo = document.getElementById('cfgModoAbaixo').value;
+      const limite = document.getElementById('cfgLimiteValor').value || 50;
+      const lbl = document.getElementById('lblCfgValorAbaixo');
+
+      if (modo === 'fixo') {
+        lbl.textContent = `Lucro Fixo até R$ ${limite} (R$)`;
+      } else {
+        lbl.textContent = `Lucro em % até R$ ${limite} (%)`;
+      }
+    }
+
+    async function carregarRegrasUsuario() {
+      if (!currentUser) return;
+      try {
+        const docRef = await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').get();
+        if (docRef.exists) {
+          regrasLucro = { ...regrasLucro, ...docRef.data() };
+        }
+        document.getElementById('cfgLimiteValor').value = regrasLucro.limiteValor;
+        document.getElementById('cfgModoAbaixo').value = regrasLucro.modoAbaixo;
+        document.getElementById('cfgValAbaixo').value = regrasLucro.valAbaixo;
+        document.getElementById('cfgPctAcima').value = regrasLucro.pctAcima;
+        atualizarInterfaceConfig();
+      } catch (err) {
+        console.error('Erro ao carregar regras:', err);
+      }
+    }
+
+    async function salvarConfigRegras() {
+      if (!currentUser) return;
+      regrasLucro = {
+        limiteValor: parseFloat(document.getElementById('cfgLimiteValor').value) || 50,
+        modoAbaixo: document.getElementById('cfgModoAbaixo').value,
+        valAbaixo: parseFloat(document.getElementById('cfgValAbaixo').value) || 0,
+        pctAcima: parseFloat(document.getElementById('cfgPctAcima').value) || 0
+      };
+
+      await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
+      alert('Regras de lucro salvas com sucesso!');
+      togglePainelConfig();
+    }
 
     const percentualInput = document.getElementById('percentualComissao');
     const btnSalvar = document.getElementById('btnSalvar');
@@ -255,8 +352,7 @@
       }
     });
 
-    // Auth Observer ajustado para isolamento por Usuário
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
       const loadingScreen = document.getElementById('loadingScreen');
       const loginScreen = document.getElementById('loginScreen');
       const mainDashboard = document.getElementById('mainDashboard');
@@ -268,6 +364,7 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
+        await carregarRegrasUsuario();
         carregarDados();
       } else {
         currentUser = null;
@@ -296,7 +393,6 @@
       auth.signOut();
     }
 
-    // Carrega a subcoleção exclusiva do usuário logado
     function carregarDados() {
       if (!currentUser) return;
       
@@ -309,7 +405,21 @@
         });
     }
 
-    // Registrar Saque no isolamento do usuário atual
+    // Calcular Lucro Bruto baseado nas regras configuradas
+    function calcularLucroBrutoSeu(valor) {
+      const { limiteValor, modoAbaixo, valAbaixo, pctAcima } = regrasLucro;
+
+      if (valor <= limiteValor) {
+        if (modoAbaixo === 'fixo') {
+          return valAbaixo;
+        } else {
+          return valor * (valAbaixo / 100);
+        }
+      } else {
+        return valor * (pctAcima / 100);
+      }
+    }
+
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) return;
@@ -323,7 +433,7 @@
 
       const percentual = parseFloat(percentualVal);
       const comissaoPessoa = valor * (percentual / 100);
-      const lucroBrutoSeu = valor > 50 ? valor * 0.10 : 5.00;
+      const lucroBrutoSeu = calcularLucroBrutoSeu(valor);
       const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
 
       await db.collection('users').doc(currentUser.uid).collection('saques').add({
