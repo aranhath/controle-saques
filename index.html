@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Saques & Comissões</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Cabeçalho -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Gestão de Saques & Comissões</h1>
+        <p class="text-slate-400 text-sm">Painel de controle financeiro individual e semanal/mensal</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded border border-slate-700">Exportar Backup</button>
+        <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded border border-slate-700 cursor-pointer">
+          Importar Backup
+          <input type="file" id="importFile" onchange="importarDados(event)" class="hidden" accept=".json">
+        </label>
+      </div>
+    </header>
+
+    <!-- Formulaário de Lançamento -->
+    <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+      <h2 class="text-lg font-semibold text-slate-200 mb-4">Novo Lançamento de Saque</h2>
+      <form id="saqueForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
+          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Valor do Saque (R$)</label>
+          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium p-2 rounded text-sm transition">Registrar Saque</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filtros de Visualização -->
+    <section class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-between">
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Período:</span>
+        <button onclick="setFiltroData('hoje')" class="filter-btn text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Hoje</button>
+        <button onclick="setFiltroData('ontem')" class="filter-btn text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Ontem</button>
+        <button onclick="setFiltroData('7dias')" class="filter-btn text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Últimos 7 dias</button>
+        <button onclick="setFiltroData('mes')" class="filter-btn text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Mês Atual</button>
+        <button onclick="setFiltroData('todos')" class="filter-btn text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Todos</button>
+      </div>
+
+      <div class="w-full md:w-auto">
+        <select id="filtroPessoa" onchange="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200">
+          <option value="">Todas as pessoas</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Cards de Resumo -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <p class="text-xs text-slate-400">Total de Saques</p>
+        <p id="totalQtd" class="text-2xl font-bold text-slate-100 mt-1">0</p>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <p class="text-xs text-slate-400">Volume Processado</p>
+        <p id="totalVolume" class="text-2xl font-bold text-sky-400 mt-1">R$ 0,00</p>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <p class="text-xs text-slate-400">Pagar aos CPFs (2%)</p>
+        <p id="totalComissaoPessoas" class="text-2xl font-bold text-amber-400 mt-1">R$ 0,00</p>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <p class="text-xs text-slate-400">Seu Lucro Líquido</p>
+        <p id="totalLucroLiquido" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</p>
+      </div>
+    </section>
+
+    <!-- Tabela de Registros -->
+    <section class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+      <div class="px-5 py-4 border-b border-slate-700">
+        <h3 class="font-semibold text-slate-200">Histórico de Saques Lançados</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-900/50 text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="p-3.5">Data</th>
+              <th class="p-3.5">Pessoa / CPF</th>
+              <th class="p-3.5">Valor Saque</th>
+              <th class="p-3.5">Lucro Bruto (Seu)</th>
+              <th class="p-3.5">Pagar Pessoa (2%)</th>
+              <th class="p-3.5">Lucro Líquido</th>
+              <th class="p-3.5 text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaCorpo" class="divide-y divide-slate-700/50">
+            <!-- Linhas geradas dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    let saques = JSON.parse(localStorage.getItem('saques_db')) || [];
+    let filtroAtual = 'todos';
+
+    // Data padrão no form = hoje
+    document.getElementById('dataSaque').valueToDate = new Date();
+    document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
+
+    document.getElementById('saqueForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = document.getElementById('dataSaque').value;
+      const nome = document.getElementById('nomePessoa').value.trim();
+      const valor = parseFloat(document.getElementById('valorSaque').value);
+
+      if (!data || !nome || isNaN(valor)) return;
+
+      // Cálculos da Regra de Negócio
+      const comissaoPessoa = valor * 0.02; // 2% fixo
+      const lucroBrutoSeu = valor > 50 ? valor * 0.10 : 5.00; // 10% se >50, R$5 se <=50
+      const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
+
+      const novoSaque = {
+        id: Date.now(),
+        data,
+        nome,
+        valor,
+        comissaoPessoa,
+        lucroBrutoSeu,
+        lucroLiquidoSeu
+      };
+
+      saques.push(novoSaque);
+      salvar();
+      document.getElementById('valorSaque').value = '';
+      document.getElementById('nomePessoa').focus();
+    });
+
+    function salvar() {
+      localStorage.setItem('saques_db', JSON.stringify(saques));
+      renderizar();
+    }
+
+    function deletar(id) {
+      if (confirm('Tem certeza que deseja apagar este saque?')) {
+        saques = saques.filter(item => item.id !== id);
+        salvar();
+      }
+    }
+
+    function setFiltroData(tipo) {
+      filtroAtual = tipo;
+      renderizar();
+    }
+
+    function filtrarPorData(item) {
+      const hoje = new Date();
+      const dataItem = new Date(item.data + 'T00:00:00');
+      
+      if (filtroAtual === 'hoje') {
+        return dataItem.toDateString() === hoje.toDateString();
+      }
+      if (filtroAtual === 'ontem') {
+        const ontem = new Date();
+        ontem.setDate(hoje.getDate() - 1);
+        return dataItem.toDateString() === ontem.toDateString();
+      }
+      if (filtroAtual === '7dias') {
+        const limite = new Date();
+        limite.setDate(hoje.getDate() - 7);
+        return dataItem >= limite;
+      }
+      if (filtroAtual === 'mes') {
+        return dataItem.getMonth() === hoje.getMonth() && dataItem.getFullYear() === hoje.getFullYear();
+      }
+      return true; // 'todos'
+    }
+
+    function atualizarSelectPessoas() {
+      const select = document.getElementById('filtroPessoa');
+      const pessoaSelecionada = select.value;
+      const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort();
+
+      select.innerHTML = '<option value="">Todas as pessoas</option>';
+      nomesUnicos.forEach(nome => {
+        const opt = document.createElement('option');
+        opt.value = nome;
+        opt.textContent = nome;
+        if (nome === pessoaSelecionada) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderizar() {
+      atualizarSelectPessoas();
+      const pessoaFiltro = document.getElementById('filtroPessoa').value;
+      
+      const saquesFiltrados = saques.filter(item => {
+        const passaData = filtrarPorData(item);
+        const passaPessoa = pessoaFiltro ? item.nome === pessoaFiltro : true;
+        return passaData && passaPessoa;
+      }).sort((a,b) => new Date(b.data) - new Date(a.data));
+
+      // Tabela
+      const tbody = document.getElementById('tabelaCorpo');
+      tbody.innerHTML = '';
+
+      let totalVol = 0;
+      let totalComPessoa = 0;
+      let totalLucroLiq = 0;
+
+      saquesFiltrados.forEach(s => {
+        totalVol += s.valor;
+        totalComPessoa += s.comissaoPessoa;
+        totalLucroLiq += s.lucroLiquidoSeu;
+
+        const dataFormatada = s.data.split('-').reverse().join('/');
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-700/30 transition';
+        tr.innerHTML = `
+          <td class="p-3.5 text-slate-400">${dataFormatada}</td>
+          <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
+          <td class="p-3.5 text-sky-400 font-semibold">R$ ${s.valor.toFixed(2)}</td>
+          <td class="p-3.5 text-slate-300">R$ ${s.lucroBrutoSeu.toFixed(2)}</td>
+          <td class="p-3.5 text-amber-400 font-medium">R$ ${s.comissaoPessoa.toFixed(2)}</td>
+          <td class="p-3.5 text-emerald-400 font-bold">R$ ${s.lucroLiquidoSeu.toFixed(2)}</td>
+          <td class="p-3.5 text-center">
+            <button onclick="deletar(${s.id})" class="text-red-400 hover:text-red-300 font-medium text-xs">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Atualizar Cards
+      document.getElementById('totalQtd').textContent = saquesFiltrados.length;
+      document.getElementById('totalVolume').textContent = `R$ ${totalVol.toFixed(2)}`;
+      document.getElementById('totalComissaoPessoas').textContent = `R$ ${totalComPessoa.toFixed(2)}`;
+      document.getElementById('totalLucroLiquido').textContent = `R$ ${totalLucroLiq.toFixed(2)}`;
+    }
+
+    function exportarDados() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saques));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_saques_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importarDados(e) {
+      const fileReader = new FileReader();
+      fileReader.onload = function(event) {
+        try {
+          const importados = JSON.parse(event.target.result);
+          if (Array.isArray(importados)) {
+            saques = importados;
+            salvar();
+            alert('Dados importados com sucesso!');
+          }
+        } catch (err) {
+          alert('Erro ao carregar o arquivo de backup.');
+        }
+      };
+      fileReader.readAsText(e.target.files[0]);
+    }
+
+    renderizar();
+  </script>
+</body>
+</html>
