@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Saques & Comissões (Nuvem)</title>
+  <title>Controle de Saques</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -23,7 +23,7 @@
     <div class="bg-slate-800 border border-slate-700 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center">
         <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
-        <p class="text-slate-400 text-sm mt-1">Gestão de Saques & Comissões</p>
+        <p class="text-slate-400 text-sm mt-1">Gestão de Saque</p>
       </div>
 
       <form id="loginForm" class="space-y-4">
@@ -47,7 +47,7 @@
     <!-- Cabeçalho -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Gestão de Saques & Comissões</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Gestão de Saque</h1>
         <p class="text-slate-400 text-sm">Dados sincronizados em tempo real na nuvem</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
@@ -99,7 +99,7 @@
         <button onclick="setFiltroData('todos')" class="text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Todos</button>
       </div>
 
-      <!-- Filtro Personalizado de Pessoas (Substituindo o select padrão) -->
+      <!-- Filtro Personalizado de Pessoas -->
       <div class="relative w-full md:w-64">
         <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
           <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
@@ -257,13 +257,13 @@
       }
     });
 
-    // Controlador do Auth Observer (Sem efeito de piscar login no F5)
+    // Controlador do Auth Observer
     auth.onAuthStateChanged(user => {
       const loadingScreen = document.getElementById('loadingScreen');
       const loginScreen = document.getElementById('loginScreen');
       const mainDashboard = document.getElementById('mainDashboard');
 
-      loadingScreen.classList.add('hidden'); // Oculta a tela de carregamento suavemente
+      loadingScreen.classList.add('hidden');
 
       if (user) {
         loginScreen.classList.add('hidden');
@@ -377,7 +377,6 @@
       return true;
     }
 
-    // Lógica do Menu Dropdown de Pessoas
     function toggleDropdownPessoa() {
       const menu = document.getElementById('dropdownPessoasMenu');
       menu.classList.toggle('hidden');
@@ -400,7 +399,6 @@
 
       lista.innerHTML = '';
 
-      // Opção "Todas as pessoas"
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
         itemTodas.className = `p-2.5 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-700/50'}`;
