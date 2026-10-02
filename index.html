@@ -12,8 +12,14 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
+  <!-- TELA DE CARREGAMENTO (Evita o 'piscar' da tela de login ao dar F5) -->
+  <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center gap-3">
+    <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-sm text-slate-400 font-medium">Carregando painel...</p>
+  </div>
+
   <!-- TELA DE LOGIN -->
-  <div id="loginScreen" class="flex min-h-[80vh] items-center justify-center">
+  <div id="loginScreen" class="hidden flex min-h-[80vh] items-center justify-center">
     <div class="bg-slate-800 border border-slate-700 p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center">
         <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
@@ -93,10 +99,21 @@
         <button onclick="setFiltroData('todos')" class="text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">Todos</button>
       </div>
 
-      <div class="w-full md:w-auto">
-        <select id="filtroPessoa" onchange="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200">
-          <option value="">Todas as pessoas</option>
-        </select>
+      <!-- Filtro Personalizado de Pessoas (Substituindo o select padrão) -->
+      <div class="relative w-full md:w-64">
+        <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
+          <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
+          <svg class="w-4 h-4 text-slate-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <div id="dropdownPessoasMenu" class="hidden absolute right-0 mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-50 overflow-hidden">
+          <div class="p-2 border-b border-slate-700">
+            <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div id="listaPessoasDropdown" class="max-h-56 overflow-y-auto divide-y divide-slate-700/50">
+            <!-- Gerado via JS -->
+          </div>
+        </div>
       </div>
     </section>
 
@@ -152,7 +169,7 @@
   </div>
 
   <script>
-    // Configuração do Firebase com as credenciais reais
+    // Configuração do Firebase com credenciais reais
     const firebaseConfig = {
       apiKey: "AIzaSyCLAL7KqBer3lbxtiZmB7UFM0ti9KJRUN4",
       authDomain: "controle-saque.firebaseapp.com",
@@ -169,16 +186,15 @@
 
     let saques = [];
     let filtroAtual = 'todos';
+    let pessoaSelecionadaFiltro = '';
 
-    // Função para definir a data para o dia de hoje
     function resetDataParaHoje() {
       document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
     }
 
-    // Inicialização da Data e estado do formulário
     resetDataParaHoje();
 
-    // Validação da comissão antes de permitir salvar
+    // Validação de comissão
     const percentualInput = document.getElementById('percentualComissao');
     const btnSalvar = document.getElementById('btnSalvar');
 
@@ -195,7 +211,7 @@
       }
     });
 
-    // Auto-completar nomes
+    // Auto-completar nomes no form
     const inputNome = document.getElementById('nomePessoa');
     const sugestoesBox = document.getElementById('sugestoesNomes');
 
@@ -230,23 +246,34 @@
       sugestoesBox.classList.remove('hidden');
     });
 
-    // Fechar sugestões se clicar fora
     document.addEventListener('click', (e) => {
       if (!inputNome.contains(e.target) && !sugestoesBox.contains(e.target)) {
         sugestoesBox.classList.add('hidden');
       }
+      const menuDropdown = document.getElementById('dropdownPessoasMenu');
+      const btnDropdown = document.getElementById('btnFiltroPessoa');
+      if (menuDropdown && !menuDropdown.contains(e.target) && !btnDropdown.contains(e.target)) {
+        menuDropdown.classList.add('hidden');
+      }
     });
 
-    // Auth Observer
+    // Controlador do Auth Observer (Sem efeito de piscar login no F5)
     auth.onAuthStateChanged(user => {
+      const loadingScreen = document.getElementById('loadingScreen');
+      const loginScreen = document.getElementById('loginScreen');
+      const mainDashboard = document.getElementById('mainDashboard');
+
+      loadingScreen.classList.add('hidden'); // Oculta a tela de carregamento suavemente
+
       if (user) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainDashboard').classList.remove('hidden');
+        loginScreen.classList.add('hidden');
+        mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
         carregarDados();
       } else {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainDashboard').classList.add('hidden');
+        loginScreen.classList.remove('hidden');
+        loginScreen.classList.add('flex');
+        mainDashboard.classList.add('hidden');
       }
     });
 
@@ -268,7 +295,6 @@
       auth.signOut();
     }
 
-    // Carregar Dados da Nuvem
     function carregarDados() {
       db.collection('saques').onSnapshot(snapshot => {
         saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -303,25 +329,22 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Resets pós-registro
       document.getElementById('valorSaque').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
       btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2 rounded text-sm transition';
       btnSalvar.textContent = 'Defina a Comissão';
       
-      resetDataParaHoje(); // Garante reset para a data atual
+      resetDataParaHoje();
       document.getElementById('nomePessoa').focus();
     });
 
-    // Alternar Status de Pagamento (Pago / Pendente)
     async function togglePago(id, statusAtual) {
       await db.collection('saques').doc(id).update({
         pago: !statusAtual
       });
     }
 
-    // Deletar Saque
     async function deletar(id) {
       if (confirm('Tem certeza que deseja excluir este registro?')) {
         await db.collection('saques').doc(id).delete();
@@ -354,28 +377,57 @@
       return true;
     }
 
-    function atualizarSelectPessoas() {
-      const select = document.getElementById('filtroPessoa');
-      const pessoaSelecionada = select.value;
+    // Lógica do Menu Dropdown de Pessoas
+    function toggleDropdownPessoa() {
+      const menu = document.getElementById('dropdownPessoasMenu');
+      menu.classList.toggle('hidden');
+      if (!menu.classList.contains('hidden')) {
+        document.getElementById('buscaPessoaFiltro').focus();
+      }
+    }
+
+    function selecionarPessoaFiltro(nome) {
+      pessoaSelecionadaFiltro = nome;
+      document.getElementById('labelFiltroPessoa').textContent = nome ? nome : 'Todas as pessoas';
+      document.getElementById('dropdownPessoasMenu').classList.add('hidden');
+      renderizar();
+    }
+
+    function atualizarDropdownPessoas() {
+      const lista = document.getElementById('listaPessoasDropdown');
+      const termo = (document.getElementById('buscaPessoaFiltro').value || '').toLowerCase();
       const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort();
 
-      select.innerHTML = '<option value="">Todas as pessoas</option>';
-      nomesUnicos.forEach(nome => {
-        const opt = document.createElement('option');
-        opt.value = nome;
-        opt.textContent = nome;
-        if (nome === pessoaSelecionada) opt.selected = true;
-        select.appendChild(opt);
+      lista.innerHTML = '';
+
+      // Opção "Todas as pessoas"
+      if (!termo || 'todas as pessoas'.includes(termo)) {
+        const itemTodas = document.createElement('div');
+        itemTodas.className = `p-2.5 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-700/50'}`;
+        itemTodas.textContent = 'Todas as pessoas';
+        itemTodas.onclick = () => selecionarPessoaFiltro('');
+        lista.appendChild(itemTodas);
+      }
+
+      nomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
+        const item = document.createElement('div');
+        item.className = `p-2.5 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-700/50'}`;
+        item.textContent = nome;
+        item.onclick = () => selecionarPessoaFiltro(nome);
+        lista.appendChild(item);
       });
     }
 
+    function filtrarListaPessoasDropdown() {
+      atualizarDropdownPessoas();
+    }
+
     function renderizar() {
-      atualizarSelectPessoas();
-      const pessoaFiltro = document.getElementById('filtroPessoa').value;
+      atualizarDropdownPessoas();
 
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
-        const passaPessoa = pessoaFiltro ? item.nome === pessoaFiltro : true;
+        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
         return passaData && passaPessoa;
       }).sort((a,b) => new Date(b.data) - new Date(a.data));
 
@@ -427,7 +479,6 @@
       document.getElementById('totalLucroLiquido').textContent = `R$ ${totalLucroLiq.toFixed(2)}`;
     }
 
-    // Exportação e Importação de Backup
     function exportarBackup() {
       if (saques.length === 0) {
         alert('Não há registros para exportar.');
