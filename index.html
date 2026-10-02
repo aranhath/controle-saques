@@ -44,7 +44,12 @@
         <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Gestão de Saques & Comissões</h1>
         <p class="text-slate-400 text-sm">Dados sincronizados em tempo real na nuvem</p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition">📥 Exportar Backup</button>
+        <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded border border-slate-700 cursor-pointer transition">
+          📤 Importar Backup
+          <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
+        </label>
         <span id="userEmailTag" class="text-xs text-slate-400 border border-slate-700 px-3 py-1.5 rounded-full"></span>
         <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-1.5 rounded font-medium transition">Sair</button>
       </div>
@@ -58,20 +63,21 @@
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
           <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div>
+        <div class="relative">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
-          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-md shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
           <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%)</label>
-          <input type="number" step="0.1" min="0" id="percentualComissao" value="2" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
+          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div class="flex items-end">
-          <button type="submit" id="btnSalvar" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium p-2 rounded text-sm transition">Registrar Saque</button>
+          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2 rounded text-sm transition">Defina a Comissão</button>
         </div>
       </form>
     </section>
@@ -146,7 +152,7 @@
   </div>
 
   <script>
-    // Configuração do Firebase com as tuas credenciais reais
+    // Configuração do Firebase com as credenciais reais
     const firebaseConfig = {
       apiKey: "AIzaSyCLAL7KqBer3lbxtiZmB7UFM0ti9KJRUN4",
       authDomain: "controle-saque.firebaseapp.com",
@@ -164,8 +170,72 @@
     let saques = [];
     let filtroAtual = 'todos';
 
-    // Data Padrão Hoje
-    document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
+    // Função para definir a data para o dia de hoje
+    function resetDataParaHoje() {
+      document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
+    }
+
+    // Inicialização da Data e estado do formulário
+    resetDataParaHoje();
+
+    // Validação da comissão antes de permitir salvar
+    const percentualInput = document.getElementById('percentualComissao');
+    const btnSalvar = document.getElementById('btnSalvar');
+
+    percentualInput.addEventListener('input', () => {
+      const val = percentualInput.value.trim();
+      if (val !== '' && !isNaN(val) && parseFloat(val) >= 0) {
+        btnSalvar.disabled = false;
+        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium p-2 rounded text-sm transition';
+        btnSalvar.textContent = 'Registrar Saque';
+      } else {
+        btnSalvar.disabled = true;
+        btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2 rounded text-sm transition';
+        btnSalvar.textContent = 'Defina a Comissão';
+      }
+    });
+
+    // Auto-completar nomes
+    const inputNome = document.getElementById('nomePessoa');
+    const sugestoesBox = document.getElementById('sugestoesNomes');
+
+    inputNome.addEventListener('input', () => {
+      const termo = inputNome.value.trim().toLowerCase();
+      sugestoesBox.innerHTML = '';
+
+      if (!termo) {
+        sugestoesBox.classList.add('hidden');
+        return;
+      }
+
+      const nomesUnicos = [...new Set(saques.map(s => s.nome))];
+      const correspondencias = nomesUnicos.filter(nome => nome.toLowerCase().includes(termo));
+
+      if (correspondencias.length === 0) {
+        sugestoesBox.classList.add('hidden');
+        return;
+      }
+
+      correspondencias.forEach(nome => {
+        const item = document.createElement('div');
+        item.className = 'p-2.5 text-sm text-slate-200 hover:bg-slate-700 cursor-pointer transition';
+        item.textContent = nome;
+        item.onclick = () => {
+          inputNome.value = nome;
+          sugestoesBox.classList.add('hidden');
+        };
+        sugestoesBox.appendChild(item);
+      });
+
+      sugestoesBox.classList.remove('hidden');
+    });
+
+    // Fechar sugestões se clicar fora
+    document.addEventListener('click', (e) => {
+      if (!inputNome.contains(e.target) && !sugestoesBox.contains(e.target)) {
+        sugestoesBox.classList.add('hidden');
+      }
+    });
 
     // Auth Observer
     auth.onAuthStateChanged(user => {
@@ -212,10 +282,11 @@
       const data = document.getElementById('dataSaque').value;
       const nome = document.getElementById('nomePessoa').value.trim();
       const valor = parseFloat(document.getElementById('valorSaque').value);
-      const percentual = parseFloat(document.getElementById('percentualComissao').value) || 0;
+      const percentualVal = percentualInput.value.trim();
 
-      if (!data || !nome || isNaN(valor)) return;
+      if (!data || !nome || isNaN(valor) || percentualVal === '') return;
 
+      const percentual = parseFloat(percentualVal);
       const comissaoPessoa = valor * (percentual / 100);
       const lucroBrutoSeu = valor > 50 ? valor * 0.10 : 5.00;
       const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
@@ -232,7 +303,14 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      // Resets pós-registro
       document.getElementById('valorSaque').value = '';
+      document.getElementById('percentualComissao').value = '';
+      btnSalvar.disabled = true;
+      btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2 rounded text-sm transition';
+      btnSalvar.textContent = 'Defina a Comissão';
+      
+      resetDataParaHoje(); // Garante reset para a data atual
       document.getElementById('nomePessoa').focus();
     });
 
@@ -347,6 +425,54 @@
       document.getElementById('totalPendentePessoas').textContent = `R$ ${totalPendente.toFixed(2)}`;
       document.getElementById('totalPagoPessoas').textContent = `R$ ${totalPago.toFixed(2)}`;
       document.getElementById('totalLucroLiquido').textContent = `R$ ${totalLucroLiq.toFixed(2)}`;
+    }
+
+    // Exportação e Importação de Backup
+    function exportarBackup() {
+      if (saques.length === 0) {
+        alert('Não há registros para exportar.');
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saques, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_saques_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importarBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        try {
+          const importados = JSON.parse(event.target.result);
+          if (!Array.isArray(importados)) {
+            alert('Formato de arquivo de backup inválido.');
+            return;
+          }
+
+          if (confirm(`Atenção: Isso enviará ${importados.length} registros para o banco de dados em nuvem. Deseja continuar?`)) {
+            const batch = db.batch();
+            importados.forEach(item => {
+              const docRef = db.collection('saques').doc();
+              const { id, ...dadosSemId } = item;
+              batch.set(docRef, {
+                ...dadosSemId,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+            await batch.commit();
+            alert('Backup importado com sucesso!');
+          }
+        } catch (err) {
+          alert('Erro ao ler arquivo de backup: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
   </script>
 </body>
