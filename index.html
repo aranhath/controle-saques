@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
 
-  <!-- TELA DE CARREGAMENTO (Evita o 'piscar' da tela de login ao dar F5) -->
+  <!-- TELA DE CARREGAMENTO -->
   <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center gap-3">
     <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
     <p class="text-sm text-slate-400 font-medium">Carregando painel...</p>
@@ -169,7 +169,6 @@
   </div>
 
   <script>
-    // Configuração do Firebase com credenciais reais
     const firebaseConfig = {
       apiKey: "AIzaSyCLAL7KqBer3lbxtiZmB7UFM0ti9KJRUN4",
       authDomain: "controle-saque.firebaseapp.com",
@@ -179,14 +178,15 @@
       appId: "1:448674045514:web:c87fa8834e60ea540850b3"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    let currentUser = null;
     let saques = [];
     let filtroAtual = 'todos';
     let pessoaSelecionadaFiltro = '';
+    let unsubscribeSnapshot = null;
 
     function resetDataParaHoje() {
       document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
@@ -194,7 +194,6 @@
 
     resetDataParaHoje();
 
-    // Validação de comissão
     const percentualInput = document.getElementById('percentualComissao');
     const btnSalvar = document.getElementById('btnSalvar');
 
@@ -211,7 +210,6 @@
       }
     });
 
-    // Auto-completar nomes no form
     const inputNome = document.getElementById('nomePessoa');
     const sugestoesBox = document.getElementById('sugestoesNomes');
 
@@ -257,7 +255,7 @@
       }
     });
 
-    // Controlador do Auth Observer
+    // Auth Observer ajustado para isolamento por Usuário
     auth.onAuthStateChanged(user => {
       const loadingScreen = document.getElementById('loadingScreen');
       const loginScreen = document.getElementById('loginScreen');
@@ -266,18 +264,21 @@
       loadingScreen.classList.add('hidden');
 
       if (user) {
+        currentUser = user;
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
         carregarDados();
       } else {
+        currentUser = null;
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        saques = [];
         loginScreen.classList.remove('hidden');
         loginScreen.classList.add('flex');
         mainDashboard.classList.add('hidden');
       }
     });
 
-    // Login Form
     document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value;
@@ -295,16 +296,24 @@
       auth.signOut();
     }
 
+    // Carrega a subcoleção exclusiva do usuário logado
     function carregarDados() {
-      db.collection('saques').onSnapshot(snapshot => {
-        saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderizar();
-      });
+      if (!currentUser) return;
+      
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+      unsubscribeSnapshot = db.collection('users').doc(currentUser.uid).collection('saques')
+        .onSnapshot(snapshot => {
+          saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderizar();
+        });
     }
 
-    // Registrar Saque
+    // Registrar Saque no isolamento do usuário atual
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!currentUser) return;
+
       const data = document.getElementById('dataSaque').value;
       const nome = document.getElementById('nomePessoa').value.trim();
       const valor = parseFloat(document.getElementById('valorSaque').value);
@@ -317,7 +326,7 @@
       const lucroBrutoSeu = valor > 50 ? valor * 0.10 : 5.00;
       const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
 
-      await db.collection('saques').add({
+      await db.collection('users').doc(currentUser.uid).collection('saques').add({
         data,
         nome,
         valor,
@@ -340,14 +349,16 @@
     });
 
     async function togglePago(id, statusAtual) {
-      await db.collection('saques').doc(id).update({
+      if (!currentUser) return;
+      await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).update({
         pago: !statusAtual
       });
     }
 
     async function deletar(id) {
+      if (!currentUser) return;
       if (confirm('Tem certeza que deseja excluir este registro?')) {
-        await db.collection('saques').doc(id).delete();
+        await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).delete();
       }
     }
 
@@ -492,6 +503,7 @@
     }
 
     function importarBackup(e) {
+      if (!currentUser) return;
       const file = e.target.files[0];
       if (!file) return;
 
@@ -504,10 +516,10 @@
             return;
           }
 
-          if (confirm(`Atenção: Isso enviará ${importados.length} registros para o banco de dados em nuvem. Deseja continuar?`)) {
+          if (confirm(`Atenção: Isso enviará ${importados.length} registros para a sua conta na nuvem. Deseja continuar?`)) {
             const batch = db.batch();
             importados.forEach(item => {
-              const docRef = db.collection('saques').doc();
+              const docRef = db.collection('users').doc(currentUser.uid).collection('saques').doc();
               const { id, ...dadosSemId } = item;
               batch.set(docRef, {
                 ...dadosSemId,
