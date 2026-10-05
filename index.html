@@ -9,13 +9,11 @@
   <meta name="theme-color" content="#10b981">
   <title>Gestão de Saque</title>
 
-  <!-- WEB MANIFEST -->
-  <link rel="manifest" href="./manifest.json">
-
-  <!-- FAVICONS PADRÃO E SAFARI WEBKIT -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2310b981'/%3E%3Cstop offset='100%25' stop-color='%230284c7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='25' fill='url(%23g)'/%3E%3Cpath d='M50 18v64M63 32H43.5a10.5 10.5 0 0 0 0 21h13a10.5 10.5 0 0 1 0 21H35' fill='none' stroke='%23ffffff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2310b981'/%3E%3Cstop offset='100%25' stop-color='%230284c7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='25' fill='url(%23g)'/%3E%3Cpath d='M50 18v64M63 32H43.5a10.5 10.5 0 0 0 0 21h13a10.5 10.5 0 0 1 0 21H35' fill='none' stroke='%23ffffff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-  <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 18v64M63 32H43.5a10.5 10.5 0 0 0 0 21h13a10.5 10.5 0 0 1 0 21H35' fill='none' stroke='%2310b981' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" color="#10b981">
+  <!-- FAVICON FÍSICO PNG (REQUISITO OBRIGATÓRIO PARA O SAFARI) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=5">
+  <link rel="icon" type="image/png" sizes="192x192" href="./favicon.png?v=5">
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicon.png?v=5">
+  <link rel="shortcut icon" type="image/png" href="./favicon.png?v=5">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -46,16 +44,7 @@
       <div class="text-center flex flex-col items-center gap-3">
         <!-- Logo no Login -->
         <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40">
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <defs>
-              <linearGradient id="gradLogin" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#10b981" />
-                <stop offset="100%" stop-color="#0284c7" />
-              </linearGradient>
-            </defs>
-            <rect width="100" height="100" rx="25" fill="url(#gradLogin)" />
-            <path d="M50 18v64M63 32H43.5a10.5 10.5 0 0 0 0 21h13a10.5 10.5 0 0 1 0 21H35" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <img src="./favicon.png" alt="Logo" class="w-full h-full object-cover">
         </div>
         <div>
           <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
@@ -86,16 +75,7 @@
       <div class="flex items-center gap-3">
         <!-- Ícone ao lado de GESTÃO DE SAQUE -->
         <div class="w-11 h-11 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/30 shrink-0 border border-emerald-400/40">
-          <svg viewBox="0 0 100 100" class="w-full h-full">
-            <defs>
-              <linearGradient id="gradHeader" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#10b981" />
-                <stop offset="100%" stop-color="#0284c7" />
-              </linearGradient>
-            </defs>
-            <rect width="100" height="100" rx="25" fill="url(#gradHeader)" />
-            <path d="M50 18v64M63 32H43.5a10.5 10.5 0 0 0 0 21h13a10.5 10.5 0 0 1 0 21H35" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <img src="./favicon.png" alt="Logo" class="w-full h-full object-cover">
         </div>
         <div>
           <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
