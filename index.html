@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Controle de Saques</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome para Compatibilidade Total com iOS/Safari -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -29,12 +31,9 @@
   <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
     <div class="bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center flex flex-col items-center gap-3">
-        <!-- Logo no Login -->
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <line x1="12" y1="1" x2="12" y2="23"></line>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-          </svg>
+        <!-- Logo no Login (Compatível com iOS) -->
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white text-xl">
+          <i class="fa-solid fa-dollar-sign"></i>
         </div>
         <div>
           <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
@@ -60,15 +59,12 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-5 md:space-y-6">
     
-    <!-- Cabeçalho com Logo Nova -->
+    <!-- Cabeçalho com Logo Nova (Compatível com iOS) -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
       <div class="flex items-center gap-3">
         <!-- Ícone Cifrão Logo -->
-        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
-          <svg class="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <line x1="12" y1="1" x2="12" y2="23"></line>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-          </svg>
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0 text-white text-lg md:text-xl">
+          <i class="fa-solid fa-dollar-sign"></i>
         </div>
         <div>
           <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -80,11 +76,13 @@
 
       <div class="flex flex-wrap items-center gap-2">
         <button onclick="togglePainelConfig()" class="bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 active:bg-slate-700">
-          <span>⚙</span> Regras de Lucro
+          <i class="fa-solid fa-gear"></i> Regras de Lucro
         </button>
-        <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition active:bg-slate-700">📥 Backup</button>
+        <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition active:bg-slate-700">
+          <i class="fa-solid fa-download"></i> Backup
+        </button>
         <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700 cursor-pointer transition active:bg-slate-700">
-          📤 Importar
+          <i class="fa-solid fa-upload"></i> Importar
           <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
         </label>
         <span id="userEmailTag" class="text-xs text-slate-400 border border-slate-700 px-3 py-2 rounded-lg truncate max-w-[140px] md:max-w-none"></span>
@@ -95,7 +93,9 @@
     <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
     <section id="painelConfigRegras" class="hidden bg-slate-800/95 border border-emerald-500/40 rounded-xl p-4 md:p-5 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Ajustar Regras do Seu Lucro Bruto</h3>
+        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+          <i class="fa-solid fa-sliders"></i> Ajustar Regras do Seu Lucro Bruto
+        </h3>
         <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-3 py-1 rounded-lg text-xs transition flex items-center gap-1">
           ✕ Fechar
         </button>
@@ -111,7 +111,7 @@
           <label class="block text-slate-400 mb-1">Modo até o Valor Limite</label>
           <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none hover:border-slate-600">
             <span id="labelDropdownModo">Valor Fixo (R$)</span>
-            <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            <i class="fa-solid fa-chevron-down text-slate-400 ml-2"></i>
           </button>
           <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 divide-y divide-slate-700/50">
             <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-slate-700 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
@@ -177,7 +177,7 @@
       <div class="relative w-full sm:w-64">
         <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
           <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
-          <svg class="w-4 h-4 text-slate-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          <i class="fa-solid fa-chevron-down text-slate-400 ml-2 shrink-0"></i>
         </button>
 
         <div id="dropdownPessoasMenu" class="hidden absolute right-0 mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-50 overflow-hidden">
@@ -489,7 +489,6 @@
       }
     }
 
-    // Registrar Saque + ZERAR CAMPO DO NOME
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) return;
@@ -523,7 +522,6 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // ZERA TODOS OS CAMPOS DO FORMULÁRIO PÓS-REGISTRO
       nomeInputEl.value = '';
       document.getElementById('valorSaque').value = '';
       document.getElementById('percentualComissao').value = '';
@@ -554,7 +552,6 @@
       renderizar();
     }
 
-    // Filtro Exclusivo de Pendentes no Card Red
     function toggleFiltroPendente() {
       apenasPendentes = !apenasPendentes;
       renderizar();
@@ -632,7 +629,6 @@
     function renderizar() {
       atualizarDropdownPessoas();
 
-      // Ajustes visuais no Card Pendente quando ativado
       const cardPendente = document.getElementById('cardPendente');
       const badgePendente = document.getElementById('badgePendente');
       const txtSubPendente = document.getElementById('txtSubPendente');
@@ -655,7 +651,6 @@
         subMobile.textContent = '';
       }
 
-      // Filtra e Ordena (A a Z + Data mais recente)
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
         const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
