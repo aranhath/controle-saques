@@ -28,9 +28,18 @@
   <!-- TELA DE LOGIN -->
   <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
     <div class="bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
-      <div class="text-center">
-        <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
-        <p class="text-slate-400 text-sm mt-1">Gestão de Saque</p>
+      <div class="text-center flex flex-col items-center gap-3">
+        <!-- Logo no Login -->
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
+          <p class="text-slate-400 text-sm mt-0.5">Gestão de Saque</p>
+        </div>
       </div>
 
       <form id="loginForm" class="space-y-4">
@@ -51,12 +60,24 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-5 md:space-y-6">
     
-    <!-- Cabeçalho -->
+    <!-- Cabeçalho com Logo Nova -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Gestão de Saque</h1>
-        <p class="text-slate-400 text-xs md:text-sm">Dados sincronizados em tempo real na nuvem</p>
+      <div class="flex items-center gap-3">
+        <!-- Ícone Cifrão Logo -->
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
+          <svg class="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+            <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
+          </h1>
+          <p class="text-slate-400 text-xs md:text-sm">Dados sincronizados em tempo real na nuvem</p>
+        </div>
       </div>
+
       <div class="flex flex-wrap items-center gap-2">
         <button onclick="togglePainelConfig()" class="bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 active:bg-slate-700">
           <span>⚙</span> Regras de Lucro
@@ -168,7 +189,7 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo (Agora com clique dinâmico para filtrar status de pagamento) -->
+    <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
       <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700 hover:border-slate-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
         <p class="text-xs text-slate-400">Qtd. Saques</p>
@@ -179,21 +200,20 @@
         <p id="totalVolume" class="text-lg md:text-xl font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
       </div>
       
-      <!-- CARD CLICÁVEL: FILTRA SOMENTE PENDENTES -->
-      <div id="cardPendente" onclick="setFiltroStatus('pendente')" class="bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] relative group">
+      <!-- CARD CLICÁVEL: PENDENTES (Aprimorado) -->
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] relative group">
         <div class="flex justify-between items-center">
-          <p class="text-xs text-slate-400">A Pagar (Pendente)</p>
-          <span id="badgeFiltroPendente" class="hidden w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          <p class="text-xs text-slate-400 font-medium">A Pagar (Pendente)</p>
+          <span id="badgePendente" class="text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded font-bold">FILTRAR</span>
         </div>
         <p id="totalPendentePessoas" class="text-lg md:text-xl font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
-        <p class="text-[10px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
+        <p id="txtSubPendente" class="text-[10px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
       </div>
 
-      <!-- CARD CLICÁVEL: FILTRA SOMENTE PAGOS -->
-      <div id="cardPago" onclick="setFiltroStatus('pago')" class="bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
+      <!-- CARD FIXO: JÁ PAGO (Sem clique) -->
+      <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 md:p-4">
         <p class="text-xs text-slate-400">Já Pago aos CPFs</p>
         <p id="totalPagoPessoas" class="text-lg md:text-xl font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
-        <p class="text-[10px] text-amber-400/80 mt-0.5">👈 toque para ver pagos</p>
       </div>
 
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4 col-span-2 md:col-span-1">
@@ -254,7 +274,7 @@
     let currentUser = null;
     let saques = [];
     let filtroAtual = 'todos';
-    let filtroStatus = 'todos'; // 'todos', 'pendente', 'pago'
+    let apenasPendentes = false;
     let pessoaSelecionadaFiltro = '';
     let unsubscribeSnapshot = null;
 
@@ -469,12 +489,14 @@
       }
     }
 
+    // Registrar Saque + ZERAR CAMPO DO NOME
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) return;
 
       const data = document.getElementById('dataSaque').value;
-      const nome = document.getElementById('nomePessoa').value.trim();
+      const nomeInputEl = document.getElementById('nomePessoa');
+      const nome = nomeInputEl.value.trim();
       const valor = parseFloat(document.getElementById('valorSaque').value);
       const percentualVal = percentualInput.value.trim();
 
@@ -501,6 +523,8 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      // ZERA TODOS OS CAMPOS DO FORMULÁRIO PÓS-REGISTRO
+      nomeInputEl.value = '';
       document.getElementById('valorSaque').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
@@ -508,7 +532,7 @@
       btnSalvar.textContent = 'Defina a Comissão';
       
       resetDataParaHoje();
-      document.getElementById('nomePessoa').focus();
+      nomeInputEl.focus();
     });
 
     async function togglePago(id, statusAtual) {
@@ -530,13 +554,14 @@
       renderizar();
     }
 
-    // Alterna o filtro clicável nos cards de PENDENTE e PAGO
+    // Filtro Exclusivo de Pendentes no Card Red
+    function toggleFiltroPendente() {
+      apenasPendentes = !apenasPendentes;
+      renderizar();
+    }
+
     function setFiltroStatus(status) {
-      if (filtroStatus === status && status !== 'todos') {
-        filtroStatus = 'todos'; // Se clicar no mesmo card de novo, reseta
-      } else {
-        filtroStatus = status;
-      }
+      apenasPendentes = false;
       renderizar();
     }
 
@@ -607,37 +632,34 @@
     function renderizar() {
       atualizarDropdownPessoas();
 
-      // Destaque visual nos cards ativados pelo clique
+      // Ajustes visuais no Card Pendente quando ativado
       const cardPendente = document.getElementById('cardPendente');
-      const cardPago = document.getElementById('cardPago');
+      const badgePendente = document.getElementById('badgePendente');
+      const txtSubPendente = document.getElementById('txtSubPendente');
       const subDesktop = document.getElementById('subtituloStatusFilter');
       const subMobile = document.getElementById('subtituloStatusFilterMobile');
 
-      if (filtroStatus === 'pendente') {
-        cardPendente.className = 'bg-red-500/10 border-2 border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-lg shadow-red-950/30';
-        cardPago.className = 'bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] opacity-60';
-        subDesktop.textContent = '🔍 Exibindo Apenas Pendentes (Clique no card para limpar)';
+      if (apenasPendentes) {
+        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
+        badgePendente.textContent = 'ATIVO';
+        badgePendente.className = 'text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold animate-pulse';
+        txtSubPendente.textContent = '🔍 toque para ver todos';
+        subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
         subMobile.textContent = 'Exibindo Pendentes';
-      } else if (filtroStatus === 'pago') {
-        cardPago.className = 'bg-amber-500/10 border-2 border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-lg shadow-amber-950/30';
-        cardPendente.className = 'bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] opacity-60';
-        subDesktop.textContent = '🔍 Exibindo Apenas Pagos (Clique no card para limpar)';
-        subMobile.textContent = 'Exibindo Pagos';
       } else {
-        cardPendente.className = 'bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
-        cardPago.className = 'bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
+        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
+        badgePendente.textContent = 'FILTRAR';
+        badgePendente.className = 'text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded font-bold';
+        txtSubPendente.textContent = '👈 toque para ver pendentes';
         subDesktop.textContent = '';
         subMobile.textContent = '';
       }
 
-      // Aplica os filtros de Data, Pessoa e Status Clicável
+      // Filtra e Ordena (A a Z + Data mais recente)
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
         const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
-        let passaStatus = true;
-
-        if (filtroStatus === 'pendente') passaStatus = !item.pago;
-        if (filtroStatus === 'pago') passaStatus = item.pago;
+        const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaPessoa && passaStatus;
       }).sort((a, b) => {
@@ -672,7 +694,7 @@
         const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
         const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
 
-        // Renderização Desktop
+        // Render Desktop
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-700/30 transition';
         tr.innerHTML = `
@@ -692,7 +714,7 @@
         `;
         tbodyDesktop.appendChild(tr);
 
-        // Renderização Mobile
+        // Render Mobile
         const card = document.createElement('div');
         card.className = 'bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 space-y-2.5 shadow-md';
         card.innerHTML = `
