@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
-    /* Previne zoom no iOS/Android ao focar em inputs no mobile */
     @media (max-width: 768px) {
       input, select, textarea, button {
         font-size: 16px !important;
@@ -169,24 +168,34 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo -->
+    <!-- Cards de Resumo (Agora com clique dinâmico para filtrar status de pagamento) -->
     <section class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4">
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700 hover:border-slate-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
         <p class="text-xs text-slate-400">Qtd. Saques</p>
         <p id="totalQtd" class="text-lg md:text-xl font-bold text-slate-100 mt-1">0</p>
       </div>
-      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4">
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700 hover:border-sky-500/50 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
         <p class="text-xs text-slate-400">Volume Total</p>
         <p id="totalVolume" class="text-lg md:text-xl font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
       </div>
-      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4">
-        <p class="text-xs text-slate-400">A Pagar (Pendente)</p>
+      
+      <!-- CARD CLICÁVEL: FILTRA SOMENTE PENDENTES -->
+      <div id="cardPendente" onclick="setFiltroStatus('pendente')" class="bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] relative group">
+        <div class="flex justify-between items-center">
+          <p class="text-xs text-slate-400">A Pagar (Pendente)</p>
+          <span id="badgeFiltroPendente" class="hidden w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+        </div>
         <p id="totalPendentePessoas" class="text-lg md:text-xl font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
+        <p class="text-[10px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
       </div>
-      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4">
+
+      <!-- CARD CLICÁVEL: FILTRA SOMENTE PAGOS -->
+      <div id="cardPago" onclick="setFiltroStatus('pago')" class="bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
         <p class="text-xs text-slate-400">Já Pago aos CPFs</p>
         <p id="totalPagoPessoas" class="text-lg md:text-xl font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
+        <p class="text-[10px] text-amber-400/80 mt-0.5">👈 toque para ver pagos</p>
       </div>
+
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4 col-span-2 md:col-span-1">
         <p class="text-xs text-slate-400">Seu Lucro Líquido</p>
         <p id="totalLucroLiquido" class="text-lg md:text-xl font-bold text-emerald-400 mt-1 truncate">R$ 0,00</p>
@@ -196,8 +205,8 @@
     <!-- Histórico de Saques (Versão Desktop / Tabela) -->
     <section class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg hidden md:block">
       <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
-        <h3 class="font-semibold text-slate-200">Histórico de Saques (Ordem Alfabética)</h3>
-        <span class="text-xs text-slate-400">Organizado de A a Z</span>
+        <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques (Ordem Alfabética)</h3>
+        <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
@@ -220,8 +229,8 @@
     <!-- Histórico de Saques (Versão Mobile / Cards) -->
     <section class="block md:hidden space-y-3">
       <div class="flex justify-between items-center px-1">
-        <h3 class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
-        <span class="text-xs text-slate-400">A a Z</span>
+        <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
+        <span id="subtituloStatusFilterMobile" class="text-xs text-emerald-400 font-medium"></span>
       </div>
       <div id="listaCardsMobile" class="space-y-3"></div>
     </section>
@@ -245,6 +254,7 @@
     let currentUser = null;
     let saques = [];
     let filtroAtual = 'todos';
+    let filtroStatus = 'todos'; // 'todos', 'pendente', 'pago'
     let pessoaSelecionadaFiltro = '';
     let unsubscribeSnapshot = null;
 
@@ -470,7 +480,6 @@
 
       if (!data || !nome || isNaN(valor) || percentualVal === '') return;
 
-      // Obtém o horário atual no formato HH:mm
       const agora = new Date();
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -518,6 +527,16 @@
 
     function setFiltroData(tipo) {
       filtroAtual = tipo;
+      renderizar();
+    }
+
+    // Alterna o filtro clicável nos cards de PENDENTE e PAGO
+    function setFiltroStatus(status) {
+      if (filtroStatus === status && status !== 'todos') {
+        filtroStatus = 'todos'; // Se clicar no mesmo card de novo, reseta
+      } else {
+        filtroStatus = status;
+      }
       renderizar();
     }
 
@@ -588,11 +607,39 @@
     function renderizar() {
       atualizarDropdownPessoas();
 
-      // ORDENAÇÃO: 1º Por Ordem Alfabética do Nome (A a Z). 2º Pela Data mais recente.
+      // Destaque visual nos cards ativados pelo clique
+      const cardPendente = document.getElementById('cardPendente');
+      const cardPago = document.getElementById('cardPago');
+      const subDesktop = document.getElementById('subtituloStatusFilter');
+      const subMobile = document.getElementById('subtituloStatusFilterMobile');
+
+      if (filtroStatus === 'pendente') {
+        cardPendente.className = 'bg-red-500/10 border-2 border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-lg shadow-red-950/30';
+        cardPago.className = 'bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] opacity-60';
+        subDesktop.textContent = '🔍 Exibindo Apenas Pendentes (Clique no card para limpar)';
+        subMobile.textContent = 'Exibindo Pendentes';
+      } else if (filtroStatus === 'pago') {
+        cardPago.className = 'bg-amber-500/10 border-2 border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-lg shadow-amber-950/30';
+        cardPendente.className = 'bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] opacity-60';
+        subDesktop.textContent = '🔍 Exibindo Apenas Pagos (Clique no card para limpar)';
+        subMobile.textContent = 'Exibindo Pagos';
+      } else {
+        cardPendente.className = 'bg-slate-800 border border-red-500/30 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
+        cardPago.className = 'bg-slate-800 border border-amber-500/30 hover:border-amber-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
+        subDesktop.textContent = '';
+        subMobile.textContent = '';
+      }
+
+      // Aplica os filtros de Data, Pessoa e Status Clicável
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
         const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
-        return passaData && passaPessoa;
+        let passaStatus = true;
+
+        if (filtroStatus === 'pendente') passaStatus = !item.pago;
+        if (filtroStatus === 'pago') passaStatus = item.pago;
+
+        return passaData && passaPessoa && passaStatus;
       }).sort((a, b) => {
         const nomeA = a.nome.toLowerCase();
         const nomeB = b.nome.toLowerCase();
@@ -625,7 +672,7 @@
         const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
         const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
 
-        // Renderização Desktop (Tabela)
+        // Renderização Desktop
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-700/30 transition';
         tr.innerHTML = `
@@ -645,7 +692,7 @@
         `;
         tbodyDesktop.appendChild(tr);
 
-        // Renderização Mobile (Cards)
+        // Renderização Mobile
         const card = document.createElement('div');
         card.className = 'bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 space-y-2.5 shadow-md';
         card.innerHTML = `
