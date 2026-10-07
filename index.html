@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS COMPATÍVEIS COM SAFARI (MAC/IOS), CHROME E EDGE -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=11">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=11">
-  <link rel="mask-icon" href="./favicon.svg?v=11" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=11">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=12">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=12">
+  <link rel="mask-icon" href="./favicon.svg?v=12" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=12">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -173,18 +173,27 @@
     </section>
 
     <!-- Filtros de Visualização -->
-    <section class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-      <div class="flex flex-wrap gap-1.5 items-center">
+    <section class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 md:p-4 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+      <div class="flex flex-wrap gap-2 items-center">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Período:</span>
-        <button onclick="setFiltroData('hoje')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 active:bg-slate-600">Hoje</button>
-        <button onclick="setFiltroData('ontem')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 active:bg-slate-600">Ontem</button>
-        <button onclick="setFiltroData('7dias')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 active:bg-slate-600">7 dias</button>
-        <button onclick="setFiltroData('mes')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 active:bg-slate-600">Mês</button>
-        <button onclick="setFiltroData('todos')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 active:bg-slate-600">Todos</button>
+        <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Hoje</button>
+        <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Ontem</button>
+        <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">7 dias</button>
+        <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Mês</button>
+        <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Todos</button>
+
+        <!-- FILTRO DE DATAS PERSONALIZADO (CALENDÁRIO) -->
+        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2.5 py-1 rounded-lg text-xs text-slate-300 ml-0 sm:ml-2">
+          <span>🗓️ De:</span>
+          <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+          <span>Até:</span>
+          <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+          <button onclick="limparFiltroDataPersonalizado()" title="Limpar datas" class="text-slate-400 hover:text-red-400 font-bold px-1">✕</button>
+        </div>
       </div>
 
       <!-- Filtro Personalizado de Pessoas -->
-      <div class="relative w-full sm:w-64">
+      <div class="relative w-full lg:w-72 mt-2 lg:mt-0">
         <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
           <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
           <span class="text-slate-400 ml-2 shrink-0">▼</span>
@@ -295,7 +304,6 @@
       pctAcima: 10
     };
 
-    // FUNÇÃO CORRIGIDA: Pega a data local exata (sem conversão para UTC)
     function obterDataLocalHoje() {
       const hoje = new Date();
       const ano = hoje.getFullYear();
@@ -568,6 +576,25 @@
 
     function setFiltroData(tipo) {
       filtroAtual = tipo;
+      document.getElementById('dataInicioFiltro').value = '';
+      document.getElementById('dataFimFiltro').value = '';
+      renderizar();
+    }
+
+    function aplicarFiltroDataPersonalizado() {
+      const inicio = document.getElementById('dataInicioFiltro').value;
+      const fim = document.getElementById('dataFimFiltro').value;
+
+      if (inicio || fim) {
+        filtroAtual = 'personalizado';
+      }
+      renderizar();
+    }
+
+    function limparFiltroDataPersonalizado() {
+      document.getElementById('dataInicioFiltro').value = '';
+      document.getElementById('dataFimFiltro').value = '';
+      filtroAtual = 'todos';
       renderizar();
     }
 
@@ -581,7 +608,7 @@
       renderizar();
     }
 
-    // CORREÇÃO DOS FILTROS DE DATA COM FUSO HORÁRIO LOCAL
+    // FILTRO DE DATAS CORRIGIDO
     function filtrarPorData(item) {
       const hojeStr = obterDataLocalHoje();
       
@@ -599,14 +626,32 @@
       if (filtroAtual === '7dias') {
         const limite = new Date();
         limite.setDate(limite.getDate() - 7);
-        const dataItem = new Date(item.data + 'T00:00:00');
-        return dataItem >= limite;
+        const ano = limite.getFullYear();
+        const mes = String(limite.getMonth() + 1).padStart(2, '0');
+        const dia = String(limite.getDate()).padStart(2, '0');
+        const dataLimiteStr = `${ano}-${mes}-${dia}`;
+        return item.data >= dataLimiteStr;
       }
       
       if (filtroAtual === 'mes') {
         const [anoItem, mesItem] = item.data.split('-');
         const hoje = new Date();
-        return parseInt(anoItem) === hoje.getFullYear() && parseInt(mesItem) === (hoje.getMonth() + 1);
+        const anoAtual = String(hoje.getFullYear());
+        const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+        return anoItem === anoAtual && mesItem === mesAtual;
+      }
+
+      if (filtroAtual === 'personalizado') {
+        const inicio = document.getElementById('dataInicioFiltro').value;
+        const fim = document.getElementById('dataFimFiltro').value;
+
+        if (inicio && fim) {
+          return item.data >= inicio && item.data <= fim;
+        } else if (inicio) {
+          return item.data >= inicio;
+        } else if (fim) {
+          return item.data <= fim;
+        }
       }
       
       return true;
@@ -680,12 +725,13 @@
         subMobile.textContent = '';
       }
 
+      // CORREÇÃO CRÍTICA DO FILTRO DE PESSOAS E DATAS
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
-        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === parsePessoa(item.nome) : true;
+        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
         const passaStatus = apenasPendentes ? !item.pago : true;
 
-        return passaData && (pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true) && passaStatus;
+        return passaData && passaPessoa && passaStatus;
       }).sort((a, b) => {
         const nomeA = a.nome.toLowerCase();
         const nomeB = b.nome.toLowerCase();
