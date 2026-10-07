@@ -10,13 +10,13 @@
   <title>Gestão de Saque</title>
 
   <!-- WEB MANIFEST -->
-  <link rel="manifest" href="./manifest.json?v=10">
+  <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS COMPATÍVEIS COM SAFARI (MAC/IOS), CHROME E EDGE -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=10">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=10">
-  <link rel="mask-icon" href="./favicon.svg?v=10" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=10">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=11">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=11">
+  <link rel="mask-icon" href="./favicon.svg?v=11" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=11">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -295,8 +295,17 @@
       pctAcima: 10
     };
 
+    // FUNÇÃO CORRIGIDA: Pega a data local exata (sem conversão para UTC)
+    function obterDataLocalHoje() {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      return `${ano}-${mes}-${dia}`;
+    }
+
     function resetDataParaHoje() {
-      document.getElementById('dataSaque').value = new Date().toISOString().split('T')[0];
+      document.getElementById('dataSaque').value = obterDataLocalHoje();
     }
 
     resetDataParaHoje();
@@ -572,24 +581,34 @@
       renderizar();
     }
 
+    // CORREÇÃO DOS FILTROS DE DATA COM FUSO HORÁRIO LOCAL
     function filtrarPorData(item) {
-      const hoje = new Date();
-      const dataItem = new Date(item.data + 'T00:00:00');
+      const hojeStr = obterDataLocalHoje();
       
-      if (filtroAtual === 'hoje') return dataItem.toDateString() === hoje.toDateString();
+      if (filtroAtual === 'hoje') return item.data === hojeStr;
+      
       if (filtroAtual === 'ontem') {
         const ontem = new Date();
-        ontem.setDate(hoje.getDate() - 1);
-        return dataItem.toDateString() === ontem.toDateString();
+        ontem.setDate(ontem.getDate() - 1);
+        const ano = ontem.getFullYear();
+        const mes = String(ontem.getMonth() + 1).padStart(2, '0');
+        const dia = String(ontem.getDate()).padStart(2, '0');
+        return item.data === `${ano}-${mes}-${dia}`;
       }
+      
       if (filtroAtual === '7dias') {
         const limite = new Date();
-        limite.setDate(hoje.getDate() - 7);
+        limite.setDate(limite.getDate() - 7);
+        const dataItem = new Date(item.data + 'T00:00:00');
         return dataItem >= limite;
       }
+      
       if (filtroAtual === 'mes') {
-        return dataItem.getMonth() === hoje.getMonth() && dataItem.getFullYear() === hoje.getFullYear();
+        const [anoItem, mesItem] = item.data.split('-');
+        const hoje = new Date();
+        return parseInt(anoItem) === hoje.getFullYear() && parseInt(mesItem) === (hoje.getMonth() + 1);
       }
+      
       return true;
     }
 
@@ -663,10 +682,10 @@
 
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
-        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
+        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === parsePessoa(item.nome) : true;
         const passaStatus = apenasPendentes ? !item.pago : true;
 
-        return passaData && passaPessoa && passaStatus;
+        return passaData && (pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true) && passaStatus;
       }).sort((a, b) => {
         const nomeA = a.nome.toLowerCase();
         const nomeB = b.nome.toLowerCase();
