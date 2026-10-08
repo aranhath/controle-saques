@@ -13,20 +13,34 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=14">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=14">
-  <link rel="mask-icon" href="./favicon.svg?v=14" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=14">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=15">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=15">
+  <link rel="mask-icon" href="./favicon.svg?v=15" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=15">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    /* Forçar inputs a nunca estourarem o layout no mobile */
+    input, select, textarea, button {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+    }
+
     @media (max-width: 768px) {
       input, select, textarea, button {
         font-size: 16px !important;
       }
+      /* Ajuste especial para inputs do tipo Date no iOS/Safari */
+      input[type="date"] {
+        -webkit-appearance: none;
+        display: block;
+        width: 100% !important;
+        max-width: 100% !important;
+        text-align: center;
+      }
     }
-    /* Estilização limpa para inputs de data */
+
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(0.8);
       cursor: pointer;
@@ -77,7 +91,7 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
     
-    <!-- Cabeçalho Otimizado e Perfeitamente Alinhado -->
+    <!-- Cabeçalho Otimizado -->
     <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30">
@@ -152,38 +166,38 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg">
+    <!-- Formulário de Lançamento com Input de Data Corrigido -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg overflow-hidden">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <div>
+        <div class="w-full overflow-hidden">
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
           <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="relative">
+        <div class="relative w-full">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
         </div>
-        <div>
+        <div class="w-full">
           <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
           <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div>
+        <div class="w-full">
           <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
           <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="flex items-end sm:col-span-2 md:col-span-1">
+        <div class="flex items-end sm:col-span-2 md:col-span-1 w-full">
           <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
         </div>
       </form>
     </section>
 
-    <!-- Barra de Filtros Totalmente Organizada e Discreta -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3">
+    <!-- Barra de Filtros Totalmente Organizada -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 overflow-hidden">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
-        <!-- Botões de Período + Botão Discreto de Calendário -->
+        <!-- Botões de Período -->
         <div class="flex flex-wrap items-center gap-1.5">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">PERÍODO:</span>
           
@@ -193,9 +207,9 @@
           <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Mês</button>
           <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Todos</button>
 
-          <!-- Botão Discreto de Abrir Calendário Customizado -->
-          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium flex items-center gap-1">
-            <span>🗓️</span> Data
+          <!-- Botão Discreto de Calendário -->
+          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">
+            Data
           </button>
         </div>
 
@@ -215,13 +229,13 @@
         </div>
       </div>
 
-      <!-- Caixa Popover Compacta e Discreta para Selecionar Datas Customizadas -->
+      <!-- Caixa Popover de Intervalo de Datas 100% Ajustada ao Mobile -->
       <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-2">
         <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
-          <span>🗓️ Selecionar Intervalo de Datas</span>
+          <span>Selecionar Intervalo de Datas</span>
           <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 text-xs font-medium">Limpar</button>
         </div>
-        <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           <div>
             <label class="block text-[10px] text-slate-400 mb-1">De:</label>
             <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
@@ -234,7 +248,7 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo Perfeitamente Alinhados (Grelha Responsiva) -->
+    <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
       <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
@@ -292,7 +306,7 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Mobile / Cards Limpos) -->
+    <!-- Histórico de Saques (Versão Mobile / Cards) -->
     <section class="block md:hidden space-y-3">
       <div class="flex justify-between items-center px-1">
         <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
@@ -758,9 +772,9 @@
       const btnCal = document.getElementById('btnToggleCalendario');
       if (btnCal) {
         if (filtroAtual === 'personalizado') {
-          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition flex items-center gap-1';
+          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition';
         } else {
-          btnCal.className = 'text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium flex items-center gap-1';
+          btnCal.className = 'text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium';
         }
       }
 
