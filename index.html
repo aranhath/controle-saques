@@ -13,18 +13,24 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS COMPATÍVEIS COM SAFARI (MAC/IOS), CHROME E EDGE -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=12">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=12">
-  <link rel="mask-icon" href="./favicon.svg?v=12" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=12">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=13">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=13">
+  <link rel="mask-icon" href="./favicon.svg?v=13" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=13">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    /* Otimizações Mobile */
     @media (max-width: 768px) {
       input, select, textarea, button {
         font-size: 16px !important;
       }
+    }
+    /* Estilização elegante dos inputs de data no mobile */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.8);
+      cursor: pointer;
     }
   </style>
 
@@ -33,7 +39,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-8 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-3 sm:p-5 md:p-8 font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
   <!-- TELA DE CARREGAMENTO -->
   <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center gap-3">
@@ -45,7 +51,6 @@
   <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
     <div class="bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center flex flex-col items-center gap-3">
-        <!-- Logo no Login -->
         <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40">
           <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
         </div>
@@ -71,59 +76,67 @@
   </div>
 
   <!-- PAINEL PRINCIPAL -->
-  <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-5 md:space-y-6">
+  <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4 md:space-y-6">
     
-    <!-- Cabeçalho -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-      <div class="flex items-center gap-3">
-        <!-- Ícone ao lado de GESTÃO DE SAQUE -->
-        <div class="w-11 h-11 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/30 shrink-0 border border-emerald-400/40">
-          <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
+    <!-- Cabeçalho Otimizado -->
+    <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg space-y-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/30 shrink-0 border border-emerald-400/40">
+            <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
+              <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
+            </h1>
+            <p class="text-slate-400 text-xs">Dados sincronizados na nuvem</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-            <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
-          </h1>
-          <p class="text-slate-400 text-xs md:text-sm">Dados sincronizados em tempo real na nuvem</p>
-        </div>
+        <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:bg-red-600/40 shrink-0">
+          🚪 Sair
+        </button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <button onclick="togglePainelConfig()" class="bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 active:bg-slate-700">
-          <span>⚙</span> Regras de Lucro
-        </button>
-        <button onclick="exportarBackup()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition active:bg-slate-700">📥 Backup</button>
-        <label class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700 cursor-pointer transition active:bg-slate-700">
-          📤 Importar
-          <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
-        </label>
-        <span id="userEmailTag" class="text-xs text-slate-400 border border-slate-700 px-3 py-2 rounded-lg truncate max-w-[140px] md:max-w-none"></span>
-        <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-lg font-medium transition active:bg-red-600/40">Sair</button>
+      <!-- Barra de Ações Responsiva -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/60 text-xs">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button onclick="togglePainelConfig()" class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl font-medium transition active:scale-95 flex items-center justify-center gap-1.5">
+            ⚙️ Regras
+          </button>
+          <button onclick="exportarBackup()" class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl transition active:scale-95 flex items-center justify-center gap-1">
+            📥 Backup
+          </button>
+          <label class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl cursor-pointer transition active:scale-95 flex items-center justify-center gap-1">
+            📤 Importar
+            <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
+          </label>
+        </div>
+        <div id="userEmailTag" class="text-[11px] text-slate-400 bg-slate-900/50 border border-slate-700/60 px-2.5 py-1.5 rounded-lg truncate w-full sm:w-auto text-center sm:text-right"></div>
       </div>
     </header>
 
     <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
-    <section id="painelConfigRegras" class="hidden bg-slate-800/95 border border-emerald-500/40 rounded-xl p-4 md:p-5 shadow-2xl space-y-4">
+    <section id="painelConfigRegras" class="hidden bg-slate-800 border border-emerald-500/40 rounded-2xl p-4 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Ajustar Regras do Seu Lucro Bruto</h3>
-        <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-3 py-1 rounded-lg text-xs transition flex items-center gap-1">
-          ✕ Fechar
+        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Regras do Lucro Bruto</h3>
+        <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-2.5 py-1 rounded-lg text-xs transition">
+          ✕
         </button>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
         <div>
           <label class="block text-slate-400 mb-1">Valor Limite Saque Pequeno (R$)</label>
-          <input type="number" id="cfgLimiteValor" value="50" step="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="cfgLimiteValor" value="50" step="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
 
         <div class="relative">
           <label class="block text-slate-400 mb-1">Modo até o Valor Limite</label>
-          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none hover:border-slate-600">
+          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none">
             <span id="labelDropdownModo">Valor Fixo (R$)</span>
             <span class="text-slate-400 ml-2">▼</span>
           </button>
-          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 divide-y divide-slate-700/50">
+          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 divide-y divide-slate-700/50">
             <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-slate-700 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
             <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-slate-700 cursor-pointer text-slate-200">Porcentagem (%)</div>
           </div>
@@ -131,75 +144,87 @@
 
         <div id="boxCfgValorAbaixo">
           <label id="lblCfgValorAbaixo" class="block text-slate-400 mb-1">Lucro Fixo até R$ 50 (R$)</label>
-          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
 
         <div>
           <label class="block text-slate-400 mb-1">Lucro Acima do Limite (%)</label>
-          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
       </div>
 
       <div class="flex justify-end pt-2">
-        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg text-xs transition">Salvar Regras</button>
+        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition">Salvar Regras</button>
       </div>
     </section>
 
-    <!-- Formulário de Lançamento -->
-    <section class="bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-5 shadow-lg">
-      <h2 class="text-base md:text-lg font-semibold text-slate-200 mb-3 md:mb-4">Novo Lançamento de Saque</h2>
-      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+    <!-- Formulário de Lançamento Otimizado -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg">
+      <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
+      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
-          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div class="relative">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
-          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
-          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
-          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div class="flex items-end sm:col-span-2 md:col-span-1">
-          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-lg text-sm transition">Defina a Comissão</button>
+          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
         </div>
       </form>
     </section>
 
-    <!-- Filtros de Visualização -->
-    <section class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 md:p-4 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Período:</span>
-        <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Hoje</button>
-        <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Ontem</button>
-        <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">7 dias</button>
-        <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Mês</button>
-        <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-600 transition">Todos</button>
-
-        <!-- FILTRO DE DATAS PERSONALIZADO (CALENDÁRIO) -->
-        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 px-2.5 py-1 rounded-lg text-xs text-slate-300 ml-0 sm:ml-2">
-          <span>🗓️ De:</span>
-          <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
-          <span>Até:</span>
-          <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
-          <button onclick="limparFiltroDataPersonalizado()" title="Limpar datas" class="text-slate-400 hover:text-red-400 font-bold px-1">✕</button>
+    <!-- Filtros de Visualização Perfeitamente Alinhados -->
+    <section class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3 sm:p-4 space-y-3 shadow-md">
+      <!-- Botões de Período Rápido -->
+      <div class="space-y-2">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Período:</span>
+        <div class="grid grid-cols-5 gap-1.5 w-full">
+          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Hoje</button>
+          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Ontem</button>
+          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">7 dias</button>
+          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Mês</button>
+          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Todos</button>
         </div>
       </div>
 
-      <!-- Filtro Personalizado de Pessoas -->
-      <div class="relative w-full lg:w-72 mt-2 lg:mt-0">
-        <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
+      <!-- Filtro Personalizado por Calendário (Design Fluido Mobile) -->
+      <div class="bg-slate-900/90 border border-slate-700/80 p-2.5 rounded-xl space-y-2">
+        <div class="flex items-center justify-between text-xs text-slate-300 font-medium">
+          <span>🗓️ Filtrar por Período Personalizado</span>
+          <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 font-semibold text-xs px-1">Limpar</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-0.5">Data Inicial (De)</label>
+            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-0.5">Data Final (Até)</label>
+            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro por Nome/Titular -->
+      <div class="relative w-full">
+        <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none shadow-inner">
           <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
           <span class="text-slate-400 ml-2 shrink-0">▼</span>
         </button>
 
-        <div id="dropdownPessoasMenu" class="hidden absolute right-0 mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-50 overflow-hidden">
+        <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
           <div class="p-2 border-b border-slate-700">
             <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
           </div>
@@ -208,41 +233,41 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo -->
-    <section class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700 hover:border-slate-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
-        <p class="text-xs text-slate-400">Qtd. Saques</p>
-        <p id="totalQtd" class="text-lg md:text-xl font-bold text-slate-100 mt-1">0</p>
+    <!-- Cards de Resumo Responsivos -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-4">
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md">
+        <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
+        <p id="totalQtd" class="text-lg sm:text-xl font-bold text-slate-100 mt-0.5">0</p>
       </div>
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700 hover:border-sky-500/50 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]">
-        <p class="text-xs text-slate-400">Volume Total</p>
-        <p id="totalVolume" class="text-lg md:text-xl font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-sky-500/50 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md">
+        <p class="text-[11px] text-slate-400 font-medium">Volume Total</p>
+        <p id="totalVolume" class="text-lg sm:text-xl font-bold text-sky-400 mt-0.5 truncate">R$ 0,00</p>
       </div>
       
       <!-- CARD CLICÁVEL: PENDENTES -->
-      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] relative group">
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md relative">
         <div class="flex justify-between items-center">
-          <p class="text-xs text-slate-400 font-medium">A Pagar (Pendente)</p>
-          <span id="badgePendente" class="text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded font-bold">FILTRAR</span>
+          <p class="text-[11px] text-slate-400 font-medium">A Pagar (Pendente)</p>
+          <span id="badgePendente" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold">FILTRAR</span>
         </div>
-        <p id="totalPendentePessoas" class="text-lg md:text-xl font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
-        <p id="txtSubPendente" class="text-[10px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
+        <p id="totalPendentePessoas" class="text-lg sm:text-xl font-bold text-red-400 mt-0.5 truncate">R$ 0,00</p>
+        <p id="txtSubPendente" class="text-[9px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
       </div>
 
       <!-- CARD FIXO: JÁ PAGO -->
-      <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 md:p-4">
-        <p class="text-xs text-slate-400">Já Pago aos CPFs</p>
-        <p id="totalPagoPessoas" class="text-lg md:text-xl font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md">
+        <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
+        <p id="totalPagoPessoas" class="text-lg sm:text-xl font-bold text-amber-400 mt-0.5 truncate">R$ 0,00</p>
       </div>
 
-      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 md:p-4 col-span-2 md:col-span-1">
-        <p class="text-xs text-slate-400">Seu Lucro Líquido</p>
-        <p id="totalLucroLiquido" class="text-lg md:text-xl font-bold text-emerald-400 mt-1 truncate">R$ 0,00</p>
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md col-span-2 md:col-span-1">
+        <p class="text-[11px] text-slate-400 font-medium">Seu Lucro Líquido</p>
+        <p id="totalLucroLiquido" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5 truncate">R$ 0,00</p>
       </div>
     </section>
 
     <!-- Histórico de Saques (Versão Desktop / Tabela) -->
-    <section class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg hidden md:block">
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block">
       <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
         <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques (Ordem Alfabética)</h3>
         <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
@@ -271,7 +296,7 @@
         <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
         <span id="subtituloStatusFilterMobile" class="text-xs text-emerald-400 font-medium"></span>
       </div>
-      <div id="listaCardsMobile" class="space-y-3"></div>
+      <div id="listaCardsMobile" class="space-y-2.5"></div>
     </section>
 
   </div>
@@ -395,11 +420,11 @@
       const val = percentualInput.value.trim();
       if (val !== '' && !isNaN(val) && parseFloat(val) >= 0) {
         btnSalvar.disabled = false;
-        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-lg text-sm text-white transition shadow-lg shadow-emerald-900/30';
+        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/30 active:scale-95';
         btnSalvar.textContent = 'Registrar Saque';
       } else {
         btnSalvar.disabled = true;
-        btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-lg text-sm transition';
+        btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
         btnSalvar.textContent = 'Defina a Comissão';
       }
     });
@@ -553,7 +578,7 @@
       document.getElementById('valorSaque').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
-      btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-lg text-sm transition';
+      btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
       btnSalvar.textContent = 'Defina a Comissão';
       
       resetDataParaHoje();
@@ -608,7 +633,6 @@
       renderizar();
     }
 
-    // FILTRO DE DATAS CORRIGIDO
     function filtrarPorData(item) {
       const hojeStr = obterDataLocalHoje();
       
@@ -703,6 +727,26 @@
     function renderizar() {
       atualizarDropdownPessoas();
 
+      // Destaque visual nos botões de período ativos
+      const botoes = {
+        'hoje': 'btnFiltroHoje',
+        'ontem': 'btnFiltroOntem',
+        '7dias': 'btnFiltro7Dias',
+        'mes': 'btnFiltroMes',
+        'todos': 'btnFiltroTodos'
+      };
+
+      Object.keys(botoes).forEach(chave => {
+        const btn = document.getElementById(botoes[chave]);
+        if (btn) {
+          if (filtroAtual === chave) {
+            btn.className = 'text-xs bg-emerald-600 text-white font-bold py-2 rounded-xl border border-emerald-400 shadow-md transition text-center';
+          } else {
+            btn.className = 'text-xs bg-slate-900 text-slate-300 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition text-center font-medium';
+          }
+        }
+      });
+
       const cardPendente = document.getElementById('cardPendente');
       const badgePendente = document.getElementById('badgePendente');
       const txtSubPendente = document.getElementById('txtSubPendente');
@@ -710,22 +754,21 @@
       const subMobile = document.getElementById('subtituloStatusFilterMobile');
 
       if (apenasPendentes) {
-        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98] shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
+        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
         badgePendente.textContent = 'ATIVO';
-        badgePendente.className = 'text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold animate-pulse';
+        badgePendente.className = 'text-[9px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse';
         txtSubPendente.textContent = '🔍 toque para ver todos';
         subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
         subMobile.textContent = 'Exibindo Pendentes';
       } else {
-        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-xl p-3.5 md:p-4 transition active:scale-[0.98]';
+        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md';
         badgePendente.textContent = 'FILTRAR';
-        badgePendente.className = 'text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded font-bold';
+        badgePendente.className = 'text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold';
         txtSubPendente.textContent = '👈 toque para ver pendentes';
         subDesktop.textContent = '';
         subMobile.textContent = '';
       }
 
-      // CORREÇÃO CRÍTICA DO FILTRO DE PESSOAS E DATAS
       const saquesFiltrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
         const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
@@ -784,35 +827,35 @@
         `;
         tbodyDesktop.appendChild(tr);
 
-        // Render Mobile
+        // Render Mobile Otimizado
         const card = document.createElement('div');
-        card.className = 'bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 space-y-2.5 shadow-md';
+        card.className = 'bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 space-y-2 shadow-md';
         card.innerHTML = `
           <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
-            <div>
-              <p class="font-bold text-slate-100 text-sm">${s.nome}</p>
-              <p class="text-[11px] text-slate-400">${dataEHora}</p>
+            <div class="pr-2">
+              <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
             </div>
-            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-xl text-xs font-semibold active:scale-95 transition shrink-0 ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
               ${s.pago ? '✓ Pago' : '⏳ Pendente'}
             </button>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-xs pt-0.5">
-            <div>
-              <p class="text-[10px] text-slate-400 uppercase">Saque</p>
-              <p class="font-semibold text-sky-400">R$ ${s.valor.toFixed(2)}</p>
+          <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
+            <div class="bg-slate-900/40 p-2 rounded-xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
+              <p class="font-bold text-sky-400 mt-0.5">R$ ${s.valor.toFixed(2)}</p>
             </div>
-            <div>
-              <p class="text-[10px] text-slate-400 uppercase">Pagar Pessoa</p>
-              <p class="font-medium text-amber-400">R$ ${s.comissaoPessoa.toFixed(2)} <span class="text-[10px] text-slate-400">(${pctTexto})</span></p>
+            <div class="bg-slate-900/40 p-2 rounded-xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
+              <p class="font-medium text-amber-400 mt-0.5">R$ ${s.comissaoPessoa.toFixed(2)}</p>
             </div>
-            <div>
-              <p class="text-[10px] text-slate-400 uppercase">Seu Lucro</p>
-              <p class="font-bold text-emerald-400">R$ ${s.lucroLiquidoSeu.toFixed(2)}</p>
+            <div class="bg-slate-900/40 p-2 rounded-xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
+              <p class="font-bold text-emerald-400 mt-0.5">R$ ${s.lucroLiquidoSeu.toFixed(2)}</p>
             </div>
           </div>
           <div class="flex justify-end pt-1 border-t border-slate-700/40">
-            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-1">Excluir Registro</button>
+            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir Registro</button>
           </div>
         `;
         containerMobile.appendChild(card);
