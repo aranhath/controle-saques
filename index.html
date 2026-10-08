@@ -12,22 +12,21 @@
   <!-- WEB MANIFEST -->
   <link rel="manifest" href="./manifest.json">
 
-  <!-- FAVICONS COMPATÍVEIS COM SAFARI (MAC/IOS), CHROME E EDGE -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=13">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=13">
-  <link rel="mask-icon" href="./favicon.svg?v=13" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=13">
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=14">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=14">
+  <link rel="mask-icon" href="./favicon.svg?v=14" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=14">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Otimizações Mobile */
     @media (max-width: 768px) {
       input, select, textarea, button {
         font-size: 16px !important;
       }
     }
-    /* Estilização elegante dos inputs de data no mobile */
+    /* Estilização limpa para inputs de data */
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(0.8);
       cursor: pointer;
@@ -39,7 +38,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-3 sm:p-5 md:p-8 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-6 font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
   <!-- TELA DE CARREGAMENTO -->
   <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center gap-3">
@@ -63,55 +62,50 @@
       <form id="loginForm" class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
-          <input type="email" id="loginEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="email" id="loginEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
-          <input type="password" id="loginSenha" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="password" id="loginSenha" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <p id="loginError" class="text-xs text-red-400 hidden"></p>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] font-semibold p-3 rounded-lg text-sm transition shadow-lg shadow-emerald-900/30">Entrar no Sistema</button>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] font-semibold p-3 rounded-xl text-sm transition shadow-lg shadow-emerald-900/30">Entrar no Sistema</button>
       </form>
     </div>
   </div>
 
   <!-- PAINEL PRINCIPAL -->
-  <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4 md:space-y-6">
+  <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
     
-    <!-- Cabeçalho Otimizado -->
-    <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg space-y-3">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/30 shrink-0 border border-emerald-400/40">
-            <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
-          </div>
-          <div>
-            <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
-              <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
-            </h1>
-            <p class="text-slate-400 text-xs">Dados sincronizados na nuvem</p>
-          </div>
+    <!-- Cabeçalho Otimizado e Perfeitamente Alinhado -->
+    <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30">
+          <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
         </div>
-        <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:bg-red-600/40 shrink-0">
-          🚪 Sair
-        </button>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black tracking-tight flex items-center gap-1.5">
+            <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
+          </h1>
+          <p class="text-slate-400 text-xs">Dados sincronizados na nuvem</p>
+        </div>
       </div>
 
-      <!-- Barra de Ações Responsiva -->
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/60 text-xs">
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button onclick="togglePainelConfig()" class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl font-medium transition active:scale-95 flex items-center justify-center gap-1.5">
-            ⚙️ Regras
-          </button>
-          <button onclick="exportarBackup()" class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl transition active:scale-95 flex items-center justify-center gap-1">
-            📥 Backup
-          </button>
-          <label class="flex-1 sm:flex-none bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl cursor-pointer transition active:scale-95 flex items-center justify-center gap-1">
-            📤 Importar
-            <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
-          </label>
-        </div>
-        <div id="userEmailTag" class="text-[11px] text-slate-400 bg-slate-900/50 border border-slate-700/60 px-2.5 py-1.5 rounded-lg truncate w-full sm:w-auto text-center sm:text-right"></div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="togglePainelConfig()" class="bg-slate-900/80 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
+          ⚙️ Regras
+        </button>
+        <button onclick="exportarBackup()" class="bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs transition active:scale-95">
+          📥 Backup
+        </button>
+        <label class="bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs cursor-pointer transition active:scale-95">
+          📤 Importar
+          <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
+        </label>
+        <span id="userEmailTag" class="text-xs text-slate-400 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
+        <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
+          Sair
+        </button>
       </div>
     </header>
 
@@ -158,7 +152,7 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento Otimizado -->
+    <!-- Formulário de Lançamento -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
@@ -185,84 +179,92 @@
       </form>
     </section>
 
-    <!-- Filtros de Visualização Perfeitamente Alinhados -->
-    <section class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3 sm:p-4 space-y-3 shadow-md">
-      <!-- Botões de Período Rápido -->
-      <div class="space-y-2">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Período:</span>
-        <div class="grid grid-cols-5 gap-1.5 w-full">
-          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Hoje</button>
-          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Ontem</button>
-          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">7 dias</button>
-          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Mês</button>
-          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-900 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition active:scale-95 text-center font-medium">Todos</button>
+    <!-- Barra de Filtros Totalmente Organizada e Discreta -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        
+        <!-- Botões de Período + Botão Discreto de Calendário -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">PERÍODO:</span>
+          
+          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Hoje</button>
+          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Ontem</button>
+          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">7 dias</button>
+          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Mês</button>
+          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Todos</button>
+
+          <!-- Botão Discreto de Abrir Calendário Customizado -->
+          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium flex items-center gap-1">
+            <span>🗓️</span> Data
+          </button>
+        </div>
+
+        <!-- Filtro por Nome/Titular -->
+        <div class="relative w-full md:w-72">
+          <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
+            <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
+            <span class="text-slate-400 ml-2 shrink-0">▼</span>
+          </button>
+
+          <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div class="p-2 border-b border-slate-700">
+              <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+            </div>
+            <div id="listaPessoasDropdown" class="max-h-56 overflow-y-auto divide-y divide-slate-700/50"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Filtro Personalizado por Calendário (Design Fluido Mobile) -->
-      <div class="bg-slate-900/90 border border-slate-700/80 p-2.5 rounded-xl space-y-2">
-        <div class="flex items-center justify-between text-xs text-slate-300 font-medium">
-          <span>🗓️ Filtrar por Período Personalizado</span>
-          <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 font-semibold text-xs px-1">Limpar</button>
+      <!-- Caixa Popover Compacta e Discreta para Selecionar Datas Customizadas -->
+      <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-2">
+        <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
+          <span>🗓️ Selecionar Intervalo de Datas</span>
+          <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 text-xs font-medium">Limpar</button>
         </div>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="block text-[10px] text-slate-400 mb-0.5">Data Inicial (De)</label>
+            <label class="block text-[10px] text-slate-400 mb-1">De:</label>
             <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-[10px] text-slate-400 mb-0.5">Data Final (Até)</label>
+            <label class="block text-[10px] text-slate-400 mb-1">Até:</label>
             <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
       </div>
-
-      <!-- Filtro por Nome/Titular -->
-      <div class="relative w-full">
-        <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none shadow-inner">
-          <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
-          <span class="text-slate-400 ml-2 shrink-0">▼</span>
-        </button>
-
-        <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-          <div class="p-2 border-b border-slate-700">
-            <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
-          </div>
-          <div id="listaPessoasDropdown" class="max-h-56 overflow-y-auto divide-y divide-slate-700/50"></div>
-        </div>
-      </div>
     </section>
 
-    <!-- Cards de Resumo Responsivos -->
-    <section class="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-4">
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md">
+    <!-- Cards de Resumo Perfeitamente Alinhados (Grelha Responsiva) -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
-        <p id="totalQtd" class="text-lg sm:text-xl font-bold text-slate-100 mt-0.5">0</p>
+        <p id="totalQtd" class="text-lg font-bold text-slate-100 mt-1">0</p>
       </div>
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-sky-500/50 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md">
+
+      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-sky-500/50 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Volume Total</p>
-        <p id="totalVolume" class="text-lg sm:text-xl font-bold text-sky-400 mt-0.5 truncate">R$ 0,00</p>
+        <p id="totalVolume" class="text-lg font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
       </div>
       
       <!-- CARD CLICÁVEL: PENDENTES -->
-      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md relative">
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md relative">
         <div class="flex justify-between items-center">
           <p class="text-[11px] text-slate-400 font-medium">A Pagar (Pendente)</p>
           <span id="badgePendente" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold">FILTRAR</span>
         </div>
-        <p id="totalPendentePessoas" class="text-lg sm:text-xl font-bold text-red-400 mt-0.5 truncate">R$ 0,00</p>
+        <p id="totalPendentePessoas" class="text-lg font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
         <p id="txtSubPendente" class="text-[9px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
       </div>
 
       <!-- CARD FIXO: JÁ PAGO -->
-      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md">
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
-        <p id="totalPagoPessoas" class="text-lg sm:text-xl font-bold text-amber-400 mt-0.5 truncate">R$ 0,00</p>
+        <p id="totalPagoPessoas" class="text-lg font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
       </div>
 
-      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md col-span-2 md:col-span-1">
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 shadow-md col-span-2 sm:col-span-1">
         <p class="text-[11px] text-slate-400 font-medium">Seu Lucro Líquido</p>
-        <p id="totalLucroLiquido" class="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5 truncate">R$ 0,00</p>
+        <p id="totalLucroLiquido" class="text-lg font-bold text-emerald-400 mt-1 truncate">R$ 0,00</p>
       </div>
     </section>
 
@@ -290,7 +292,7 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Mobile / Cards) -->
+    <!-- Histórico de Saques (Versão Mobile / Cards Limpos) -->
     <section class="block md:hidden space-y-3">
       <div class="flex justify-between items-center px-1">
         <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
@@ -349,6 +351,10 @@
 
     function toggleDropdownModo() {
       document.getElementById('menuDropdownModo').classList.toggle('hidden');
+    }
+
+    function toggleCaixaDataCustomizada() {
+      document.getElementById('caixaDataCustomizada').classList.toggle('hidden');
     }
 
     function selecionarModoAbaixo(valor, texto) {
@@ -603,6 +609,7 @@
       filtroAtual = tipo;
       document.getElementById('dataInicioFiltro').value = '';
       document.getElementById('dataFimFiltro').value = '';
+      document.getElementById('caixaDataCustomizada').classList.add('hidden');
       renderizar();
     }
 
@@ -620,6 +627,7 @@
       document.getElementById('dataInicioFiltro').value = '';
       document.getElementById('dataFimFiltro').value = '';
       filtroAtual = 'todos';
+      document.getElementById('caixaDataCustomizada').classList.add('hidden');
       renderizar();
     }
 
@@ -727,7 +735,7 @@
     function renderizar() {
       atualizarDropdownPessoas();
 
-      // Destaque visual nos botões de período ativos
+      // Destaque nos botões de período
       const botoes = {
         'hoje': 'btnFiltroHoje',
         'ontem': 'btnFiltroOntem',
@@ -740,12 +748,21 @@
         const btn = document.getElementById(botoes[chave]);
         if (btn) {
           if (filtroAtual === chave) {
-            btn.className = 'text-xs bg-emerald-600 text-white font-bold py-2 rounded-xl border border-emerald-400 shadow-md transition text-center';
+            btn.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition';
           } else {
-            btn.className = 'text-xs bg-slate-900 text-slate-300 border border-slate-700 py-2 rounded-xl hover:bg-slate-700 transition text-center font-medium';
+            btn.className = 'text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium';
           }
         }
       });
+
+      const btnCal = document.getElementById('btnToggleCalendario');
+      if (btnCal) {
+        if (filtroAtual === 'personalizado') {
+          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition flex items-center gap-1';
+        } else {
+          btnCal.className = 'text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium flex items-center gap-1';
+        }
+      }
 
       const cardPendente = document.getElementById('cardPendente');
       const badgePendente = document.getElementById('badgePendente');
@@ -754,14 +771,14 @@
       const subMobile = document.getElementById('subtituloStatusFilterMobile');
 
       if (apenasPendentes) {
-        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
+        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
         badgePendente.textContent = 'ATIVO';
         badgePendente.className = 'text-[9px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse';
         txtSubPendente.textContent = '🔍 toque para ver todos';
         subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
         subMobile.textContent = 'Exibindo Pendentes';
       } else {
-        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3 sm:p-4 transition active:scale-95 shadow-md';
+        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md';
         badgePendente.textContent = 'FILTRAR';
         badgePendente.className = 'text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold';
         txtSubPendente.textContent = '👈 toque para ver pendentes';
@@ -827,7 +844,7 @@
         `;
         tbodyDesktop.appendChild(tr);
 
-        // Render Mobile Otimizado
+        // Render Mobile
         const card = document.createElement('div');
         card.className = 'bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 space-y-2 shadow-md';
         card.innerHTML = `
