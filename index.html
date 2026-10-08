@@ -13,32 +13,40 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=15">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=15">
-  <link rel="mask-icon" href="./favicon.svg?v=15" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=15">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=16">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=16">
+  <link rel="mask-icon" href="./favicon.svg?v=16" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=16">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Forçar inputs a nunca estourarem o layout no mobile */
-    input, select, textarea, button {
+    /* Reset total de caixa e prevenção de transbordamento */
+    *, ::before, ::after {
       box-sizing: border-box !important;
+    }
+
+    body {
+      overflow-x: hidden !important;
+    }
+
+    /* Correção Específica para Inputs no Safari iOS / Mobile */
+    input, select, textarea, button {
+      font-size: 16px !important;
       max-width: 100% !important;
     }
 
-    @media (max-width: 768px) {
-      input, select, textarea, button {
-        font-size: 16px !important;
-      }
-      /* Ajuste especial para inputs do tipo Date no iOS/Safari */
-      input[type="date"] {
-        -webkit-appearance: none;
-        display: block;
-        width: 100% !important;
-        max-width: 100% !important;
-        text-align: center;
-      }
+    input[type="date"] {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      border-radius: 0.75rem !important;
+      min-height: 42px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      display: block !important;
+      margin: 0 !important;
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
@@ -91,7 +99,7 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
     
-    <!-- Cabeçalho Otimizado -->
+    <!-- Cabeçalho -->
     <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30">
@@ -166,34 +174,34 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento com Input de Data Corrigido -->
+    <!-- Formulário de Lançamento (Com trava anti-vazamento no Data do Saque) -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg overflow-hidden">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="w-full overflow-hidden">
+        <div class="w-full min-w-0 overflow-hidden">
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
-          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="relative w-full">
+        <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
         </div>
-        <div class="w-full">
+        <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
           <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="w-full">
+        <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
           <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="flex items-end sm:col-span-2 md:col-span-1 w-full">
+        <div class="flex items-end sm:col-span-2 md:col-span-1 w-full min-w-0">
           <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
         </div>
       </form>
     </section>
 
-    <!-- Barra de Filtros Totalmente Organizada -->
+    <!-- Barra de Filtros (Com trava anti-vazamento no popover de Data) -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 overflow-hidden">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
@@ -229,20 +237,20 @@
         </div>
       </div>
 
-      <!-- Caixa Popover de Intervalo de Datas 100% Ajustada ao Mobile -->
-      <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-2">
+      <!-- Caixa Popover de Intervalo de Datas 100% Ajustada ao Mobile e Sem Vazar -->
+      <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-3 w-full max-w-full overflow-hidden">
         <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
           <span>Selecionar Intervalo de Datas</span>
           <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 text-xs font-medium">Limpar</button>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs w-full">
+          <div class="w-full min-w-0 overflow-hidden">
             <label class="block text-[10px] text-slate-400 mb-1">De:</label>
-            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
           </div>
-          <div>
+          <div class="w-full min-w-0 overflow-hidden">
             <label class="block text-[10px] text-slate-400 mb-1">Até:</label>
-            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
       </div>
