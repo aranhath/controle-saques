@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=36">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=36">
-  <link rel="mask-icon" href="./favicon.svg?v=36" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=36">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=37">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=37">
+  <link rel="mask-icon" href="./favicon.svg?v=37" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=37">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -361,41 +361,41 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo (Otimizado para Mobile e Desktop) -->
-    <section class="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-3 relative z-10">
+    <!-- Cards de Resumo (Design Centralizado e Harmonioso) -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-3 relative z-10">
       
-      <!-- Seu Lucro Líquido (Destaque Principal no Mobile) -->
-      <div class="glass-card rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 shadow-lg col-span-2 md:col-span-1 order-1 md:order-5 border-emerald-500/30 bg-emerald-950/20">
-        <p class="text-[10px] sm:text-[11px] text-emerald-400 font-semibold tracking-wide uppercase">Seu Lucro Líquido</p>
-        <p id="totalLucroLiquido" class="text-base sm:text-lg font-black text-emerald-400 mt-1 truncate">R$ 0,00</p>
+      <!-- HERO CARD: Seu Lucro Líquido (Topo no Mobile / Direita no PC) -->
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl col-span-2 md:col-span-1 order-1 md:order-5 border-emerald-500/40 bg-gradient-to-b from-emerald-950/30 to-slate-900/80 flex flex-col items-center justify-center text-center space-y-1">
+        <span class="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Seu Lucro Líquido</span>
+        <p id="totalLucroLiquido" class="text-xl sm:text-2xl font-black text-emerald-400 pt-0.5 truncate max-w-full">R$ 0,00</p>
       </div>
 
       <!-- Qtd Saques -->
-      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-white/30 cursor-pointer rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 transition active:scale-95 shadow-lg order-2 md:order-1">
-        <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
-        <p id="totalQtd" class="text-base sm:text-lg font-bold text-slate-100 mt-1">0</p>
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-white/30 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-lg order-2 md:order-1 flex flex-col items-center justify-center text-center">
+        <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
+        <p id="totalQtd" class="text-lg sm:text-xl font-bold text-slate-100 mt-1">0</p>
       </div>
 
       <!-- Volume Total -->
-      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-sky-500/50 cursor-pointer rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 transition active:scale-95 shadow-lg order-3 md:order-2">
-        <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium">Volume Total</p>
-        <p id="totalVolume" class="text-base sm:text-lg font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-sky-500/50 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-lg order-3 md:order-2 flex flex-col items-center justify-center text-center">
+        <p class="text-[11px] text-slate-400 font-medium">Volume Total</p>
+        <p id="totalVolume" class="text-base sm:text-lg font-bold text-sky-400 mt-1 truncate max-w-full">R$ 0,00</p>
       </div>
       
       <!-- A Pagar (Pendente) -->
-      <div id="cardPendente" onclick="toggleFiltroPendente()" class="glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 transition active:scale-95 shadow-lg relative order-4 md:order-3">
-        <div class="flex justify-between items-center gap-1">
-          <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">A Pagar (Pendente)</p>
-          <span id="badgePendente" class="text-[8px] sm:text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold shrink-0">FILTRAR</span>
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-lg relative order-4 md:order-3 flex flex-col items-center justify-center text-center space-y-0.5">
+        <div class="flex items-center gap-1.5 justify-center w-full">
+          <p class="text-[11px] text-slate-400 font-medium">A Pagar (Pendente)</p>
+          <span id="badgePendente" class="text-[8px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold shrink-0">FILTRAR</span>
         </div>
-        <p id="totalPendentePessoas" class="text-base sm:text-lg font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
-        <p id="txtSubPendente" class="text-[8px] sm:text-[9px] text-red-400/80 mt-0.5 truncate">👈 ver pendentes</p>
+        <p id="totalPendentePessoas" class="text-base sm:text-lg font-bold text-red-400 truncate max-w-full">R$ 0,00</p>
+        <p id="txtSubPendente" class="text-[9px] text-red-400/80">👈 toque para ver</p>
       </div>
 
       <!-- Já Pago aos CPFs -->
-      <div class="glass-card rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 shadow-lg order-5 md:order-4">
-        <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Já Pago aos CPFs</p>
-        <p id="totalPagoPessoas" class="text-base sm:text-lg font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-lg order-5 md:order-4 flex flex-col items-center justify-center text-center">
+        <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
+        <p id="totalPagoPessoas" class="text-base sm:text-lg font-bold text-amber-400 mt-1 truncate max-w-full">R$ 0,00</p>
       </div>
 
     </section>
@@ -561,7 +561,6 @@
       pctAcima: 10
     };
 
-    // FUNÇÃO AUXILIAR DE FORMATAÇÃO MONETÁRIA BRASILEIRA (R$ 10.500,78)
     function formatarMoeda(valor) {
       if (isNaN(valor) || valor === null || valor === undefined) return 'R$ 0,00';
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1403,17 +1402,17 @@
       const subMobile = document.getElementById('subtituloStatusFilterMobile');
 
       if (apenasPendentes) {
-        cardPendente.className = 'glass-card border-2 border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30 relative order-4 md:order-3';
+        cardPendente.className = 'glass-card border-2 border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30 relative order-4 md:order-3 flex flex-col items-center justify-center text-center space-y-0.5';
         badgePendente.textContent = 'ATIVO';
-        badgePendente.className = 'text-[8px] sm:text-[9px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse shrink-0';
+        badgePendente.className = 'text-[8px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse shrink-0';
         txtSubPendente.textContent = '🔍 ver todos';
         subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
         subMobile.textContent = 'Exibindo Pendentes';
       } else {
-        cardPendente.className = 'glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 transition active:scale-95 shadow-lg relative order-4 md:order-3';
+        cardPendente.className = 'glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-lg relative order-4 md:order-3 flex flex-col items-center justify-center text-center space-y-0.5';
         badgePendente.textContent = 'FILTRAR';
-        badgePendente.className = 'text-[8px] sm:text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold shrink-0';
-        txtSubPendente.textContent = '👈 ver pendentes';
+        badgePendente.className = 'text-[8px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold shrink-0';
+        txtSubPendente.textContent = '👈 toque para ver';
         subDesktop.textContent = '';
         subMobile.textContent = '';
       }
@@ -1478,15 +1477,15 @@
             </button>
           </div>
           <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
-            <div class="glass-input p-2 rounded-2xl">
+            <div class="glass-input p-2 rounded-2xl text-center">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
               <p class="font-bold text-sky-400 mt-0.5 truncate">${formatarMoeda(s.valor)}</p>
             </div>
-            <div class="glass-input p-2 rounded-2xl">
+            <div class="glass-input p-2 rounded-2xl text-center">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
               <p class="font-medium text-amber-400 mt-0.5 truncate">${formatarMoeda(s.comissaoPessoa)}</p>
             </div>
-            <div class="glass-input p-2 rounded-2xl">
+            <div class="glass-input p-2 rounded-2xl text-center">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
               <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(s.lucroLiquidoSeu)}</p>
             </div>
