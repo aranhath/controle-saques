@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=24">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=24">
-  <link rel="mask-icon" href="./favicon.svg?v=24" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=24">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=25">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=25">
+  <link rel="mask-icon" href="./favicon.svg?v=25" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=25">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -174,7 +174,7 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento (Camada Z-30 Superior para Autocomplete Flutuar por Cima de Tudo) -->
+    <!-- Formulário de Lançamento (Camada Z-30 Superior) -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
@@ -185,7 +185,6 @@
         <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-          <!-- Autocomplete de Nomes com Z-50 e Fundo Opaco -->
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-700/60"></div>
         </div>
         <div class="w-full min-w-0">
@@ -202,7 +201,7 @@
       </form>
     </section>
 
-    <!-- Barra de Filtros (Camada Z-20 para Ficar Abaixo do Formulário, mas Acima dos Cards) -->
+    <!-- Barra de Filtros -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-20">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
@@ -230,7 +229,6 @@
               <span class="text-slate-400 ml-2 shrink-0">▼</span>
             </button>
 
-            <!-- Dropdown Filtro Pessoas com Z-50 -->
             <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-slate-700">
                 <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
@@ -239,9 +237,9 @@
             </div>
           </div>
 
-          <!-- BOTÃO GERAR EXTRATO -->
-          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 shrink-0">
-            <span>📸</span> Gerar extrato
+          <!-- BOTÃO GERAR EXTRATO (Sem Emoji) -->
+          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center shrink-0">
+            Gerar extrato
           </button>
         </div>
 
@@ -266,7 +264,7 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo (Camada Z-10 Inferior) -->
+    <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 relative z-10">
       <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
@@ -335,7 +333,36 @@
 
   </div>
 
-  <!-- CONTAINER DO EXTRATO -->
+  <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO -->
+  <div id="modalExtrato" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <!-- Cabeçalho do Modal -->
+      <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+        <h3 class="font-bold text-slate-100 text-sm md:text-base">Extrato Gerado</h3>
+        <button onclick="fecharModalExtrato()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
+      </div>
+      
+      <!-- Imagem de Pré-visualização -->
+      <div class="p-4 overflow-y-auto flex justify-center bg-slate-950/50">
+        <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-xl border border-slate-700 max-w-full shadow-lg">
+      </div>
+
+      <!-- Ações (Compartilhar e Baixar) -->
+      <div class="p-4 border-t border-slate-700 bg-slate-900/50 flex flex-col sm:flex-row items-center gap-2 justify-end">
+        <button onclick="fecharModalExtrato()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+          Fechar
+        </button>
+        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow-lg shadow-sky-900/30">
+          <span>📤</span> Compartilhar
+        </button>
+        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/30">
+          <span>📥</span> Salvar no Dispositivo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER OCULTO DO EXTRATO -->
   <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
     <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
       
@@ -425,6 +452,9 @@
     let apenasPendentes = false;
     let pessoaSelecionadaFiltro = '';
     let unsubscribeSnapshot = null;
+    let extratoBlobGlobal = null;
+    let extratoDataUrlGlobal = '';
+    let extratoNomeArquivoGlobal = '';
 
     let regrasLucro = {
       limiteValor: 50,
@@ -844,6 +874,7 @@
       }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
+    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL
     async function gerarImagemExtrato() {
       if (!pessoaSelecionadaFiltro) {
         alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
@@ -921,17 +952,62 @@
           scale: 2
         });
 
-        const link = document.createElement('a');
-        const nomeArquivo = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
-        link.download = nomeArquivo;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        extratoDataUrlGlobal = canvas.toDataURL('image/png');
+        extratoNomeArquivoGlobal = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
+
+        canvas.toBlob(blob => {
+          extratoBlobGlobal = blob;
+        }, 'image/png');
+
+        document.getElementById('imgPreviewExtrato').src = extratoDataUrlGlobal;
+        document.getElementById('modalExtrato').classList.remove('hidden');
+
       } catch (err) {
         alert('Erro ao gerar imagem do extrato: ' + err.message);
       } finally {
         btnGerar.innerHTML = textoOriginal;
         btnGerar.disabled = false;
       }
+    }
+
+    function fecharModalExtrato() {
+      document.getElementById('modalExtrato').classList.add('hidden');
+    }
+
+    async function compartilharExtrato() {
+      if (!extratoBlobGlobal && !extratoDataUrlGlobal) return;
+
+      const file = new File([extratoBlobGlobal], extratoNomeArquivoGlobal, { type: 'image/png' });
+
+      // Suporte Mobile (Navegador com Web Share API)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Extrato de Saque',
+            text: `Segue o extrato de ${pessoaSelecionadaFiltro}`
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') console.error('Erro ao compartilhar:', err);
+        }
+      } else {
+        // Suporte Desktop / PC (Copia imagem para área de transferência)
+        try {
+          const item = new ClipboardItem({ "image/png": extratoBlobGlobal });
+          await navigator.clipboard.write([item]);
+          alert('Imagem copiada para a área de transferência! Você pode colar (Ctrl+V ou Cmd+V) no WhatsApp Web.');
+        } catch (err) {
+          alert('Seu navegador não suporta compartilhamento direto. Use a opção "Salvar no Dispositivo".');
+        }
+      }
+    }
+
+    function baixarExtrato() {
+      if (!extratoDataUrlGlobal) return;
+      const link = document.createElement('a');
+      link.download = extratoNomeArquivoGlobal;
+      link.href = extratoDataUrlGlobal;
+      link.click();
     }
 
     function renderizar() {
