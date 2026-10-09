@@ -13,15 +13,16 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=16">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=16">
-  <link rel="mask-icon" href="./favicon.svg?v=16" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=16">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=17">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=17">
+  <link rel="mask-icon" href="./favicon.svg?v=17" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=17">
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Biblioteca para converter elementos HTML em Imagem PNG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
-    /* Reset total de caixa e prevenção de transbordamento */
     *, ::before, ::after {
       box-sizing: border-box !important;
     }
@@ -30,7 +31,6 @@
       overflow-x: hidden !important;
     }
 
-    /* Correção Específica para Inputs no Safari iOS / Mobile */
     input, select, textarea, button {
       font-size: 16px !important;
       max-width: 100% !important;
@@ -174,7 +174,7 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento (Com trava anti-vazamento no Data do Saque) -->
+    <!-- Formulário de Lançamento -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg overflow-hidden">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
@@ -201,7 +201,7 @@
       </form>
     </section>
 
-    <!-- Barra de Filtros (Com trava anti-vazamento no popover de Data) -->
+    <!-- Barra de Filtros + Botão de Gerar Imagem do Extrato -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 overflow-hidden">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
@@ -221,23 +221,31 @@
           </button>
         </div>
 
-        <!-- Filtro por Nome/Titular -->
-        <div class="relative w-full md:w-72">
-          <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
-            <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
-            <span class="text-slate-400 ml-2 shrink-0">▼</span>
-          </button>
+        <!-- Filtro por Nome/Titular + Botão de Gerar Extrato -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          <div class="relative w-full md:w-64">
+            <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
+              <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
+              <span class="text-slate-400 ml-2 shrink-0">▼</span>
+            </button>
 
-          <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-            <div class="p-2 border-b border-slate-700">
-              <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+              <div class="p-2 border-b border-slate-700">
+                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+              </div>
+              <div id="listaPessoasDropdown" class="max-h-56 overflow-y-auto divide-y divide-slate-700/50"></div>
             </div>
-            <div id="listaPessoasDropdown" class="max-h-56 overflow-y-auto divide-y divide-slate-700/50"></div>
           </div>
+
+          <!-- BOTÃO GERAR EXTRATO (Aparece quando uma pessoa é selecionada) -->
+          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 shrink-0">
+            <span>📸</span> Gerar Imagem do Extrato
+          </button>
         </div>
+
       </div>
 
-      <!-- Caixa Popover de Intervalo de Datas 100% Ajustada ao Mobile e Sem Vazar -->
+      <!-- Caixa Popover de Intervalo de Datas -->
       <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-3 w-full max-w-full overflow-hidden">
         <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
           <span>Selecionar Intervalo de Datas</span>
@@ -323,6 +331,81 @@
       <div id="listaCardsMobile" class="space-y-2.5"></div>
     </section>
 
+  </div>
+
+  <!-- CONTAINER OCULTO PARA GERAR A IMAGEM DO EXTRATO -->
+  <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
+    <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
+      
+      <!-- Cabeçalho do Extrato -->
+      <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl overflow-hidden border border-emerald-400/40">
+            <img src="./favicon.svg" alt="Logo" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h2 class="text-xl font-black tracking-tight text-emerald-400">GESTÃO DE SAQUE</h2>
+            <p class="text-xs text-slate-400">Comprovante de Comissões</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] text-slate-400 uppercase font-semibold">Gerado em</p>
+          <p id="extratoDataEmissao" class="text-xs text-slate-200 font-medium"></p>
+        </div>
+      </div>
+
+      <!-- Dados da Pessoa e Período -->
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3.5 space-y-1">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-400">Titular / CPF:</span>
+          <span id="extratoNomeTitular" class="font-bold text-slate-100 text-sm"></span>
+        </div>
+        <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700/50">
+          <span class="text-slate-400">Período dos Saques:</span>
+          <span id="extratoPeriodoTexto" class="font-semibold text-emerald-400"></span>
+        </div>
+      </div>
+
+      <!-- Tabela Detalhada de Saques -->
+      <div class="space-y-2">
+        <p class="text-xs font-bold text-slate-300 uppercase tracking-wider">Detalhamento das Operações</p>
+        <div class="border border-slate-700/80 rounded-xl overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800 text-slate-400 uppercase border-b border-slate-700">
+              <tr>
+                <th class="p-2.5">Data & Hora</th>
+                <th class="p-2.5">Valor Saque</th>
+                <th class="p-2.5">Taxa (%)</th>
+                <th class="p-2.5 text-right">Comissão (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="extratoTabelaCorpo" class="divide-y divide-slate-800 bg-slate-900/60"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rodapé com Totais e Valor Final a Receber -->
+      <div class="bg-gradient-to-r from-emerald-950/40 via-slate-800 to-slate-800 border border-emerald-500/50 rounded-xl p-4 space-y-2">
+        <div class="flex justify-between text-xs text-slate-300">
+          <span>Qtd. de Saques:</span>
+          <span id="extratoQtdSaques" class="font-bold text-slate-100"></span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-300">
+          <span>Volume Total Movimentado:</span>
+          <span id="extratoVolumeTotal" class="font-bold text-sky-400"></span>
+        </div>
+        <div class="flex justify-between items-center text-base pt-2 border-t border-slate-700/80">
+          <span class="font-bold text-slate-200">TOTAL A RECEBER:</span>
+          <span id="extratoTotalReceber" class="font-black text-emerald-400 text-xl"></span>
+        </div>
+      </div>
+
+      <!-- Rodapé de Garantia -->
+      <p class="text-[10px] text-center text-slate-500 pt-1">
+        Relatório oficial gerado automaticamente pelo Sistema Gestão de Saque.
+      </p>
+
+    </div>
   </div>
 
   <script>
@@ -754,8 +837,124 @@
       atualizarDropdownPessoas();
     }
 
+    // OBTEM OS SAQUES FILTRADOS ATUAIS DA TELA
+    function obterSaquesFiltradosAtuais() {
+      return saques.filter(item => {
+        const passaData = filtrarPorData(item);
+        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
+        const passaStatus = apenasPendentes ? !item.pago : true;
+
+        return passaData && passaPessoa && passaStatus;
+      }).sort((a, b) => new Date(a.data) - new Date(b.data));
+    }
+
+    // FUNÇÃO QUE MONTA E GERA A IMAGEM PNG DO EXTRATO
+    async function gerarImagemExtrato() {
+      if (!pessoaSelecionadaFiltro) {
+        alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
+        return;
+      }
+
+      const dadosExtrato = obterSaquesFiltradosAtuais();
+
+      if (dadosExtrato.length === 0) {
+        alert('Não há registros de saques para esta pessoa no período selecionado.');
+        return;
+      }
+
+      const btnGerar = document.getElementById('btnGerarExtrato');
+      const textoOriginal = btnGerar.innerHTML;
+      btnGerar.innerHTML = '⏳ Gerando...';
+      btnGerar.disabled = true;
+
+      // 1. Preencher Dados da Pessoa
+      document.getElementById('extratoNomeTitular').textContent = pessoaSelecionadaFiltro;
+
+      // 2. Preencher Data de Emissão
+      const agora = new Date();
+      document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+      // 3. Montar Descrição do Período
+      let textoPeriodo = 'Todos os Registros';
+      if (filtroAtual === 'hoje') textoPeriodo = `Hoje (${agora.toLocaleDateString('pt-BR')})`;
+      else if (filtroAtual === 'ontem') {
+        const ontem = new Date();
+        ontem.setDate(ontem.getDate() - 1);
+        textoPeriodo = `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
+      }
+      else if (filtroAtual === '7dias') textoPeriodo = 'Últimos 7 dias';
+      else if (filtroAtual === 'mes') textoPeriodo = `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
+      else if (filtroAtual === 'personalizado') {
+        const ini = document.getElementById('dataInicioFiltro').value;
+        const fim = document.getElementById('dataFimFiltro').value;
+        if (ini && fim) textoPeriodo = `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
+        else if (ini) textoPeriodo = `A partir de ${ini.split('-').reverse().join('/')}`;
+        else if (fim) textoPeriodo = `Até ${fim.split('-').reverse().join('/')}`;
+      }
+      document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
+
+      // 4. Preencher Tabela de Saques
+      const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
+      tabelaCorpo.innerHTML = '';
+
+      let volTotal = 0;
+      let comissaoTotal = 0;
+
+      dadosExtrato.forEach(s => {
+        volTotal += s.valor;
+        comissaoTotal += s.comissaoPessoa;
+
+        const dtForm = s.data.split('-').reverse().join('/');
+        const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
+        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2.5 text-slate-300">${dtHr}</td>
+          <td class="p-2.5 font-semibold text-sky-400">R$ ${s.valor.toFixed(2)}</td>
+          <td class="p-2.5 text-slate-400">${pctTexto}</td>
+          <td class="p-2.5 font-bold text-emerald-400 text-right">R$ ${s.comissaoPessoa.toFixed(2)}</td>
+        `;
+        tabelaCorpo.appendChild(tr);
+      });
+
+      // 5. Preencher Totais do Rodapé
+      document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
+      document.getElementById('extratoVolumeTotal').textContent = `R$ ${volTotal.toFixed(2)}`;
+      document.getElementById('extratoTotalReceber').textContent = `R$ ${comissaoTotal.toFixed(2)}`;
+
+      // 6. Converter HTML em Imagem PNG com html2canvas
+      const container = document.getElementById('extratoCard');
+      
+      try {
+        const canvas = await html2canvas(container, {
+          backgroundColor: '#0f172a',
+          scale: 2
+        });
+
+        const link = document.createElement('a');
+        const nomeArquivo = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
+        link.download = nomeArquivo;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        alert('Erro ao gerar imagem do extrato: ' + err.message);
+      } finally {
+        btnGerar.innerHTML = textoOriginal;
+        btnGerar.disabled = false;
+      }
+    }
+
     function renderizar() {
       atualizarDropdownPessoas();
+
+      // Controlar exibição do botão "Gerar Imagem do Extrato"
+      const btnGerarExtrato = document.getElementById('btnGerarExtrato');
+      if (pessoaSelecionadaFiltro) {
+        btnGerarExtrato.classList.remove('hidden');
+      } else {
+        btnGerarExtrato.classList.add('hidden');
+      }
 
       // Destaque nos botões de período
       const botoes = {
@@ -808,19 +1007,7 @@
         subMobile.textContent = '';
       }
 
-      const saquesFiltrados = saques.filter(item => {
-        const passaData = filtrarPorData(item);
-        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
-        const passaStatus = apenasPendentes ? !item.pago : true;
-
-        return passaData && passaPessoa && passaStatus;
-      }).sort((a, b) => {
-        const nomeA = a.nome.toLowerCase();
-        const nomeB = b.nome.toLowerCase();
-        if (nomeA < nomeB) return -1;
-        if (nomeA > nomeB) return 1;
-        return new Date(b.data) - new Date(a.data);
-      });
+      const saquesFiltrados = obterSaquesFiltradosAtuais();
 
       const tbodyDesktop = document.getElementById('tabelaCorpoDesktop');
       const containerMobile = document.getElementById('listaCardsMobile');
