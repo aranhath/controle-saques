@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=30">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=30">
-  <link rel="mask-icon" href="./favicon.svg?v=30" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=30">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=34">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=34">
+  <link rel="mask-icon" href="./favicon.svg?v=34" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=34">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -148,22 +148,75 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <button onclick="togglePainelPessoas()" class="glass-input hover:bg-slate-800/80 text-sky-400 border border-sky-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
+          👥 Cadastro
+        </button>
         <button onclick="togglePainelConfig()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
           ⚙️ Regras
         </button>
-        <button onclick="exportarBackup()" class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs transition active:scale-95">
-          📥 Backup
-        </button>
-        <label class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs cursor-pointer transition active:scale-95">
-          📤 Importar
-          <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
-        </label>
         <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
         <button onclick="logout()" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
           Sair
         </button>
       </div>
     </header>
+
+    <!-- PAINEL DE GESTÃO DE PESSOAS / CADASTROS -->
+    <section id="painelPessoas" class="hidden glass-card border-sky-500/40 rounded-3xl p-4 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="text-sm font-bold text-sky-400 flex items-center gap-2">👥 Cadastro e Gestão de Pessoas</h3>
+        <button onclick="togglePainelPessoas()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-2.5 py-1 rounded-lg text-xs transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Formulário de Nova Pessoa / Edição -->
+      <form id="formPessoa" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <input type="hidden" id="idPessoaEditando">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular</label>
+          <input type="text" id="cadNomePessoa" required placeholder="Ex: João Silva" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">CPF (Opcional)</label>
+          <input type="text" id="cadCpfPessoa" placeholder="Ex: 12345678900" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div class="flex items-end gap-2">
+          <button type="submit" id="btnSalvarPessoa" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold p-2.5 rounded-xl text-xs transition shadow-lg border border-sky-400/30">
+            Salvar Cadastro
+          </button>
+          <button type="button" id="btnCancelarEditPessoa" onclick="cancelarEdicaoPessoa()" class="hidden glass-input text-slate-300 p-2.5 rounded-xl text-xs hover:bg-slate-800 transition">
+            Cancelar
+          </button>
+        </div>
+      </form>
+
+      <!-- Tabela e Filtros de Pessoas -->
+      <div class="space-y-3 pt-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-semibold text-slate-300">Pessoas Cadastradas</span>
+          <div class="flex gap-1.5">
+            <button onclick="filtrarStatusPessoaModal('ativas')" id="btnFiltroPessoasAtivas" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]">Ativas</button>
+            <button onclick="filtrarStatusPessoaModal('ocultas')" id="btnFiltroPessoasOcultas" class="px-2.5 py-1 rounded-lg glass-input text-slate-400 font-medium text-[11px]">Ocultas</button>
+            <button onclick="filtrarStatusPessoaModal('todas')" id="btnFiltroPessoasTodas" class="px-2.5 py-1 rounded-lg glass-input text-slate-400 font-medium text-[11px]">Todas</button>
+          </div>
+        </div>
+
+        <div class="max-h-60 overflow-y-auto rounded-2xl border border-white/10 glass-input">
+          <table class="w-full text-left text-xs text-slate-200">
+            <thead class="bg-slate-950/60 uppercase text-[10px] text-slate-400 border-b border-white/10 sticky top-0">
+              <tr>
+                <th class="p-2.5">Nome</th>
+                <th class="p-2.5">CPF</th>
+                <th class="p-2.5">Status</th>
+                <th class="p-2.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaPessoasCorpo" class="divide-y divide-white/5"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
     <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
     <section id="painelConfigRegras" class="hidden glass-card border-emerald-500/40 rounded-3xl p-4 shadow-2xl space-y-4">
@@ -211,23 +264,25 @@
     <!-- Formulário de Lançamento (Camada Z-30 Superior) -->
     <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
-      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3" autocomplete="off">
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Data do Saque</label>
           <input type="date" id="dataSaque" required class="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular do CPF</label>
-          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <!-- Atributos para bloquear completamento do Safari/Navegador -->
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
+          <p id="msgErroCadastroNome" class="text-[10px] text-red-400 mt-1 font-medium hidden">⚠️ Selecione uma pessoa cadastrada no sistema</p>
         </div>
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Valor Saque (R$)</label>
-          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
-          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="flex items-end sm:col-span-2 md:col-span-1 w-full min-w-0">
           <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
@@ -265,7 +320,7 @@
 
             <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-white/10">
-                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
+                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
               </div>
               <div id="listaPessoasDropdown" class="max-h-52 overflow-y-auto divide-y divide-white/10"></div>
             </div>
@@ -381,7 +436,7 @@
         <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-2xl border border-white/10 max-w-full shadow-2xl">
       </div>
 
-      <!-- Ações (Compartilhar e Baixar sem emojis) -->
+      <!-- Ações -->
       <div class="p-4 border-t border-white/10 bg-slate-900/40 flex flex-col sm:flex-row items-center gap-2 justify-end">
         <button onclick="fecharModalExtrato()" class="w-full sm:w-auto glass-input text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
           Fechar
@@ -399,8 +454,6 @@
   <!-- CONTAINER OCULTO DO EXTRATO -->
   <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
     <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
-      
-      <!-- Cabeçalho Limpo sem Logo -->
       <div class="flex items-center justify-between border-b border-slate-700 pb-4">
         <div>
           <h2 class="text-2xl font-black tracking-tight text-emerald-400 leading-none">GESTÃO DE SAQUE</h2>
@@ -412,7 +465,6 @@
         </div>
       </div>
 
-      <!-- Dados da Pessoa e Período -->
       <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3.5 space-y-1">
         <div class="flex justify-between items-center text-xs">
           <span class="text-slate-400">Titular / CPF:</span>
@@ -424,7 +476,6 @@
         </div>
       </div>
 
-      <!-- Tabela Detalhada de Saques -->
       <div class="space-y-2">
         <p class="text-xs font-bold text-slate-300 uppercase tracking-wider">Detalhamento das Operações</p>
         <div class="border border-slate-700/80 rounded-xl overflow-hidden">
@@ -442,7 +493,6 @@
         </div>
       </div>
 
-      <!-- Rodapé com Totais -->
       <div class="bg-gradient-to-r from-emerald-950/40 via-slate-800 to-slate-800 border border-emerald-500/50 rounded-xl p-4 space-y-2">
         <div class="flex justify-between text-xs text-slate-300">
           <span>Qtd. de Saques:</span>
@@ -458,11 +508,9 @@
         </div>
       </div>
 
-      <!-- Rodapé de Garantia -->
       <p class="text-[10px] text-center text-slate-500 pt-1">
         Relatório oficial gerado automaticamente pelo Sistema Gestão de Saque.
       </p>
-
     </div>
   </div>
 
@@ -482,10 +530,13 @@
 
     let currentUser = null;
     let saques = [];
+    let pessoas = [];
     let filtroAtual = 'todos';
     let apenasPendentes = false;
     let pessoaSelecionadaFiltro = '';
+    let statusFiltroPessoaModal = 'ativas';
     let unsubscribeSnapshot = null;
+    let unsubscribePessoas = null;
     let extratoBlobGlobal = null;
     let extratoDataUrlGlobal = '';
     let extratoNomeArquivoGlobal = '';
@@ -513,6 +564,10 @@
 
     function togglePainelConfig() {
       document.getElementById('painelConfigRegras').classList.toggle('hidden');
+    }
+
+    function togglePainelPessoas() {
+      document.getElementById('painelPessoas').classList.toggle('hidden');
     }
 
     function toggleDropdownModo() {
@@ -559,18 +614,8 @@
       }
     }
 
-    async function salvarConfigRegras() {
-      if (!currentUser) return;
-      regrasLucro.limiteValor = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
-      regrasLucro.valAbaixo = parseFloat(document.getElementById('cfgValAbaixo').value) || 0;
-      regrasLucro.pctAcima = parseFloat(document.getElementById('cfgPctAcima').value) || 0;
-
-      await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
-      alert('Regras de lucro salvas com sucesso!');
-      togglePainelConfig();
-    }
-
-    async function migrarDadosAntigosSeExistem() {
+    // MIGRAR DADOS ANTIGOS E CRIAR CADASTRO DE PESSOAS AUTOMATICAMENTE
+    async function migrarDadosAntigosEGerarPessoas() {
       if (!currentUser) return;
       try {
         const snapshotGeral = await db.collection('saques').get();
@@ -582,27 +627,90 @@
           });
           await batch.commit();
         }
-      } catch (err) {}
+
+        const saquesSnap = await db.collection('users').doc(currentUser.uid).collection('saques').get();
+        const pessoasSnap = await db.collection('users').doc(currentUser.uid).collection('pessoas').get();
+
+        const nomesPessoasCadastradas = new Set(pessoasSnap.docs.map(doc => doc.data().nome.toLowerCase().trim()));
+
+        if (!saquesSnap.empty) {
+          const batchPessoas = db.batch();
+          let novasPessoasCount = 0;
+
+          saquesSnap.docs.forEach(doc => {
+            const dados = doc.data();
+            if (dados.nome) {
+              let nomeBruto = dados.nome.trim();
+              let nomeFormatado = nomeBruto;
+              let cpfExtraido = '';
+
+              if (nomeBruto.includes('-')) {
+                const partes = nomeBruto.split('-');
+                nomeFormatado = partes[0].trim();
+                cpfExtraido = partes.slice(1).join('-').trim();
+              }
+
+              const chaveBusca = nomeFormatado.toLowerCase();
+              if (!nomesPessoasCadastradas.has(chaveBusca) && nomeFormatado !== '') {
+                nomesPessoasCadastradas.add(chaveBusca);
+                const refNovaPessoa = db.collection('users').doc(currentUser.uid).collection('pessoas').doc();
+                batchPessoas.set(refNovaPessoa, {
+                  nome: nomeFormatado,
+                  cpf: cpfExtraido,
+                  ativo: true,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                novasPessoasCount++;
+              }
+            }
+          });
+
+          if (novasPessoasCount > 0) {
+            await batchPessoas.commit();
+          }
+        }
+      } catch (err) {
+        console.error('Erro na migração:', err);
+      }
     }
 
     const percentualInput = document.getElementById('percentualComissao');
     const btnSalvar = document.getElementById('btnSalvar');
+    const inputNome = document.getElementById('nomePessoa');
+    const sugestoesBox = document.getElementById('sugestoesNomes');
+    const msgErroCadastro = document.getElementById('msgErroCadastroNome');
 
-    percentualInput.addEventListener('input', () => {
-      const val = percentualInput.value.trim();
-      if (val !== '' && !isNaN(val) && parseFloat(val) >= 0) {
+    function validarFormularioSaque() {
+      const valPercentual = percentualInput.value.trim();
+      const valNome = inputNome.value.trim().toLowerCase();
+
+      // Verifica se a pessoa digitada existe entre as Pessoas Ativas no Cadastro
+      const pessoasAtivas = pessoas.filter(p => p.ativo !== false);
+      const pessoaValida = pessoasAtivas.some(p => {
+        const opc1 = p.nome.toLowerCase();
+        const opc2 = p.cpf ? `${p.nome} - ${p.cpf}`.toLowerCase() : '';
+        return valNome === opc1 || (opc2 !== '' && valNome === opc2);
+      });
+
+      if (valNome !== '' && !pessoaValida) {
+        msgErroCadastro.classList.remove('hidden');
+      } else {
+        msgErroCadastro.classList.add('hidden');
+      }
+
+      if (valPercentual !== '' && !isNaN(valPercentual) && parseFloat(valPercentual) >= 0 && pessoaValida) {
         btnSalvar.disabled = false;
         btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30 active:scale-95';
         btnSalvar.textContent = 'Registrar Saque';
       } else {
         btnSalvar.disabled = true;
         btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
-        btnSalvar.textContent = 'Defina a Comissão';
+        btnSalvar.textContent = !pessoaValida && valNome !== '' ? 'Cadastro Necessário' : 'Defina a Comissão';
       }
-    });
+    }
 
-    const inputNome = document.getElementById('nomePessoa');
-    const sugestoesBox = document.getElementById('sugestoesNomes');
+    percentualInput.addEventListener('input', validarFormularioSaque);
+    inputNome.addEventListener('input', validarFormularioSaque);
 
     inputNome.addEventListener('input', () => {
       const termo = inputNome.value.trim().toLowerCase();
@@ -613,21 +721,26 @@
         return;
       }
 
-      const nomesUnicos = [...new Set(saques.map(s => s.nome))];
-      const correspondencias = nomesUnicos.filter(nome => nome.toLowerCase().includes(termo));
+      // Sugere APENAS Pessoas ATIVAS no cadastro
+      const pessoasAtivas = pessoas.filter(p => p.ativo !== false);
+      const correspondencias = pessoasAtivas.filter(p => 
+        p.nome.toLowerCase().includes(termo) || (p.cpf && p.cpf.includes(termo))
+      );
 
       if (correspondencias.length === 0) {
         sugestoesBox.classList.add('hidden');
         return;
       }
 
-      correspondencias.forEach(nome => {
+      correspondencias.forEach(p => {
         const item = document.createElement('div');
-        item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition';
-        item.textContent = nome;
+        item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition flex justify-between items-center';
+        const textoExibicao = p.cpf ? `${p.nome} - ${p.cpf}` : p.nome;
+        item.textContent = textoExibicao;
         item.onclick = () => {
-          inputNome.value = nome;
+          inputNome.value = textoExibicao;
           sugestoesBox.classList.add('hidden');
+          validarFormularioSaque();
         };
         sugestoesBox.appendChild(item);
       });
@@ -663,13 +776,16 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
-        await migrarDadosAntigosSeExistem();
+        await migrarDadosAntigosEGerarPessoas();
         await carregarRegrasUsuario();
+        carregarDadosPessoas();
         carregarDados();
       } else {
         currentUser = null;
         if (unsubscribeSnapshot) unsubscribeSnapshot();
+        if (unsubscribePessoas) unsubscribePessoas();
         saques = [];
+        pessoas = [];
         loginScreen.classList.remove('hidden');
         loginScreen.classList.add('flex');
         mainDashboard.classList.add('hidden');
@@ -693,6 +809,21 @@
       auth.signOut();
     }
 
+    // OBTEM E ESCUTA AS PESSOAS CADASTRADAS NO BANCO
+    function carregarDadosPessoas() {
+      if (!currentUser) return;
+      if (unsubscribePessoas) unsubscribePessoas();
+
+      unsubscribePessoas = db.collection('users').doc(currentUser.uid).collection('pessoas')
+        .onSnapshot(snapshot => {
+          pessoas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          pessoas.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+          renderizarTabelaPessoasModal();
+          atualizarDropdownPessoas();
+          validarFormularioSaque();
+        });
+    }
+
     function carregarDados() {
       if (!currentUser) return;
       if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -702,6 +833,133 @@
           saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           renderizar();
         });
+    }
+
+    // FORMULÁRIO DE CADASTRO/EDIÇÃO DE PESSOAS
+    document.getElementById('formPessoa').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const id = document.getElementById('idPessoaEditando').value;
+      const nome = document.getElementById('cadNomePessoa').value.trim();
+      const cpf = document.getElementById('cadCpfPessoa').value.trim();
+
+      if (!nome) return;
+
+      if (id) {
+        // Atualizar Pessoa
+        const pessoaAntiga = pessoas.find(p => p.id === id);
+        const nomeAntigoForm = pessoaAntiga ? (pessoaAntiga.cpf ? `${pessoaAntiga.nome} - ${pessoaAntiga.cpf}` : pessoaAntiga.nome) : '';
+
+        await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).update({
+          nome,
+          cpf
+        });
+
+        // Atualizar saques antigos com o novo formato se necessário
+        const novoNomeForm = cpf ? `${nome} - ${cpf}` : nome;
+        if (nomeAntigoForm && nomeAntigoForm !== novoNomeForm) {
+          const saquesParaAtualizar = saques.filter(s => s.nome === nomeAntigoForm);
+          if (saquesParaAtualizar.length > 0) {
+            const batch = db.batch();
+            saquesParaAtualizar.forEach(s => {
+              const ref = db.collection('users').doc(currentUser.uid).collection('saques').doc(s.id);
+              batch.update(ref, { nome: novoNomeForm });
+            });
+            await batch.commit();
+          }
+        }
+
+        cancelarEdicaoPessoa();
+      } else {
+        // Cadastrar Nova Pessoa
+        await db.collection('users').doc(currentUser.uid).collection('pessoas').add({
+          nome,
+          cpf,
+          ativo: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('cadNomePessoa').value = '';
+        document.getElementById('cadCpfPessoa').value = '';
+      }
+    });
+
+    function editarPessoa(id) {
+      const p = pessoas.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('idPessoaEditando').value = p.id;
+      document.getElementById('cadNomePessoa').value = p.nome;
+      document.getElementById('cadCpfPessoa').value = p.cpf || '';
+      document.getElementById('btnSalvarPessoa').textContent = 'Atualizar Cadastro';
+      document.getElementById('btnCancelarEditPessoa').classList.remove('hidden');
+    }
+
+    function cancelarEdicaoPessoa() {
+      document.getElementById('idPessoaEditando').value = '';
+      document.getElementById('cadNomePessoa').value = '';
+      document.getElementById('cadCpfPessoa').value = '';
+      document.getElementById('btnSalvarPessoa').textContent = 'Salvar Cadastro';
+      document.getElementById('btnCancelarEditPessoa').classList.add('hidden');
+    }
+
+    async function toggleAtivoPessoa(id, statusAtual) {
+      if (!currentUser) return;
+      await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).update({
+        ativo: !statusAtual
+      });
+    }
+
+    async function excluirPessoa(id) {
+      if (!currentUser) return;
+      if (confirm('Tem certeza que deseja excluir esta pessoa do cadastro? (Os saques já registrados continuarão salvos no histórico).')) {
+        await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).delete();
+      }
+    }
+
+    function filtrarStatusPessoaModal(status) {
+      statusFiltroPessoaModal = status;
+      document.getElementById('btnFiltroPessoasAtivas').className = status === 'ativas' ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]' : 'px-2.5 py-1 rounded-lg glass-input text-slate-400 font-medium text-[11px]';
+      document.getElementById('btnFiltroPessoasOcultas').className = status === 'ocultas' ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]' : 'px-2.5 py-1 rounded-lg glass-input text-slate-400 font-medium text-[11px]';
+      document.getElementById('btnFiltroPessoasTodas').className = status === 'todas' ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]' : 'px-2.5 py-1 rounded-lg glass-input text-slate-400 font-medium text-[11px]';
+      renderizarTabelaPessoasModal();
+    }
+
+    function renderizarTabelaPessoasModal() {
+      const tbody = document.getElementById('tabelaPessoasCorpo');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let listaExibicao = pessoas;
+      if (statusFiltroPessoaModal === 'ativas') {
+        listaExibicao = pessoas.filter(p => p.ativo !== false);
+      } else if (statusFiltroPessoaModal === 'ocultas') {
+        listaExibicao = pessoas.filter(p => p.ativo === false);
+      }
+
+      listaExibicao.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-white/5 transition';
+        const isAtivo = p.ativo !== false;
+        tr.innerHTML = `
+          <td class="p-2.5 font-medium text-slate-100">${p.nome}</td>
+          <td class="p-2.5 text-slate-400">${p.cpf || '-'}</td>
+          <td class="p-2.5">
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isAtivo ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700/60 text-slate-400 border border-slate-600/30'}">
+              ${isAtivo ? 'Ativo' : 'Oculto'}
+            </span>
+          </td>
+          <td class="p-2.5 text-right flex items-center justify-end gap-1.5">
+            <button onclick="editarPessoa('${p.id}')" class="text-sky-400 hover:text-sky-300 font-medium px-1.5 py-0.5">Editar</button>
+            <button onclick="toggleAtivoPessoa('${p.id}', ${isAtivo})" class="text-amber-400 hover:text-amber-300 font-medium px-1.5 py-0.5">
+              ${isAtivo ? 'Ocultar' : 'Ativar'}
+            </button>
+            <button onclick="excluirPessoa('${p.id}')" class="text-red-400 hover:text-red-300 font-medium px-1.5 py-0.5">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function calcularLucroBrutoSeu(valor) {
@@ -754,6 +1012,7 @@
       btnSalvar.textContent = 'Defina a Comissão';
       
       resetDataParaHoje();
+      validarFormularioSaque();
       nomeInputEl.focus();
     });
 
@@ -872,8 +1131,14 @@
 
     function atualizarDropdownPessoas() {
       const lista = document.getElementById('listaPessoasDropdown');
+      if (!lista) return;
+
       const termo = (document.getElementById('buscaPessoaFiltro').value || '').toLowerCase();
-      const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      
+      // Junta nomes de pessoas cadastradas ativas e nomes do histórico
+      const pessoasAtivas = pessoas.filter(p => p.ativo !== false).map(p => p.cpf ? `${p.nome} - ${p.cpf}` : p.nome);
+      const nomesHistorico = saques.map(s => s.nome);
+      const todosNomesUnicos = [...new Set([...pessoasAtivas, ...nomesHistorico])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
       lista.innerHTML = '';
 
@@ -885,7 +1150,7 @@
         lista.appendChild(itemTodas);
       }
 
-      nomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
+      todosNomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
         const item = document.createElement('div');
         item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         item.textContent = nome;
@@ -909,7 +1174,7 @@
       }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
-    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL (ORDENADO CRONOLOGICAMENTE POR DATA E HORA)
+    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL
     async function gerarImagemExtrato() {
       if (!pessoaSelecionadaFiltro) {
         alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
@@ -923,7 +1188,6 @@
         return;
       }
 
-      // Ordenar estritamente por Data e Horário
       dadosExtrato.sort((a, b) => {
         const dataA = a.data || '';
         const dataB = b.data || '';
@@ -1026,7 +1290,6 @@
 
       const file = new File([extratoBlobGlobal], extratoNomeArquivoGlobal, { type: 'image/png' });
 
-      // Suporte Mobile (Navegador com Web Share API - Sem texto de legenda)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -1038,7 +1301,6 @@
           if (err.name !== 'AbortError') console.error('Erro ao compartilhar:', err);
         }
       } else {
-        // Suporte Desktop / PC (Copia imagem para área de transferência)
         try {
           const item = new ClipboardItem({ "image/png": extratoBlobGlobal });
           await navigator.clipboard.write([item]);
@@ -1209,54 +1471,6 @@
       document.getElementById('totalPendentePessoas').textContent = `R$ ${totalPendente.toFixed(2)}`;
       document.getElementById('totalPagoPessoas').textContent = `R$ ${totalPago.toFixed(2)}`;
       document.getElementById('totalLucroLiquido').textContent = `R$ ${totalLucroLiq.toFixed(2)}`;
-    }
-
-    function exportarBackup() {
-      if (saques.length === 0) {
-        alert('Não há registros para exportar.');
-        return;
-      }
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saques, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `backup_saques_${new Date().toISOString().split('T')[0]}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importarBackup(e) {
-      if (!currentUser) return;
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        try {
-          const importados = JSON.parse(event.target.result);
-          if (!Array.isArray(importados)) {
-            alert('Formato de arquivo de backup inválido.');
-            return;
-          }
-
-          if (confirm(`Atenção: Isso enviará ${importados.length} registros para a sua conta na nuvem. Deseja continuar?`)) {
-            const batch = db.batch();
-            importados.forEach(item => {
-              const docRef = db.collection('users').doc(currentUser.uid).collection('saques').doc();
-              const { id, ...dadosSemId } = item;
-              batch.set(docRef, {
-                ...dadosSemId,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-            });
-            await batch.commit();
-            alert('Backup importado com sucesso!');
-          }
-        } catch (err) {
-          alert('Erro ao ler arquivo de backup: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
     }
   </script>
 </body>
