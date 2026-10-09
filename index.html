@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=25">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=25">
-  <link rel="mask-icon" href="./favicon.svg?v=25" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=25">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=26">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=26">
+  <link rel="mask-icon" href="./favicon.svg?v=26" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=26">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -237,7 +237,7 @@
             </div>
           </div>
 
-          <!-- BOTÃO GERAR EXTRATO (Sem Emoji) -->
+          <!-- BOTÃO GERAR EXTRATO -->
           <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center shrink-0">
             Gerar extrato
           </button>
@@ -979,13 +979,13 @@
 
       const file = new File([extratoBlobGlobal], extratoNomeArquivoGlobal, { type: 'image/png' });
 
-      // Suporte Mobile (Navegador com Web Share API)
+      // Suporte Mobile (Navegador com Web Share API - Sem texto de legenda)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
-            title: 'Extrato de Saque',
-            text: `Segue o extrato de ${pessoaSelecionadaFiltro}`
+            title: '',
+            text: ''
           });
         } catch (err) {
           if (err.name !== 'AbortError') console.error('Erro ao compartilhar:', err);
