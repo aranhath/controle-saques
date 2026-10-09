@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=39">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=39">
-  <link rel="mask-icon" href="./favicon.svg?v=39" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=39">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=40">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=40">
+  <link rel="mask-icon" href="./favicon.svg?v=40" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=40">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -239,7 +239,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
         <div>
           <label class="block text-slate-300 mb-1">Valor Limite Saque Pequeno (R$)</label>
-          <input type="number" id="cfgLimiteValor" value="50" step="1" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
+          <input type="number" id="cfgLimiteValor" value="50" step="1" oninput="atualizarInterfaceConfig()" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
         </div>
 
         <div class="relative">
@@ -270,7 +270,7 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento (Alinhamento Ajustado) -->
+    <!-- Formulário de Lançamento (Alinhado Perfeitamente) -->
     <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end" autocomplete="off">
@@ -629,6 +629,27 @@
         atualizarInterfaceConfig();
       } catch (err) {
         console.error('Erro ao carregar regras:', err);
+      }
+    }
+
+    async function salvarConfigRegras() {
+      if (!currentUser) return;
+
+      const limiteVal = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
+      const valAbaixoVal = parseFloat(document.getElementById('cfgValAbaixo').value) || 5;
+      const pctAcimaVal = parseFloat(document.getElementById('cfgPctAcima').value) || 10;
+
+      regrasLucro.limiteValor = limiteVal;
+      regrasLucro.valAbaixo = valAbaixoVal;
+      regrasLucro.pctAcima = pctAcimaVal;
+
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
+        alert('Regras de cálculo salvas com sucesso!');
+        togglePainelConfig();
+        renderizar();
+      } catch (err) {
+        alert('Erro ao salvar regras: ' + err.message);
       }
     }
 
@@ -1282,4 +1303,227 @@
         tabelaCorpo.appendChild(tr);
       });
 
-      document.getElementById('extratoQtdSaques').
+      document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
+      document.getElementById('extratoVolumeTotal').textContent = formatarMoeda(volTotal);
+      document.getElementById('extratoTotalReceber').textContent = formatarMoeda(comissaoTotal);
+
+      const container = document.getElementById('extratoCard');
+      
+      try {
+        const canvas = await html2canvas(container, {
+          backgroundColor: '#0f172a',
+          scale: 2
+        });
+
+        extratoDataUrlGlobal = canvas.toDataURL('image/png');
+        extratoNomeArquivoGlobal = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
+
+        canvas.toBlob(blob => {
+          extratoBlobGlobal = blob;
+        }, 'image/png');
+
+        document.getElementById('imgPreviewExtrato').src = extratoDataUrlGlobal;
+        document.getElementById('modalExtrato').classList.remove('hidden');
+
+      } catch (err) {
+        alert('Erro ao gerar imagem do extrato: ' + err.message);
+      } finally {
+        btnGerar.innerHTML = textoOriginal;
+        btnGerar.disabled = false;
+      }
+    }
+
+    function fecharModalExtrato() {
+      document.getElementById('modalExtrato').classList.add('hidden');
+    }
+
+    async function compartilharExtrato() {
+      if (!extratoBlobGlobal && !extratoDataUrlGlobal) return;
+
+      const file = new File([extratoBlobGlobal], extratoNomeArquivoGlobal, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: '',
+            text: ''
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') console.error('Erro ao compartilhar:', err);
+        }
+      } else {
+        try {
+          const item = new ClipboardItem({ "image/png": extratoBlobGlobal });
+          await navigator.clipboard.write([item]);
+          alert('Imagem copiada para a área de transferência! Você pode colar (Ctrl+V ou Cmd+V) no WhatsApp Web.');
+        } catch (err) {
+          alert('Seu navegador não suporta compartilhamento direto. Use a opção "Salvar no Dispositivo".');
+        }
+      }
+    }
+
+    function baixarExtrato() {
+      if (!extratoDataUrlGlobal) return;
+      const link = document.createElement('a');
+      link.download = extratoNomeArquivoGlobal;
+      link.href = extratoDataUrlGlobal;
+      link.click();
+    }
+
+    function renderizar() {
+      const menuBusca = document.getElementById('buscaPessoaFiltro');
+      const comFocoNaBusca = document.activeElement === menuBusca;
+      
+      atualizarDropdownPessoas();
+
+      if (comFocoNaBusca) {
+        document.getElementById('dropdownPessoasMenu').classList.remove('hidden');
+      }
+
+      const btnGerarExtrato = document.getElementById('btnGerarExtrato');
+      if (pessoaSelecionadaFiltro) {
+        btnGerarExtrato.classList.remove('hidden');
+      } else {
+        btnGerarExtrato.classList.add('hidden');
+      }
+
+      const botoes = {
+        'hoje': 'btnFiltroHoje',
+        'ontem': 'btnFiltroOntem',
+        '7dias': 'btnFiltro7Dias',
+        'mes': 'btnFiltroMes',
+        'todos': 'btnFiltroTodos'
+      };
+
+      Object.keys(botoes).forEach(chave => {
+        const btn = document.getElementById(botoes[chave]);
+        if (btn) {
+          if (filtroAtual === chave) {
+            btn.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
+          } else {
+            btn.className = 'text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
+          }
+        }
+      });
+
+      const btnCal = document.getElementById('btnToggleCalendario');
+      if (btnCal) {
+        if (filtroAtual === 'personalizado') {
+          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
+        } else {
+          btnCal.className = 'text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
+        }
+      }
+
+      const cardPendente = document.getElementById('cardPendente');
+      const badgePendente = document.getElementById('badgePendente');
+      const txtSubPendente = document.getElementById('txtSubPendente');
+      const subDesktop = document.getElementById('subtituloStatusFilter');
+      const subMobile = document.getElementById('subtituloStatusFilterMobile');
+
+      if (apenasPendentes) {
+        cardPendente.className = 'glass-card border-2 border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30 relative order-4 md:order-3 flex flex-col items-center justify-center text-center space-y-1';
+        badgePendente.textContent = 'ATIVO';
+        badgePendente.className = 'text-[8px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse shrink-0';
+        txtSubPendente.textContent = 'toque para ver';
+        subDesktop.textContent = 'Exibindo Apenas Saques Pendentes';
+        subMobile.textContent = 'Exibindo Pendentes';
+      } else {
+        cardPendente.className = 'glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 transition active:scale-95 shadow-lg relative order-4 md:order-3 flex flex-col items-center justify-center text-center space-y-1';
+        badgePendente.textContent = 'FILTRAR';
+        badgePendente.className = 'text-[8px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold shrink-0';
+        txtSubPendente.textContent = 'toque para ver';
+        subDesktop.textContent = '';
+        subMobile.textContent = '';
+      }
+
+      const saquesFiltrados = obterSaquesFiltradosAtuais();
+
+      const tbodyDesktop = document.getElementById('tabelaCorpoDesktop');
+      const containerMobile = document.getElementById('listaCardsMobile');
+      tbodyDesktop.innerHTML = '';
+      containerMobile.innerHTML = '';
+
+      let totalVol = 0;
+      let totalPendente = 0;
+      let totalPago = 0;
+      let totalLucroLiq = 0;
+
+      saquesFiltrados.forEach(s => {
+        totalVol += s.valor;
+        totalLucroLiq += s.lucroLiquidoSeu;
+
+        if (s.pago) {
+          totalPago += s.comissaoPessoa;
+        } else {
+          totalPendente += s.comissaoPessoa;
+        }
+
+        const dataFormatada = s.data.split('-').reverse().join('/');
+        const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
+        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+        // Render Desktop
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
+          <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
+          <td class="p-3.5 text-sky-400 font-semibold">${formatarMoeda(s.valor)}</td>
+          <td class="p-3.5 text-amber-400 font-medium">${formatarMoeda(s.comissaoPessoa)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
+          <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(s.lucroLiquidoSeu)}</td>
+          <td class="p-3.5">
+            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+              ${s.pago ? 'Pago' : 'Pendente'}
+            </button>
+          </td>
+          <td class="p-3.5 text-center">
+            <button onclick="deletar('${s.id}')" class="text-red-400 hover:text-red-300 font-medium text-xs px-2 py-1">Excluir</button>
+          </td>
+        `;
+        tbodyDesktop.appendChild(tr);
+
+        // Render Mobile
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
+        card.innerHTML = `
+          <div class="flex justify-between items-start border-b border-white/10 pb-2">
+            <div class="pr-2">
+              <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
+            </div>
+            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-xl text-xs font-semibold active:scale-95 transition shrink-0 ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+              ${s.pago ? 'Pago' : 'Pendente'}
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
+            <div class="glass-input p-2 rounded-2xl text-center">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
+              <p class="font-bold text-sky-400 mt-0.5 truncate">${formatarMoeda(s.valor)}</p>
+            </div>
+            <div class="glass-input p-2 rounded-2xl text-center">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
+              <p class="font-medium text-amber-400 mt-0.5 truncate">${formatarMoeda(s.comissaoPessoa)}</p>
+            </div>
+            <div class="glass-input p-2 rounded-2xl text-center">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
+              <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(s.lucroLiquidoSeu)}</p>
+            </div>
+          </div>
+          <div class="flex justify-end pt-1 border-t border-white/10">
+            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir Registro</button>
+          </div>
+        `;
+        containerMobile.appendChild(card);
+      });
+
+      document.getElementById('totalQtd').textContent = saquesFiltrados.length;
+      document.getElementById('totalVolume').textContent = formatarMoeda(totalVol);
+      document.getElementById('totalPendentePessoas').textContent = formatarMoeda(totalPendente);
+      document.getElementById('totalPagoPessoas').textContent = formatarMoeda(totalPago);
+      document.getElementById('totalLucroLiquido').textContent = formatarMoeda(totalLucroLiq);
+    }
+  </script>
+</body>
+</html>
