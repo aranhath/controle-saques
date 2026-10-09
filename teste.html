@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gestão Saque">
+  <meta name="theme-color" content="#0f172a">
+  <title>Gestão de Saque</title>
+
+  <!-- WEB MANIFEST -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=28">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=28">
+  <link rel="mask-icon" href="./favicon.svg?v=28" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=28">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Biblioteca para converter HTML em Imagem PNG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    *, ::before, ::after {
+      box-sizing: border-box !important;
+    }
+
+    body {
+      overflow-x: hidden !important;
+      background: radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.15), transparent 45%),
+                  radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.18), transparent 50%),
+                  linear-gradient(135deg, #060b13 0%, #0c1322 50%, #110d21 100%);
+      background-attachment: fixed;
+    }
+
+    /* Efeito Liquid Glass iOS */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+    }
+
+    .glass-input {
+      background: rgba(10, 15, 29, 0.7) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .glass-input:focus {
+      border-color: rgba(16, 185, 129, 0.6) !important;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25) !important;
+    }
+
+    input, select, textarea, button {
+      font-size: 16px !important;
+      max-width: 100% !important;
+    }
+
+    input[type="date"] {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      border-radius: 0.75rem !important;
+      min-height: 42px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      display: block !important;
+      margin: 0 !important;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.8);
+      cursor: pointer;
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="text-slate-100 min-h-screen p-3 md:p-6 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- TELA DE CARREGAMENTO -->
+  <div id="loadingScreen" class="fixed inset-0 bg-slate-950/90 backdrop-blur-2xl z-50 flex flex-col items-center justify-center gap-3">
+    <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-sm text-slate-300 font-medium tracking-wide">Carregando painel...</p>
+  </div>
+
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
+    <div class="glass-card p-6 md:p-8 rounded-3xl w-full max-w-md shadow-2xl space-y-6">
+      <div class="text-center flex flex-col items-center gap-3">
+        <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40 flex items-center justify-center bg-slate-900/80">
+          <img src="./favicon.svg" alt="Logo" class="w-10 h-10 object-contain">
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-emerald-400">Acesso Restrito</h1>
+          <p class="text-slate-400 text-sm mt-0.5">Gestão de Saque</p>
+        </div>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">E-mail</label>
+          <input type="email" id="loginEmail" required class="glass-input w-full rounded-xl p-3 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Senha</label>
+          <input type="password" id="loginSenha" required class="glass-input w-full rounded-xl p-3 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <p id="loginError" class="text-xs text-red-400 hidden"></p>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] font-semibold p-3 rounded-xl text-sm transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30">Entrar no Sistema</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PAINEL PRINCIPAL -->
+  <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
+    
+    <!-- Cabeçalho -->
+    <header class="glass-card rounded-3xl p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30 flex items-center justify-center bg-slate-900/80">
+          <img src="./favicon.svg" alt="Logo" class="w-8 h-8 object-contain">
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black tracking-tight flex items-center gap-1.5">
+            <span class="text-emerald-400">GESTÃO</span> <span class="text-slate-100">DE SAQUE</span>
+          </h1>
+          <p class="text-slate-400 text-xs">Dados sincronizados na nuvem</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="togglePainelConfig()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
+          ⚙️ Regras
+        </button>
+        <button onclick="exportarBackup()" class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs transition active:scale-95">
+          📥 Backup
+        </button>
+        <label class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs cursor-pointer transition active:scale-95">
+          📤 Importar
+          <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
+        </label>
+        <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
+        <button onclick="logout()" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
+    <section id="painelConfigRegras" class="hidden glass-card border-emerald-500/40 rounded-3xl p-4 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Regras do Lucro Bruto</h3>
+        <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-2.5 py-1 rounded-lg text-xs transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1">Valor Limite Saque Pequeno (R$)</label>
+          <input type="number" id="cfgLimiteValor" value="50" step="1" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
+        </div>
+
+        <div class="relative">
+          <label class="block text-slate-300 mb-1">Modo até o Valor Limite</label>
+          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="glass-input w-full rounded-xl p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none">
+            <span id="labelDropdownModo">Valor Fixo (R$)</span>
+            <span class="text-slate-400 ml-2">▼</span>
+          </button>
+          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 glass-card rounded-xl shadow-xl z-50 divide-y divide-white/10">
+            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-slate-800/80 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
+            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-slate-800/80 cursor-pointer text-slate-200">Porcentagem (%)</div>
+          </div>
+        </div>
+
+        <div id="boxCfgValorAbaixo">
+          <label id="lblCfgValorAbaixo" class="block text-slate-300 mb-1">Lucro Fixo até R$ 50 (R$)</label>
+          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1">Lucro Acima do Limite (%)</label>
+          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition border border-emerald-400/30">Salvar Regras</button>
+      </div>
+    </section>
+
+    <!-- Formulário de Lançamento (Camada Z-30 Superior) -->
+    <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
+      <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
+      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="w-full min-w-0">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Data do Saque</label>
+          <input type="date" id="dataSaque" required class="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div class="relative w-full min-w-0">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular do CPF</label>
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-card rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
+        </div>
+        <div class="w-full min-w-0">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Valor Saque (R$)</label>
+          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div class="w-full min-w-0">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
+          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div class="flex items-end sm:col-span-2 md:col-span-1 w-full min-w-0">
+          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Barra de Filtros -->
+    <section class="glass-card rounded-3xl p-3 md:p-4 shadow-xl space-y-3 relative z-20">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        
+        <!-- Botões de Período -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">PERÍODO:</span>
+          
+          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Hoje</button>
+          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Ontem</button>
+          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">7 dias</button>
+          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Mês</button>
+          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Todos</button>
+
+          <!-- Botão Discreto de Calendário -->
+          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">
+            Data
+          </button>
+        </div>
+
+        <!-- Filtro por Nome/Titular -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          <div class="relative w-full md:w-64">
+            <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" type="button" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-white/20 focus:outline-none">
+              <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
+              <span class="text-slate-400 ml-2 shrink-0">▼</span>
+            </button>
+
+            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-card rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div class="p-2 border-b border-white/10">
+                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
+              </div>
+              <div id="listaPessoasDropdown" class="max-h-52 overflow-y-auto divide-y divide-white/10"></div>
+            </div>
+          </div>
+
+          <!-- BOTÃO GERAR EXTRATO -->
+          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/40 border border-emerald-400/30 flex items-center justify-center shrink-0">
+            Gerar extrato
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Caixa Popover de Intervalo de Datas -->
+      <div id="caixaDataCustomizada" class="hidden glass-input rounded-2xl p-3 space-y-3 w-full max-w-full overflow-hidden">
+        <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
+          <span>Selecionar Intervalo de Datas</span>
+          <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 text-xs font-medium">Limpar</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs w-full">
+          <div class="w-full min-w-0 overflow-hidden">
+            <label class="block text-[10px] text-slate-400 mb-1">De:</label>
+            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="glass-input w-full rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none">
+          </div>
+          <div class="w-full min-w-0 overflow-hidden">
+            <label class="block text-[10px] text-slate-400 mb-1">Até:</label>
+            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="glass-input w-full rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards de Resumo -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 relative z-10">
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-white/30 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg">
+        <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
+        <p id="totalQtd" class="text-lg font-bold text-slate-100 mt-1">0</p>
+      </div>
+
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-sky-500/50 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg">
+        <p class="text-[11px] text-slate-400 font-medium">Volume Total</p>
+        <p id="totalVolume" class="text-lg font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
+      </div>
+      
+      <!-- CARD CLICÁVEL: PENDENTES -->
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg relative">
+        <div class="flex justify-between items-center">
+          <p class="text-[11px] text-slate-400 font-medium">A Pagar (Pendente)</p>
+          <span id="badgePendente" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold">FILTRAR</span>
+        </div>
+        <p id="totalPendentePessoas" class="text-lg font-bold text-red-400 mt-1 truncate">R$ 0,00</p>
+        <p id="txtSubPendente" class="text-[9px] text-red-400/80 mt-0.5">👈 toque para ver pendentes</p>
+      </div>
+
+      <!-- CARD FIXO: JÁ PAGO -->
+      <div class="glass-card rounded-3xl p-3.5 shadow-lg">
+        <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
+        <p id="totalPagoPessoas" class="text-lg font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-3.5 shadow-lg col-span-2 sm:col-span-1">
+        <p class="text-[11px] text-slate-400 font-medium">Seu Lucro Líquido</p>
+        <p id="totalLucroLiquido" class="text-lg font-bold text-emerald-400 mt-1 truncate">R$ 0,00</p>
+      </div>
+    </section>
+
+    <!-- Histórico de Saques (Versão Desktop / Tabela) -->
+    <section class="glass-card rounded-3xl overflow-hidden shadow-xl hidden md:block relative z-10">
+      <div class="px-5 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques</h3>
+        <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-950/40 text-xs uppercase text-slate-400 border-b border-white/10">
+            <tr>
+              <th class="p-3.5">Titular CPF</th>
+              <th class="p-3.5">Data & Hora</th>
+              <th class="p-3.5">Valor Saque</th>
+              <th class="p-3.5">Pagar Pessoa</th>
+              <th class="p-3.5">Seu Lucro Líq.</th>
+              <th class="p-3.5">Status Pgto</th>
+              <th class="p-3.5 text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaCorpoDesktop" class="divide-y divide-white/5"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Histórico de Saques (Versão Mobile / Cards) -->
+    <section class="block md:hidden space-y-3 relative z-10">
+      <div class="flex justify-between items-center px-1">
+        <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico</h3>
+        <span id="subtituloStatusFilterMobile" class="text-xs text-emerald-400 font-medium"></span>
+      </div>
+      <div id="listaCardsMobile" class="space-y-2.5"></div>
+    </section>
+
+  </div>
+
+  <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO -->
+  <div id="modalExtrato" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[200] flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <!-- Cabeçalho do Modal -->
+      <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/40">
+        <h3 class="font-bold text-slate-100 text-sm md:text-base">Extrato Gerado</h3>
+        <button onclick="fecharModalExtrato()" class="text-slate-400 hover:text-white glass-input w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
+      </div>
+      
+      <!-- Imagem de Pré-visualização -->
+      <div class="p-4 overflow-y-auto flex justify-center bg-slate-950/60">
+        <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-2xl border border-white/10 max-w-full shadow-2xl">
+      </div>
+
+      <!-- Ações (Compartilhar e Baixar sem emojis) -->
+      <div class="p-4 border-t border-white/10 bg-slate-900/40 flex flex-col sm:flex-row items-center gap-2 justify-end">
+        <button onclick="fecharModalExtrato()" class="w-full sm:w-auto glass-input text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+          Fechar
+        </button>
+        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-sky-900/40 border border-sky-400/30">
+          Compartilhar
+        </button>
+        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-emerald-900/40 border border-emerald-400/30">
+          Salvar no Dispositivo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER OCULTO DO EXTRATO -->
+  <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
+    <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
+      
+      <!-- Cabeçalho Limpo sem Logo -->
+      <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div>
+          <h2 class="text-2xl font-black tracking-tight text-emerald-400 leading-none">GESTÃO DE SAQUE</h2>
+          <p class="text-xs text-slate-400 mt-1 leading-none">Comprovante de Comissões</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] text-slate-400 uppercase font-semibold leading-none">Gerado em</p>
+          <p id="extratoDataEmissao" class="text-xs text-slate-200 font-medium mt-1 leading-none"></p>
+        </div>
+      </div>
+
+      <!-- Dados da Pessoa e Período -->
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3.5 space-y-1">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-400">Titular / CPF:</span>
+          <span id="extratoNomeTitular" class="font-bold text-slate-100 text-sm"></span>
+        </div>
+        <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700/50">
+          <span class="text-slate-400">Período dos Saques:</span>
+          <span id="extratoPeriodoTexto" class="font-semibold text-emerald-400"></span>
+        </div>
+      </div>
+
+      <!-- Tabela Detalhada de Saques -->
+      <div class="space-y-2">
+        <p class="text-xs font-bold text-slate-300 uppercase tracking-wider">Detalhamento das Operações</p>
+        <div class="border border-slate-700/80 rounded-xl overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800 text-slate-400 uppercase border-b border-slate-700">
+              <tr>
+                <th class="p-2.5">Data & Hora</th>
+                <th class="p-2.5">Valor Saque</th>
+                <th class="p-2.5">Taxa (%)</th>
+                <th class="p-2.5 text-right">Comissão (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="extratoTabelaCorpo" class="divide-y divide-slate-800 bg-slate-900/60"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rodapé com Totais -->
+      <div class="bg-gradient-to-r from-emerald-950/40 via-slate-800 to-slate-800 border border-emerald-500/50 rounded-xl p-4 space-y-2">
+        <div class="flex justify-between text-xs text-slate-300">
+          <span>Qtd. de Saques:</span>
+          <span id="extratoQtdSaques" class="font-bold text-slate-100"></span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-300">
+          <span>Volume Total Movimentado:</span>
+          <span id="extratoVolumeTotal" class="font-bold text-sky-400"></span>
+        </div>
+        <div class="flex justify-between items-center text-base pt-2 border-t border-slate-700/80">
+          <span class="font-bold text-slate-200">TOTAL A RECEBER:</span>
+          <span id="extratoTotalReceber" class="font-black text-emerald-400 text-xl"></span>
+        </div>
+      </div>
+
+      <!-- Rodapé de Garantia -->
+      <p class="text-[10px] text-center text-slate-500 pt-1">
+        Relatório oficial gerado automaticamente pelo Sistema Gestão de Saque.
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLAL7KqBer3lbxtiZmB7UFM0ti9KJRUN4",
+      authDomain: "controle-saque.firebaseapp.com",
+      projectId: "controle-saque",
+      storageBucket: "controle-saque.firebasestorage.app",
+      messagingSenderId: "448674045514",
+      appId: "1:448674045514:web:c87fa8834e60ea540850b3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let saques = [];
+    let filtroAtual = 'todos';
+    let apenasPendentes = false;
+    let pessoaSelecionadaFiltro = '';
+    let unsubscribeSnapshot = null;
+    let extratoBlobGlobal = null;
+    let extratoDataUrlGlobal = '';
+    let extratoNomeArquivoGlobal = '';
+
+    let regrasLucro = {
+      limiteValor: 50,
+      modoAbaixo: 'fixo',
+      valAbaixo: 5,
+      pctAcima: 10
+    };
+
+    function obterDataLocalHoje() {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    function resetDataParaHoje() {
+      document.getElementById('dataSaque').value = obterDataLocalHoje();
+    }
+
+    resetDataParaHoje();
+
+    function togglePainelConfig() {
+      document.getElementById('painelConfigRegras').classList.toggle('hidden');
+    }
+
+    function toggleDropdownModo() {
+      document.getElementById('menuDropdownModo').classList.toggle('hidden');
+    }
+
+    function toggleCaixaDataCustomizada() {
+      document.getElementById('caixaDataCustomizada').classList.toggle('hidden');
+    }
+
+    function selecionarModoAbaixo(valor, texto) {
+      regrasLucro.modoAbaixo = valor;
+      document.getElementById('labelDropdownModo').textContent = texto;
+      document.getElementById('menuDropdownModo').classList.add('hidden');
+      atualizarInterfaceConfig();
+    }
+
+    function atualizarInterfaceConfig() {
+      const modo = regrasLucro.modoAbaixo;
+      const limite = document.getElementById('cfgLimiteValor').value || 50;
+      const lbl = document.getElementById('lblCfgValorAbaixo');
+
+      if (modo === 'fixo') {
+        lbl.textContent = `Lucro Fixo até R$ ${limite} (R$)`;
+      } else {
+        lbl.textContent = `Lucro em % até R$ ${limite} (%)`;
+      }
+    }
+
+    async function carregarRegrasUsuario() {
+      if (!currentUser) return;
+      try {
+        const docRef = await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').get();
+        if (docRef.exists) {
+          regrasLucro = { ...regrasLucro, ...docRef.data() };
+        }
+        document.getElementById('cfgLimiteValor').value = regrasLucro.limiteValor;
+        document.getElementById('labelDropdownModo').textContent = regrasLucro.modoAbaixo === 'fixo' ? 'Valor Fixo (R$)' : 'Porcentagem (%)';
+        document.getElementById('cfgValAbaixo').value = regrasLucro.valAbaixo;
+        document.getElementById('cfgPctAcima').value = regrasLucro.pctAcima;
+        atualizarInterfaceConfig();
+      } catch (err) {
+        console.error('Erro ao carregar regras:', err);
+      }
+    }
+
+    async function salvarConfigRegras() {
+      if (!currentUser) return;
+      regrasLucro.limiteValor = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
+      regrasLucro.valAbaixo = parseFloat(document.getElementById('cfgValAbaixo').value) || 0;
+      regrasLucro.pctAcima = parseFloat(document.getElementById('cfgPctAcima').value) || 0;
+
+      await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
+      alert('Regras de lucro salvas com sucesso!');
+      togglePainelConfig();
+    }
+
+    async function migrarDadosAntigosSeExistem() {
+      if (!currentUser) return;
+      try {
+        const snapshotGeral = await db.collection('saques').get();
+        if (!snapshotGeral.empty) {
+          const batch = db.batch();
+          snapshotGeral.docs.forEach(doc => {
+            const docRefNovo = db.collection('users').doc(currentUser.uid).collection('saques').doc(doc.id);
+            batch.set(docRefNovo, doc.data());
+          });
+          await batch.commit();
+        }
+      } catch (err) {}
+    }
+
+    const percentualInput = document.getElementById('percentualComissao');
+    const btnSalvar = document.getElementById('btnSalvar');
+
+    percentualInput.addEventListener('input', () => {
+      const val = percentualInput.value.trim();
+      if (val !== '' && !isNaN(val) && parseFloat(val) >= 0) {
+        btnSalvar.disabled = false;
+        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30 active:scale-95';
+        btnSalvar.textContent = 'Registrar Saque';
+      } else {
+        btnSalvar.disabled = true;
+        btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
+        btnSalvar.textContent = 'Defina a Comissão';
+      }
+    });
+
+    const inputNome = document.getElementById('nomePessoa');
+    const sugestoesBox = document.getElementById('sugestoesNomes');
+
+    inputNome.addEventListener('input', () => {
+      const termo = inputNome.value.trim().toLowerCase();
+      sugestoesBox.innerHTML = '';
+
+      if (!termo) {
+        sugestoesBox.classList.add('hidden');
+        return;
+      }
+
+      const nomesUnicos = [...new Set(saques.map(s => s.nome))];
+      const correspondencias = nomesUnicos.filter(nome => nome.toLowerCase().includes(termo));
+
+      if (correspondencias.length === 0) {
+        sugestoesBox.classList.add('hidden');
+        return;
+      }
+
+      correspondencias.forEach(nome => {
+        const item = document.createElement('div');
+        item.className = 'p-3 text-sm text-slate-200 hover:bg-slate-800/80 cursor-pointer transition';
+        item.textContent = nome;
+        item.onclick = () => {
+          inputNome.value = nome;
+          sugestoesBox.classList.add('hidden');
+        };
+        sugestoesBox.appendChild(item);
+      });
+
+      sugestoesBox.classList.remove('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!inputNome.contains(e.target) && !sugestoesBox.contains(e.target)) {
+        sugestoesBox.classList.add('hidden');
+      }
+      const menuDropdown = document.getElementById('dropdownPessoasMenu');
+      const btnDropdown = document.getElementById('btnFiltroPessoa');
+      if (menuDropdown && !menuDropdown.contains(e.target) && !btnDropdown.contains(e.target)) {
+        menuDropdown.classList.add('hidden');
+      }
+      const menuModo = document.getElementById('menuDropdownModo');
+      const btnModo = document.getElementById('btnDropdownModo');
+      if (menuModo && !menuModo.contains(e.target) && !btnModo.contains(e.target)) {
+        menuModo.classList.add('hidden');
+      }
+    });
+
+    auth.onAuthStateChanged(async user => {
+      const loadingScreen = document.getElementById('loadingScreen');
+      const loginScreen = document.getElementById('loginScreen');
+      const mainDashboard = document.getElementById('mainDashboard');
+
+      loadingScreen.classList.add('hidden');
+
+      if (user) {
+        currentUser = user;
+        loginScreen.classList.add('hidden');
+        mainDashboard.classList.remove('hidden');
+        document.getElementById('userEmailTag').textContent = user.email;
+        await migrarDadosAntigosSeExistem();
+        await carregarRegrasUsuario();
+        carregarDados();
+      } else {
+        currentUser = null;
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        saques = [];
+        loginScreen.classList.remove('hidden');
+        loginScreen.classList.add('flex');
+        mainDashboard.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const senha = document.getElementById('loginSenha').value;
+      const errorEl = document.getElementById('loginError');
+
+      auth.signInWithEmailAndPassword(email, senha)
+        .catch(err => {
+          errorEl.textContent = 'Erro ao entrar: ' + err.message;
+          errorEl.classList.remove('hidden');
+        });
+    });
+
+    function logout() {
+      auth.signOut();
+    }
+
+    function carregarDados() {
+      if (!currentUser) return;
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+      unsubscribeSnapshot = db.collection('users').doc(currentUser.uid).collection('saques')
+        .onSnapshot(snapshot => {
+          saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderizar();
+        });
+    }
+
+    function calcularLucroBrutoSeu(valor) {
+      const { limiteValor, modoAbaixo, valAbaixo, pctAcima } = regrasLucro;
+      if (valor <= limiteValor) {
+        return modoAbaixo === 'fixo' ? valAbaixo : valor * (valAbaixo / 100);
+      } else {
+        return valor * (pctAcima / 100);
+      }
+    }
+
+    document.getElementById('saqueForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const data = document.getElementById('dataSaque').value;
+      const nomeInputEl = document.getElementById('nomePessoa');
+      const nome = nomeInputEl.value.trim();
+      const valor = parseFloat(document.getElementById('valorSaque').value);
+      const percentualVal = percentualInput.value.trim();
+
+      if (!data || !nome || isNaN(valor) || percentualVal === '') return;
+
+      const agora = new Date();
+      const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      const percentual = parseFloat(percentualVal);
+      const comissaoPessoa = valor * (percentual / 100);
+      const lucroBrutoSeu = calcularLucroBrutoSeu(valor);
+      const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
+
+      await db.collection('users').doc(currentUser.uid).collection('saques').add({
+        data,
+        hora: horaStr,
+        nome,
+        valor,
+        percentual,
+        comissaoPessoa,
+        lucroBrutoSeu,
+        lucroLiquidoSeu,
+        pago: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      nomeInputEl.value = '';
+      document.getElementById('valorSaque').value = '';
+      document.getElementById('percentualComissao').value = '';
+      btnSalvar.disabled = true;
+      btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
+      btnSalvar.textContent = 'Defina a Comissão';
+      
+      resetDataParaHoje();
+      nomeInputEl.focus();
+    });
+
+    async function togglePago(id, statusAtual) {
+      if (!currentUser) return;
+      await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).update({
+        pago: !statusAtual
+      });
+    }
+
+    async function deletar(id) {
+      if (!currentUser) return;
+      if (confirm('Tem certeza que deseja excluir este registro?')) {
+        await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).delete();
+      }
+    }
+
+    function setFiltroData(tipo) {
+      filtroAtual = tipo;
+      document.getElementById('dataInicioFiltro').value = '';
+      document.getElementById('dataFimFiltro').value = '';
+      document.getElementById('caixaDataCustomizada').classList.add('hidden');
+      renderizar();
+    }
+
+    function aplicarFiltroDataPersonalizado() {
+      const inicio = document.getElementById('dataInicioFiltro').value;
+      const fim = document.getElementById('dataFimFiltro').value;
+
+      if (inicio || fim) {
+        filtroAtual = 'personalizado';
+      }
+      renderizar();
+    }
+
+    function limparFiltroDataPersonalizado() {
+      document.getElementById('dataInicioFiltro').value = '';
+      document.getElementById('dataFimFiltro').value = '';
+      filtroAtual = 'todos';
+      document.getElementById('caixaDataCustomizada').classList.add('hidden');
+      renderizar();
+    }
+
+    function toggleFiltroPendente() {
+      apenasPendentes = !apenasPendentes;
+      renderizar();
+    }
+
+    function setFiltroStatus(status) {
+      apenasPendentes = false;
+      renderizar();
+    }
+
+    function filtrarPorData(item) {
+      const hojeStr = obterDataLocalHoje();
+      
+      if (filtroAtual === 'hoje') return item.data === hojeStr;
+      
+      if (filtroAtual === 'ontem') {
+        const ontem = new Date();
+        ontem.setDate(ontem.getDate() - 1);
+        const ano = ontem.getFullYear();
+        const mes = String(ontem.getMonth() + 1).padStart(2, '0');
+        const dia = String(ontem.getDate()).padStart(2, '0');
+        return item.data === `${ano}-${mes}-${dia}`;
+      }
+      
+      if (filtroAtual === '7dias') {
+        const limite = new Date();
+        limite.setDate(limite.getDate() - 7);
+        const ano = limite.getFullYear();
+        const mes = String(limite.getMonth() + 1).padStart(2, '0');
+        const dia = String(limite.getDate()).padStart(2, '0');
+        const dataLimiteStr = `${ano}-${mes}-${dia}`;
+        return item.data >= dataLimiteStr;
+      }
+      
+      if (filtroAtual === 'mes') {
+        const [anoItem, mesItem] = item.data.split('-');
+        const hoje = new Date();
+        const anoAtual = String(hoje.getFullYear());
+        const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+        return anoItem === anoAtual && mesItem === mesAtual;
+      }
+
+      if (filtroAtual === 'personalizado') {
+        const inicio = document.getElementById('dataInicioFiltro').value;
+        const fim = document.getElementById('dataFimFiltro').value;
+
+        if (inicio && fim) {
+          return item.data >= inicio && item.data <= fim;
+        } else if (inicio) {
+          return item.data >= inicio;
+        } else if (fim) {
+          return item.data <= fim;
+        }
+      }
+      
+      return true;
+    }
+
+    function toggleDropdownPessoa() {
+      const menu = document.getElementById('dropdownPessoasMenu');
+      menu.classList.toggle('hidden');
+      if (!menu.classList.contains('hidden')) {
+        document.getElementById('buscaPessoaFiltro').focus();
+      }
+    }
+
+    function selecionarPessoaFiltro(nome) {
+      pessoaSelecionadaFiltro = nome;
+      document.getElementById('labelFiltroPessoa').textContent = nome ? nome : 'Todas as pessoas';
+      document.getElementById('dropdownPessoasMenu').classList.add('hidden');
+      renderizar();
+    }
+
+    function atualizarDropdownPessoas() {
+      const lista = document.getElementById('listaPessoasDropdown');
+      const termo = (document.getElementById('buscaPessoaFiltro').value || '').toLowerCase();
+      const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+      lista.innerHTML = '';
+
+      if (!termo || 'todas as pessoas'.includes(termo)) {
+        const itemTodas = document.createElement('div');
+        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-800/80'}`;
+        itemTodas.textContent = 'Todas as pessoas';
+        itemTodas.onclick = () => selecionarPessoaFiltro('');
+        lista.appendChild(itemTodas);
+      }
+
+      nomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
+        const item = document.createElement('div');
+        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-800/80'}`;
+        item.textContent = nome;
+        item.onclick = () => selecionarPessoaFiltro(nome);
+        lista.appendChild(item);
+      });
+    }
+
+    function filtrarListaPessoasDropdown() {
+      atualizarDropdownPessoas();
+    }
+
+    function obterSaquesFiltradosAtuais() {
+      return saques.filter(item => {
+        const passaData = filtrarPorData(item);
+        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
+        const passaStatus = apenasPendentes ? !item.pago : true;
+
+        return passaData && passaPessoa && passaStatus;
+      });
+    }
+
+    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL (ORDENADO CRONOLOGICAMENTE POR DATA E HORA)
+    async function gerarImagemExtrato() {
+      if (!pessoaSelecionadaFiltro) {
+        alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
+        return;
+      }
+
+      let dadosExtrato = obterSaquesFiltradosAtuais();
+
+      if (dadosExtrato.length === 0) {
+        alert('Não há registros de saques para esta pessoa no período selecionado.');
+        return;
+      }
+
+      // Ordenar estritamente por Data e Horário
+      dadosExtrato.sort((a, b) => {
+        const dataA = a.data || '';
+        const dataB = b.data || '';
+        if (dataA !== dataB) {
+          return dataA.localeCompare(dataB);
+        }
+        const horaA = a.hora || '00:00';
+        const horaB = b.hora || '00:00';
+        return horaA.localeCompare(horaB);
+      });
+
+      const btnGerar = document.getElementById('btnGerarExtrato');
+      const textoOriginal = btnGerar.innerHTML;
+      btnGerar.innerHTML = '⏳ Gerando...';
+      btnGerar.disabled = true;
+
+      document.getElementById('extratoNomeTitular').textContent = pessoaSelecionadaFiltro;
+
+      const agora = new Date();
+      document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+      let textoPeriodo = 'Todos os Registros';
+      if (filtroAtual === 'hoje') textoPeriodo = `Hoje (${agora.toLocaleDateString('pt-BR')})`;
+      else if (filtroAtual === 'ontem') {
+        const ontem = new Date();
+        ontem.setDate(ontem.getDate() - 1);
+        textoPeriodo = `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
+      }
+      else if (filtroAtual === '7dias') textoPeriodo = 'Últimos 7 dias';
+      else if (filtroAtual === 'mes') textoPeriodo = `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
+      else if (filtroAtual === 'personalizado') {
+        const ini = document.getElementById('dataInicioFiltro').value;
+        const fim = document.getElementById('dataFimFiltro').value;
+        if (ini && fim) textoPeriodo = `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
+        else if (ini) textoPeriodo = `A partir de ${ini.split('-').reverse().join('/')}`;
+        else if (fim) textoPeriodo = `Até ${fim.split('-').reverse().join('/')}`;
+      }
+      document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
+
+      const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
+      tabelaCorpo.innerHTML = '';
+
+      let volTotal = 0;
+      let comissaoTotal = 0;
+
+      dadosExtrato.forEach(s => {
+        volTotal += s.valor;
+        comissaoTotal += s.comissaoPessoa;
+
+        const dtForm = s.data.split('-').reverse().join('/');
+        const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
+        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2.5 text-slate-300">${dtHr}</td>
+          <td class="p-2.5 font-semibold text-sky-400">R$ ${s.valor.toFixed(2)}</td>
+          <td class="p-2.5 text-slate-400">${pctTexto}</td>
+          <td class="p-2.5 font-bold text-emerald-400 text-right">R$ ${s.comissaoPessoa.toFixed(2)}</td>
+        `;
+        tabelaCorpo.appendChild(tr);
+      });
+
+      document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
+      document.getElementById('extratoVolumeTotal').textContent = `R$ ${volTotal.toFixed(2)}`;
+      document.getElementById('extratoTotalReceber').textContent = `R$ ${comissaoTotal.toFixed(2)}`;
+
+      const container = document.getElementById('extratoCard');
+      
+      try {
+        const canvas = await html2canvas(container, {
+          backgroundColor: '#0f172a',
+          scale: 2
+        });
+
+        extratoDataUrlGlobal = canvas.toDataURL('image/png');
+        extratoNomeArquivoGlobal = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
+
+        canvas.toBlob(blob => {
+          extratoBlobGlobal = blob;
+        }, 'image/png');
+
+        document.getElementById('imgPreviewExtrato').src = extratoDataUrlGlobal;
+        document.getElementById('modalExtrato').classList.remove('hidden');
+
+      } catch (err) {
+        alert('Erro ao gerar imagem do extrato: ' + err.message);
+      } finally {
+        btnGerar.innerHTML = textoOriginal;
+        btnGerar.disabled = false;
+      }
+    }
+
+    function fecharModalExtrato() {
+      document.getElementById('modalExtrato').classList.add('hidden');
+    }
+
+    async function compartilharExtrato() {
+      if (!extratoBlobGlobal && !extratoDataUrlGlobal) return;
+
+      const file = new File([extratoBlobGlobal], extratoNomeArquivoGlobal, { type: 'image/png' });
+
+      // Suporte Mobile (Navegador com Web Share API - Sem texto de legenda)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: '',
+            text: ''
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') console.error('Erro ao compartilhar:', err);
+        }
+      } else {
+        // Suporte Desktop / PC (Copia imagem para área de transferência)
+        try {
+          const item = new ClipboardItem({ "image/png": extratoBlobGlobal });
+          await navigator.clipboard.write([item]);
+          alert('Imagem copiada para a área de transferência! Você pode colar (Ctrl+V ou Cmd+V) no WhatsApp Web.');
+        } catch (err) {
+          alert('Seu navegador não suporta compartilhamento direto. Use a opção "Salvar no Dispositivo".');
+        }
+      }
+    }
+
+    function baixarExtrato() {
+      if (!extratoDataUrlGlobal) return;
+      const link = document.createElement('a');
+      link.download = extratoNomeArquivoGlobal;
+      link.href = extratoDataUrlGlobal;
+      link.click();
+    }
+
+    function renderizar() {
+      const menuBusca = document.getElementById('buscaPessoaFiltro');
+      const comFocoNaBusca = document.activeElement === menuBusca;
+      
+      atualizarDropdownPessoas();
+
+      if (comFocoNaBusca) {
+        document.getElementById('dropdownPessoasMenu').classList.remove('hidden');
+      }
+
+      const btnGerarExtrato = document.getElementById('btnGerarExtrato');
+      if (pessoaSelecionadaFiltro) {
+        btnGerarExtrato.classList.remove('hidden');
+      } else {
+        btnGerarExtrato.classList.add('hidden');
+      }
+
+      const botoes = {
+        'hoje': 'btnFiltroHoje',
+        'ontem': 'btnFiltroOntem',
+        '7dias': 'btnFiltro7Dias',
+        'mes': 'btnFiltroMes',
+        'todos': 'btnFiltroTodos'
+      };
+
+      Object.keys(botoes).forEach(chave => {
+        const btn = document.getElementById(botoes[chave]);
+        if (btn) {
+          if (filtroAtual === chave) {
+            btn.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
+          } else {
+            btn.className = 'text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
+          }
+        }
+      });
+
+      const btnCal = document.getElementById('btnToggleCalendario');
+      if (btnCal) {
+        if (filtroAtual === 'personalizado') {
+          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
+        } else {
+          btnCal.className = 'text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
+        }
+      }
+
+      const cardPendente = document.getElementById('cardPendente');
+      const badgePendente = document.getElementById('badgePendente');
+      const txtSubPendente = document.getElementById('txtSubPendente');
+      const subDesktop = document.getElementById('subtituloStatusFilter');
+      const subMobile = document.getElementById('subtituloStatusFilterMobile');
+
+      if (apenasPendentes) {
+        cardPendente.className = 'glass-card border-2 border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
+        badgePendente.textContent = 'ATIVO';
+        badgePendente.className = 'text-[9px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse';
+        txtSubPendente.textContent = '🔍 toque para ver todos';
+        subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
+        subMobile.textContent = 'Exibindo Pendentes';
+      } else {
+        cardPendente.className = 'glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg';
+        badgePendente.textContent = 'FILTRAR';
+        badgePendente.className = 'text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold';
+        txtSubPendente.textContent = '👈 toque para ver pendentes';
+        subDesktop.textContent = '';
+        subMobile.textContent = '';
+      }
+
+      const saquesFiltrados = obterSaquesFiltradosAtuais();
+
+      const tbodyDesktop = document.getElementById('tabelaCorpoDesktop');
+      const containerMobile = document.getElementById('listaCardsMobile');
+      tbodyDesktop.innerHTML = '';
+      containerMobile.innerHTML = '';
+
+      let totalVol = 0;
+      let totalPendente = 0;
+      let totalPago = 0;
+      let totalLucroLiq = 0;
+
+      saquesFiltrados.forEach(s => {
+        totalVol += s.valor;
+        totalLucroLiq += s.lucroLiquidoSeu;
+
+        if (s.pago) {
+          totalPago += s.comissaoPessoa;
+        } else {
+          totalPendente += s.comissaoPessoa;
+        }
+
+        const dataFormatada = s.data.split('-').reverse().join('/');
+        const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
+        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+        // Render Desktop
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
+          <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
+          <td class="p-3.5 text-sky-400 font-semibold">R$ ${s.valor.toFixed(2)}</td>
+          <td class="p-3.5 text-amber-400 font-medium">R$ ${s.comissaoPessoa.toFixed(2)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
+          <td class="p-3.5 text-emerald-400 font-bold">R$ ${s.lucroLiquidoSeu.toFixed(2)}</td>
+          <td class="p-3.5">
+            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+              ${s.pago ? '✓ Pago' : '⏳ Pendente'}
+            </button>
+          </td>
+          <td class="p-3.5 text-center">
+            <button onclick="deletar('${s.id}')" class="text-red-400 hover:text-red-300 font-medium text-xs px-2 py-1">Excluir</button>
+          </td>
+        `;
+        tbodyDesktop.appendChild(tr);
+
+        // Render Mobile
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
+        card.innerHTML = `
+          <div class="flex justify-between items-start border-b border-white/10 pb-2">
+            <div class="pr-2">
+              <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
+            </div>
+            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-xl text-xs font-semibold active:scale-95 transition shrink-0 ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+              ${s.pago ? '✓ Pago' : '⏳ Pendente'}
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
+            <div class="glass-input p-2 rounded-2xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
+              <p class="font-bold text-sky-400 mt-0.5">R$ ${s.valor.toFixed(2)}</p>
+            </div>
+            <div class="glass-input p-2 rounded-2xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
+              <p class="font-medium text-amber-400 mt-0.5">R$ ${s.comissaoPessoa.toFixed(2)}</p>
+            </div>
+            <div class="glass-input p-2 rounded-2xl">
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
+              <p class="font-bold text-emerald-400 mt-0.5">R$ ${s.lucroLiquidoSeu.toFixed(2)}</p>
+            </div>
+          </div>
+          <div class="flex justify-end pt-1 border-t border-white/10">
+            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir Registro</button>
+          </div>
+        `;
+        containerMobile.appendChild(card);
+      });
+
+      document.getElementById('totalQtd').textContent = saquesFiltrados.length;
+      document.getElementById('totalVolume').textContent = `R$ ${totalVol.toFixed(2)}`;
+      document.getElementById('totalPendentePessoas').textContent = `R$ ${totalPendente.toFixed(2)}`;
+      document.getElementById('totalPagoPessoas').textContent = `R$ ${totalPago.toFixed(2)}`;
+      document.getElementById('totalLucroLiquido').textContent = `R$ ${totalLucroLiq.toFixed(2)}`;
+    }
+
+    function exportarBackup() {
+      if (saques.length === 0) {
+        alert('Não há registros para exportar.');
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saques, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_saques_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importarBackup(e) {
+      if (!currentUser) return;
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        try {
+          const importados = JSON.parse(event.target.result);
+          if (!Array.isArray(importados)) {
+            alert('Formato de arquivo de backup inválido.');
+            return;
+          }
+
+          if (confirm(`Atenção: Isso enviará ${importados.length} registros para a sua conta na nuvem. Deseja continuar?`)) {
+            const batch = db.batch();
+            importados.forEach(item => {
+              const docRef = db.collection('users').doc(currentUser.uid).collection('saques').doc();
+              const { id, ...dadosSemId } = item;
+              batch.set(docRef, {
+                ...dadosSemId,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+            await batch.commit();
+            alert('Backup importado com sucesso!');
+          }
+        } catch (err) {
+          alert('Erro ao ler arquivo de backup: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
