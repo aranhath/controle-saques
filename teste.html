@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=28">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=28">
-  <link rel="mask-icon" href="./favicon.svg?v=28" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=28">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=29">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=29">
+  <link rel="mask-icon" href="./favicon.svg?v=29" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=29">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -35,7 +35,7 @@
       background-attachment: fixed;
     }
 
-    /* Efeito Liquid Glass iOS */
+    /* Efeito Liquid Glass iOS Padrao */
     .glass-card {
       background: rgba(15, 23, 42, 0.65) !important;
       backdrop-filter: blur(20px) saturate(180%) !important;
@@ -54,6 +54,15 @@
     .glass-input:focus {
       border-color: rgba(16, 185, 129, 0.6) !important;
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.25) !important;
+    }
+
+    /* Vidro Fosco Denso para Menus Suspensos / Dropdowns para Leitura Nítida sem Sobreposição */
+    .glass-dropdown {
+      background: rgba(11, 17, 32, 0.92) !important;
+      backdrop-filter: blur(30px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7) !important;
     }
 
     input, select, textarea, button {
@@ -177,9 +186,9 @@
             <span id="labelDropdownModo">Valor Fixo (R$)</span>
             <span class="text-slate-400 ml-2">▼</span>
           </button>
-          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 glass-card rounded-xl shadow-xl z-50 divide-y divide-white/10">
-            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-slate-800/80 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
-            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-slate-800/80 cursor-pointer text-slate-200">Porcentagem (%)</div>
+          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 glass-dropdown rounded-xl shadow-xl z-50 divide-y divide-white/10">
+            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
+            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Porcentagem (%)</div>
           </div>
         </div>
 
@@ -210,7 +219,8 @@
         <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
-          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-card rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
+          <!-- Autocomplete com vidro fosco denso glass-dropdown -->
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
         </div>
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Valor Saque (R$)</label>
@@ -254,7 +264,8 @@
               <span class="text-slate-400 ml-2 shrink-0">▼</span>
             </button>
 
-            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-card rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <!-- Menu Dropdown com vidro fosco denso glass-dropdown -->
+            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-white/10">
                 <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
               </div>
@@ -614,7 +625,7 @@
 
       correspondencias.forEach(nome => {
         const item = document.createElement('div');
-        item.className = 'p-3 text-sm text-slate-200 hover:bg-slate-800/80 cursor-pointer transition';
+        item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition';
         item.textContent = nome;
         item.onclick = () => {
           inputNome.value = nome;
@@ -870,7 +881,7 @@
 
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
-        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-800/80'}`;
+        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         itemTodas.textContent = 'Todas as pessoas';
         itemTodas.onclick = () => selecionarPessoaFiltro('');
         lista.appendChild(itemTodas);
@@ -878,7 +889,7 @@
 
       nomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
         const item = document.createElement('div');
-        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-800/80'}`;
+        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         item.textContent = nome;
         item.onclick = () => selecionarPessoaFiltro(nome);
         lista.appendChild(item);
@@ -1230,7 +1241,7 @@
           }
 
           if (confirm(`Atenção: Isso enviará ${importados.length} registros para a sua conta na nuvem. Deseja continuar?`)) {
-            const batch = db.batch();
+            const batch = db.collection('users').doc(currentUser.uid).collection('saques').doc();
             importados.forEach(item => {
               const docRef = db.collection('users').doc(currentUser.uid).collection('saques').doc();
               const { id, ...dadosSemId } = item;
