@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=20">
-  <link rel="mask-icon" href="./favicon.svg?v=20" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=20">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=21">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=21">
+  <link rel="mask-icon" href="./favicon.svg?v=21" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=21">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -237,9 +237,9 @@
             </div>
           </div>
 
-          <!-- BOTÃO GERAR EXTRATO -->
+          <!-- BOTÃO GERAR EXTRATO ALTERADO PARA "Gerar extrato" -->
           <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 shrink-0">
-            <span>📸</span> Gerar Imagem do Extrato
+            <span>📸</span> Gerar extrato
           </button>
         </div>
 
@@ -298,10 +298,10 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Desktop / Tabela) -->
+    <!-- Histórico de Saques (Versão Desktop / Tabela) Sem "(Ordem Alfabética)" -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block relative z-10">
       <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
-        <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques (Ordem Alfabética)</h3>
+        <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques</h3>
         <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
       </div>
       <div class="overflow-x-auto">
@@ -322,10 +322,10 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Mobile / Cards) -->
+    <!-- Histórico de Saques (Versão Mobile / Cards) Sem "(Ordem Alfabética)" -->
     <section class="block md:hidden space-y-3 relative z-10">
       <div class="flex justify-between items-center px-1">
-        <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico (Ordem Alfabética)</h3>
+        <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico</h3>
         <span id="subtituloStatusFilterMobile" class="text-xs text-emerald-400 font-medium"></span>
       </div>
       <div id="listaCardsMobile" class="space-y-2.5"></div>
@@ -333,11 +333,11 @@
 
   </div>
 
-  <!-- CONTAINER DO EXTRATO (SEM LOGO, TOTALMENTE ORGANIZADO) -->
+  <!-- CONTAINER DO EXTRATO -->
   <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
     <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
       
-      <!-- Cabeçalho Limpo e Alinhado sem Logo -->
+      <!-- Cabeçalho Limpo sem Logo -->
       <div class="flex items-center justify-between border-b border-slate-700 pb-4">
         <div>
           <h2 class="text-2xl font-black tracking-tight text-emerald-400 leading-none">GESTÃO DE SAQUE</h2>
@@ -807,7 +807,7 @@
     function atualizarDropdownPessoas() {
       const lista = document.getElementById('listaPessoasDropdown');
       const termo = (document.getElementById('buscaPessoaFiltro').value || '').toLowerCase();
-      const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort();
+      const nomesUnicos = [...new Set(saques.map(s => s.nome))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
       lista.innerHTML = '';
 
@@ -832,6 +832,7 @@
       atualizarDropdownPessoas();
     }
 
+    // ORDENAÇÃO ESTRITA EM ORDEM ALFABÉTICA (A - Z) PELO NOME DO TITULAR
     function obterSaquesFiltradosAtuais() {
       return saques.filter(item => {
         const passaData = filtrarPorData(item);
@@ -839,7 +840,7 @@
         const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaPessoa && passaStatus;
-      }).sort((a, b) => new Date(a.data) - new Date(b.data));
+      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
     async function gerarImagemExtrato() {
