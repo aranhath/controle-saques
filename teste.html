@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=31">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=31">
-  <link rel="mask-icon" href="./favicon.svg?v=31" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=31">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=32">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=32">
+  <link rel="mask-icon" href="./favicon.svg?v=32" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=32">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -619,17 +619,6 @@
       }
     }
 
-    async function salvarConfigRegras() {
-      if (!currentUser) return;
-      regrasLucro.limiteValor = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
-      regrasLucro.valAbaixo = parseFloat(document.getElementById('cfgValAbaixo').value) || 0;
-      regrasLucro.pctAcima = parseFloat(document.getElementById('cfgPctAcima').value) || 0;
-
-      await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
-      alert('Regras de lucro salvas com sucesso!');
-      togglePainelConfig();
-    }
-
     // MIGRAR DADOS ANTIGOS E CRIAR CADASTRO DE PESSOAS AUTOMATICAMENTE
     async function migrarDadosAntigosEGerarPessoas() {
       if (!currentUser) return;
@@ -846,7 +835,7 @@
       if (id) {
         // Atualizar Pessoa
         const pessoaAntiga = pessoas.find(p => p.id === id);
-        const nomeAntigoForm : string = pessoaAntiga ? (pessoaAntiga.cpf ? `${pessoaAntiga.nome} - ${pessoaAntiga.cpf}` : pessoaAntiga.nome) : '';
+        const nomeAntigoForm = pessoaAntiga ? (pessoaAntiga.cpf ? `${pessoaAntiga.nome} - ${pessoaAntiga.cpf}` : pessoaAntiga.nome) : '';
 
         await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).update({
           nome,
