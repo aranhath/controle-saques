@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=21">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=21">
-  <link rel="mask-icon" href="./favicon.svg?v=21" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=21">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=22">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=22">
+  <link rel="mask-icon" href="./favicon.svg?v=22" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=22">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -174,15 +174,15 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg overflow-hidden">
+    <!-- Formulário de Lançamento (Overflow Ajustado para Exibir Sugestões no PC) -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg relative z-20">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="w-full min-w-0 overflow-hidden">
+        <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
           <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="relative w-full min-w-0">
+        <div class="relative w-full min-w-0 z-50">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
@@ -202,7 +202,7 @@
     </section>
 
     <!-- Barra de Filtros -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-30">
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-10">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         <!-- Botões de Período -->
@@ -237,7 +237,7 @@
             </div>
           </div>
 
-          <!-- BOTÃO GERAR EXTRATO ALTERADO PARA "Gerar extrato" -->
+          <!-- BOTÃO GERAR EXTRATO -->
           <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 shrink-0">
             <span>📸</span> Gerar extrato
           </button>
@@ -298,7 +298,7 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Desktop / Tabela) Sem "(Ordem Alfabética)" -->
+    <!-- Histórico de Saques (Versão Desktop / Tabela) -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block relative z-10">
       <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
         <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques</h3>
@@ -322,7 +322,7 @@
       </div>
     </section>
 
-    <!-- Histórico de Saques (Versão Mobile / Cards) Sem "(Ordem Alfabética)" -->
+    <!-- Histórico de Saques (Versão Mobile / Cards) -->
     <section class="block md:hidden space-y-3 relative z-10">
       <div class="flex justify-between items-center px-1">
         <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico</h3>
@@ -832,7 +832,6 @@
       atualizarDropdownPessoas();
     }
 
-    // ORDENAÇÃO ESTRITA EM ORDEM ALFABÉTICA (A - Z) PELO NOME DO TITULAR
     function obterSaquesFiltradosAtuais() {
       return saques.filter(item => {
         const passaData = filtrarPorData(item);
