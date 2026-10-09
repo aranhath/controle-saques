@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=23">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=23">
-  <link rel="mask-icon" href="./favicon.svg?v=23" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=23">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=24">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=24">
+  <link rel="mask-icon" href="./favicon.svg?v=24" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=24">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -174,18 +174,19 @@
       </div>
     </section>
 
-    <!-- Formulário de Lançamento -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg relative z-20">
+    <!-- Formulário de Lançamento (Camada Z-30 Superior para Autocomplete Flutuar por Cima de Tudo) -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
           <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="relative w-full min-w-0 z-50">
+        <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-700/50"></div>
+          <!-- Autocomplete de Nomes com Z-50 e Fundo Opaco -->
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-700/60"></div>
         </div>
         <div class="w-full min-w-0">
           <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
@@ -201,8 +202,8 @@
       </form>
     </section>
 
-    <!-- Barra de Filtros (Nível de Camada Z-50 e Dropdown Z-[100] para sobrepor os cards de resumo) -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-50">
+    <!-- Barra de Filtros (Camada Z-20 para Ficar Abaixo do Formulário, mas Acima dos Cards) -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-20">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         <!-- Botões de Período -->
@@ -229,8 +230,8 @@
               <span class="text-slate-400 ml-2 shrink-0">▼</span>
             </button>
 
-            <!-- Menu Dropdown com Z-[100] -->
-            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[100] overflow-hidden">
+            <!-- Dropdown Filtro Pessoas com Z-50 -->
+            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-slate-700">
                 <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
               </div>
@@ -265,8 +266,8 @@
       </div>
     </section>
 
-    <!-- Cards de Resumo (Camada Z-0 para ficar sempre por baixo do dropdown) -->
-    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 relative z-0">
+    <!-- Cards de Resumo (Camada Z-10 Inferior) -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 relative z-10">
       <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
         <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
         <p id="totalQtd" class="text-lg font-bold text-slate-100 mt-1">0</p>
@@ -300,7 +301,7 @@
     </section>
 
     <!-- Histórico de Saques (Versão Desktop / Tabela) -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block relative z-0">
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block relative z-10">
       <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
         <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques</h3>
         <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
@@ -324,7 +325,7 @@
     </section>
 
     <!-- Histórico de Saques (Versão Mobile / Cards) -->
-    <section class="block md:hidden space-y-3 relative z-0">
+    <section class="block md:hidden space-y-3 relative z-10">
       <div class="flex justify-between items-center px-1">
         <h3 id="tituloHistoricoMobile" class="font-semibold text-slate-200 text-sm">Histórico</h3>
         <span id="subtituloStatusFilterMobile" class="text-xs text-emerald-400 font-medium"></span>
