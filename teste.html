@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=29">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=29">
-  <link rel="mask-icon" href="./favicon.svg?v=29" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=29">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=30">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=30">
+  <link rel="mask-icon" href="./favicon.svg?v=30" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=30">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -56,7 +56,7 @@
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.25) !important;
     }
 
-    /* Vidro Fosco Denso para Menus Suspensos / Dropdowns para Leitura Nítida sem Sobreposição */
+    /* Vidro Fosco Denso para Dropdowns */
     .glass-dropdown {
       background: rgba(11, 17, 32, 0.92) !important;
       backdrop-filter: blur(30px) saturate(200%) !important;
@@ -219,7 +219,6 @@
         <div class="relative w-full min-w-0">
           <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular do CPF</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
-          <!-- Autocomplete com vidro fosco denso glass-dropdown -->
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
         </div>
         <div class="w-full min-w-0">
@@ -264,7 +263,6 @@
               <span class="text-slate-400 ml-2 shrink-0">▼</span>
             </button>
 
-            <!-- Menu Dropdown com vidro fosco denso glass-dropdown -->
             <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-white/10">
                 <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
@@ -900,6 +898,7 @@
       atualizarDropdownPessoas();
     }
 
+    // RETORNA OS SAQUES FILTRADOS E ORDENADOS POR ORDEM ALFABÉTICA
     function obterSaquesFiltradosAtuais() {
       return saques.filter(item => {
         const passaData = filtrarPorData(item);
@@ -907,7 +906,7 @@
         const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaPessoa && passaStatus;
-      });
+      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
     // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL (ORDENADO CRONOLOGICAMENTE POR DATA E HORA)
@@ -1241,7 +1240,7 @@
           }
 
           if (confirm(`Atenção: Isso enviará ${importados.length} registros para a sua conta na nuvem. Deseja continuar?`)) {
-            const batch = db.collection('users').doc(currentUser.uid).collection('saques').doc();
+            const batch = db.batch();
             importados.forEach(item => {
               const docRef = db.collection('users').doc(currentUser.uid).collection('saques').doc();
               const { id, ...dadosSemId } = item;
