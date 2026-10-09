@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=19">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=19">
-  <link rel="mask-icon" href="./favicon.svg?v=19" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=19">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=20">
+  <link rel="mask-icon" href="./favicon.svg?v=20" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=20">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -333,22 +333,17 @@
 
   </div>
 
-  <!-- CONTAINER DO EXTRATO COM LOGO 100% CENTRALIZADA E ALINHADA -->
+  <!-- CONTAINER DO EXTRATO (SEM LOGO, TOTALMENTE ORGANIZADO) -->
   <div id="extratoRenderContainer" style="position: absolute; left: -9999px; top: -9999px; width: 550px;">
     <div id="extratoCard" class="bg-slate-900 text-slate-100 p-6 rounded-2xl border-2 border-emerald-500/40 font-sans space-y-5 shadow-2xl">
       
-      <!-- Cabeçalho do Extrato -->
+      <!-- Cabeçalho Limpo e Alinhado sem Logo -->
       <div class="flex items-center justify-between border-b border-slate-700 pb-4">
-        <div class="flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl border border-emerald-400/40 flex items-center justify-center bg-slate-800 shrink-0">
-            <img src="./favicon.svg" alt="Logo" class="w-7 h-7 object-contain block mx-auto">
-          </div>
-          <div class="flex flex-col justify-center">
-            <h2 class="text-lg font-black tracking-tight text-emerald-400 leading-none">GESTÃO DE SAQUE</h2>
-            <p class="text-[11px] text-slate-400 mt-1 leading-none">Comprovante de Comissões</p>
-          </div>
+        <div>
+          <h2 class="text-2xl font-black tracking-tight text-emerald-400 leading-none">GESTÃO DE SAQUE</h2>
+          <p class="text-xs text-slate-400 mt-1 leading-none">Comprovante de Comissões</p>
         </div>
-        <div class="text-right flex flex-col justify-center">
+        <div class="text-right">
           <p class="text-[10px] text-slate-400 uppercase font-semibold leading-none">Gerado em</p>
           <p id="extratoDataEmissao" class="text-xs text-slate-200 font-medium mt-1 leading-none"></p>
         </div>
