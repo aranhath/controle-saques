@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=26">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=26">
-  <link rel="mask-icon" href="./favicon.svg?v=26" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=26">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=27">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=27">
+  <link rel="mask-icon" href="./favicon.svg?v=27" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=27">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -347,16 +347,16 @@
         <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-xl border border-slate-700 max-w-full shadow-lg">
       </div>
 
-      <!-- Ações (Compartilhar e Baixar) -->
+      <!-- Ações (Compartilhar e Baixar sem emojis) -->
       <div class="p-4 border-t border-slate-700 bg-slate-900/50 flex flex-col sm:flex-row items-center gap-2 justify-end">
         <button onclick="fecharModalExtrato()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
           Fechar
         </button>
-        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow-lg shadow-sky-900/30">
-          <span>📤</span> Compartilhar
+        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-sky-900/30">
+          Compartilhar
         </button>
-        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/30">
-          <span>📥</span> Salvar no Dispositivo
+        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+          Salvar no Dispositivo
         </button>
       </div>
     </div>
@@ -871,22 +871,34 @@
         const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaPessoa && passaStatus;
-      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      });
     }
 
-    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL
+    // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL (ORDENADO CRONOLOGICAMENTE POR DATA E HORA)
     async function gerarImagemExtrato() {
       if (!pessoaSelecionadaFiltro) {
         alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
         return;
       }
 
-      const dadosExtrato = obterSaquesFiltradosAtuais();
+      let dadosExtrato = obterSaquesFiltradosAtuais();
 
       if (dadosExtrato.length === 0) {
         alert('Não há registros de saques para esta pessoa no período selecionado.');
         return;
       }
+
+      // Ordenar estritamente por Data e Horário (do mais antigo para o mais recente)
+      dadosExtrato.sort((a, b) => {
+        const dataA = a.data || '';
+        const dataB = b.data || '';
+        if (dataA !== dataB) {
+          return dataA.localeCompare(dataB);
+        }
+        const horaA = a.hora || '00:00';
+        const horaB = b.hora || '00:00';
+        return horaA.localeCompare(horaB);
+      });
 
       const btnGerar = document.getElementById('btnGerarExtrato');
       const textoOriginal = btnGerar.innerHTML;
