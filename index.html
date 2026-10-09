@@ -6,17 +6,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Gestão Saque">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#0f172a">
   <title>Gestão de Saque</title>
 
   <!-- WEB MANIFEST -->
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=27">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=27">
-  <link rel="mask-icon" href="./favicon.svg?v=27" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=27">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=30">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=30">
+  <link rel="mask-icon" href="./favicon.svg?v=30" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=30">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -29,6 +29,40 @@
 
     body {
       overflow-x: hidden !important;
+      background: radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.15), transparent 45%),
+                  radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.18), transparent 50%),
+                  linear-gradient(135deg, #060b13 0%, #0c1322 50%, #110d21 100%);
+      background-attachment: fixed;
+    }
+
+    /* Efeito Liquid Glass iOS Padrao */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+    }
+
+    .glass-input {
+      background: rgba(10, 15, 29, 0.7) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .glass-input:focus {
+      border-color: rgba(16, 185, 129, 0.6) !important;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25) !important;
+    }
+
+    /* Vidro Fosco Denso para Dropdowns */
+    .glass-dropdown {
+      background: rgba(11, 17, 32, 0.92) !important;
+      backdrop-filter: blur(30px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7) !important;
     }
 
     input, select, textarea, button {
@@ -60,19 +94,19 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-6 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+<body class="text-slate-100 min-h-screen p-3 md:p-6 font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
   <!-- TELA DE CARREGAMENTO -->
-  <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center gap-3">
+  <div id="loadingScreen" class="fixed inset-0 bg-slate-950/90 backdrop-blur-2xl z-50 flex flex-col items-center justify-center gap-3">
     <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-    <p class="text-sm text-slate-400 font-medium">Carregando painel...</p>
+    <p class="text-sm text-slate-300 font-medium tracking-wide">Carregando painel...</p>
   </div>
 
   <!-- TELA DE LOGIN -->
   <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
-    <div class="bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-6">
+    <div class="glass-card p-6 md:p-8 rounded-3xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center flex flex-col items-center gap-3">
-        <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40 flex items-center justify-center bg-slate-900">
+        <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40 flex items-center justify-center bg-slate-900/80">
           <img src="./favicon.svg" alt="Logo" class="w-10 h-10 object-contain">
         </div>
         <div>
@@ -83,15 +117,15 @@
 
       <form id="loginForm" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
-          <input type="email" id="loginEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">E-mail</label>
+          <input type="email" id="loginEmail" required class="glass-input w-full rounded-xl p-3 text-sm text-slate-100 focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
-          <input type="password" id="loginSenha" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Senha</label>
+          <input type="password" id="loginSenha" required class="glass-input w-full rounded-xl p-3 text-sm text-slate-100 focus:outline-none">
         </div>
         <p id="loginError" class="text-xs text-red-400 hidden"></p>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] font-semibold p-3 rounded-xl text-sm transition shadow-lg shadow-emerald-900/30">Entrar no Sistema</button>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] font-semibold p-3 rounded-xl text-sm transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30">Entrar no Sistema</button>
       </form>
     </div>
   </div>
@@ -100,9 +134,9 @@
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
     
     <!-- Cabeçalho -->
-    <header class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <header class="glass-card rounded-3xl p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30 flex items-center justify-center bg-slate-900">
+        <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30 flex items-center justify-center bg-slate-900/80">
           <img src="./favicon.svg" alt="Logo" class="w-8 h-8 object-contain">
         </div>
         <div>
@@ -114,26 +148,26 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="togglePainelConfig()" class="bg-slate-900/80 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
+        <button onclick="togglePainelConfig()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
           ⚙️ Regras
         </button>
-        <button onclick="exportarBackup()" class="bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs transition active:scale-95">
+        <button onclick="exportarBackup()" class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs transition active:scale-95">
           📥 Backup
         </button>
-        <label class="bg-slate-900/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs cursor-pointer transition active:scale-95">
+        <label class="glass-input hover:bg-slate-800/80 text-slate-300 px-3 py-2 rounded-xl text-xs cursor-pointer transition active:scale-95">
           📤 Importar
           <input type="file" id="importFile" onchange="importarBackup(event)" class="hidden" accept=".json">
         </label>
-        <span id="userEmailTag" class="text-xs text-slate-400 bg-slate-900/50 border border-slate-700 px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
-        <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
+        <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
+        <button onclick="logout()" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
           Sair
         </button>
       </div>
     </header>
 
     <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
-    <section id="painelConfigRegras" class="hidden bg-slate-800 border border-emerald-500/40 rounded-2xl p-4 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+    <section id="painelConfigRegras" class="hidden glass-card border-emerald-500/40 rounded-3xl p-4 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
         <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Regras do Lucro Bruto</h3>
         <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-2.5 py-1 rounded-lg text-xs transition">
           ✕
@@ -142,81 +176,81 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
         <div>
-          <label class="block text-slate-400 mb-1">Valor Limite Saque Pequeno (R$)</label>
-          <input type="number" id="cfgLimiteValor" value="50" step="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-slate-300 mb-1">Valor Limite Saque Pequeno (R$)</label>
+          <input type="number" id="cfgLimiteValor" value="50" step="1" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
         </div>
 
         <div class="relative">
-          <label class="block text-slate-400 mb-1">Modo até o Valor Limite</label>
-          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none">
+          <label class="block text-slate-300 mb-1">Modo até o Valor Limite</label>
+          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="glass-input w-full rounded-xl p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none">
             <span id="labelDropdownModo">Valor Fixo (R$)</span>
             <span class="text-slate-400 ml-2">▼</span>
           </button>
-          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 divide-y divide-slate-700/50">
-            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-slate-700 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
-            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-slate-700 cursor-pointer text-slate-200">Porcentagem (%)</div>
+          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 glass-dropdown rounded-xl shadow-xl z-50 divide-y divide-white/10">
+            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
+            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Porcentagem (%)</div>
           </div>
         </div>
 
         <div id="boxCfgValorAbaixo">
-          <label id="lblCfgValorAbaixo" class="block text-slate-400 mb-1">Lucro Fixo até R$ 50 (R$)</label>
-          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label id="lblCfgValorAbaixo" class="block text-slate-300 mb-1">Lucro Fixo até R$ 50 (R$)</label>
+          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">Lucro Acima do Limite (%)</label>
-          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-slate-300 mb-1">Lucro Acima do Limite (%)</label>
+          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
         </div>
       </div>
 
       <div class="flex justify-end pt-2">
-        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition">Salvar Regras</button>
+        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition border border-emerald-400/30">Salvar Regras</button>
       </div>
     </section>
 
     <!-- Formulário de Lançamento (Camada Z-30 Superior) -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 md:p-5 shadow-lg relative z-30">
+    <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <div class="w-full min-w-0">
-          <label class="block text-xs font-medium text-slate-400 mb-1">Data do Saque</label>
-          <input type="date" id="dataSaque" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Data do Saque</label>
+          <input type="date" id="dataSaque" required class="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="relative w-full min-w-0">
-          <label class="block text-xs font-medium text-slate-400 mb-1">Nome / Titular do CPF</label>
-          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-700/60"></div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular do CPF</label>
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
         </div>
         <div class="w-full min-w-0">
-          <label class="block text-xs font-medium text-slate-400 mb-1">Valor Saque (R$)</label>
-          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Valor Saque (R$)</label>
+          <input type="number" step="0.01" id="valorSaque" placeholder="0.00" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="w-full min-w-0">
-          <label class="block text-xs font-medium text-slate-400 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
-          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Comissão CPF (%) <span class="text-emerald-400">*obrigatório</span></label>
+          <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="flex items-end sm:col-span-2 md:col-span-1 w-full min-w-0">
-          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
+          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
         </div>
       </form>
     </section>
 
     <!-- Barra de Filtros -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-3 md:p-4 shadow-md space-y-3 relative z-20">
+    <section class="glass-card rounded-3xl p-3 md:p-4 shadow-xl space-y-3 relative z-20">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         <!-- Botões de Período -->
         <div class="flex flex-wrap items-center gap-1.5">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">PERÍODO:</span>
           
-          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Hoje</button>
-          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Ontem</button>
-          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">7 dias</button>
-          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Mês</button>
-          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">Todos</button>
+          <button id="btnFiltroHoje" onclick="setFiltroData('hoje')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Hoje</button>
+          <button id="btnFiltroOntem" onclick="setFiltroData('ontem')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Ontem</button>
+          <button id="btnFiltro7Dias" onclick="setFiltroData('7dias')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">7 dias</button>
+          <button id="btnFiltroMes" onclick="setFiltroData('mes')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Mês</button>
+          <button id="btnFiltroTodos" onclick="setFiltroData('todos')" class="text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">Todos</button>
 
           <!-- Botão Discreto de Calendário -->
-          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium">
+          <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">
             Data
           </button>
         </div>
@@ -224,21 +258,21 @@
         <!-- Filtro por Nome/Titular -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
           <div class="relative w-full md:w-64">
-            <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" type="button" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-slate-600 focus:outline-none">
+            <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" type="button" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-white/20 focus:outline-none">
               <span id="labelFiltroPessoa" class="truncate font-medium">Todas as pessoas</span>
               <span class="text-slate-400 ml-2 shrink-0">▼</span>
             </button>
 
-            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-              <div class="p-2 border-b border-slate-700">
-                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+            <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div class="p-2 border-b border-white/10">
+                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
               </div>
-              <div id="listaPessoasDropdown" class="max-h-52 overflow-y-auto divide-y divide-slate-700/50"></div>
+              <div id="listaPessoasDropdown" class="max-h-52 overflow-y-auto divide-y divide-white/10"></div>
             </div>
           </div>
 
           <!-- BOTÃO GERAR EXTRATO -->
-          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/30 flex items-center justify-center shrink-0">
+          <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/40 border border-emerald-400/30 flex items-center justify-center shrink-0">
             Gerar extrato
           </button>
         </div>
@@ -246,7 +280,7 @@
       </div>
 
       <!-- Caixa Popover de Intervalo de Datas -->
-      <div id="caixaDataCustomizada" class="hidden bg-slate-900 border border-slate-700/90 rounded-xl p-3 space-y-3 w-full max-w-full overflow-hidden">
+      <div id="caixaDataCustomizada" class="hidden glass-input rounded-2xl p-3 space-y-3 w-full max-w-full overflow-hidden">
         <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
           <span>Selecionar Intervalo de Datas</span>
           <button onclick="limparFiltroDataPersonalizado()" class="text-red-400 hover:text-red-300 text-xs font-medium">Limpar</button>
@@ -254,11 +288,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs w-full">
           <div class="w-full min-w-0 overflow-hidden">
             <label class="block text-[10px] text-slate-400 mb-1">De:</label>
-            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <input type="date" id="dataInicioFiltro" onchange="aplicarFiltroDataPersonalizado()" class="glass-input w-full rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none">
           </div>
           <div class="w-full min-w-0 overflow-hidden">
             <label class="block text-[10px] text-slate-400 mb-1">Até:</label>
-            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <input type="date" id="dataFimFiltro" onchange="aplicarFiltroDataPersonalizado()" class="glass-input w-full rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none">
           </div>
         </div>
       </div>
@@ -266,18 +300,18 @@
 
     <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 relative z-10">
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-slate-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-white/30 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg">
         <p class="text-[11px] text-slate-400 font-medium">Qtd. Saques</p>
         <p id="totalQtd" class="text-lg font-bold text-slate-100 mt-1">0</p>
       </div>
 
-      <div onclick="setFiltroStatus('todos')" class="bg-slate-800 border border-slate-700/80 hover:border-sky-500/50 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md">
+      <div onclick="setFiltroStatus('todos')" class="glass-card hover:border-sky-500/50 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg">
         <p class="text-[11px] text-slate-400 font-medium">Volume Total</p>
         <p id="totalVolume" class="text-lg font-bold text-sky-400 mt-1 truncate">R$ 0,00</p>
       </div>
       
       <!-- CARD CLICÁVEL: PENDENTES -->
-      <div id="cardPendente" onclick="toggleFiltroPendente()" class="bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md relative">
+      <div id="cardPendente" onclick="toggleFiltroPendente()" class="glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg relative">
         <div class="flex justify-between items-center">
           <p class="text-[11px] text-slate-400 font-medium">A Pagar (Pendente)</p>
           <span id="badgePendente" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold">FILTRAR</span>
@@ -287,26 +321,26 @@
       </div>
 
       <!-- CARD FIXO: JÁ PAGO -->
-      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 shadow-md">
+      <div class="glass-card rounded-3xl p-3.5 shadow-lg">
         <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
         <p id="totalPagoPessoas" class="text-lg font-bold text-amber-400 mt-1 truncate">R$ 0,00</p>
       </div>
 
-      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 shadow-md col-span-2 sm:col-span-1">
+      <div class="glass-card rounded-3xl p-3.5 shadow-lg col-span-2 sm:col-span-1">
         <p class="text-[11px] text-slate-400 font-medium">Seu Lucro Líquido</p>
         <p id="totalLucroLiquido" class="text-lg font-bold text-emerald-400 mt-1 truncate">R$ 0,00</p>
       </div>
     </section>
 
     <!-- Histórico de Saques (Versão Desktop / Tabela) -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-lg hidden md:block relative z-10">
-      <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center">
+    <section class="glass-card rounded-3xl overflow-hidden shadow-xl hidden md:block relative z-10">
+      <div class="px-5 py-4 border-b border-white/10 flex justify-between items-center">
         <h3 id="tituloHistoricoDesktop" class="font-semibold text-slate-200">Histórico de Saques</h3>
         <span id="subtituloStatusFilter" class="text-xs text-emerald-400 font-medium"></span>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
-          <thead class="bg-slate-900/50 text-xs uppercase text-slate-400 border-b border-slate-700">
+          <thead class="bg-slate-950/40 text-xs uppercase text-slate-400 border-b border-white/10">
             <tr>
               <th class="p-3.5">Titular CPF</th>
               <th class="p-3.5">Data & Hora</th>
@@ -317,7 +351,7 @@
               <th class="p-3.5 text-center">Ações</th>
             </tr>
           </thead>
-          <tbody id="tabelaCorpoDesktop" class="divide-y divide-slate-700/50"></tbody>
+          <tbody id="tabelaCorpoDesktop" class="divide-y divide-white/5"></tbody>
         </table>
       </div>
     </section>
@@ -334,28 +368,28 @@
   </div>
 
   <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO -->
-  <div id="modalExtrato" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+  <div id="modalExtrato" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[200] flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
       <!-- Cabeçalho do Modal -->
-      <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+      <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-100 text-sm md:text-base">Extrato Gerado</h3>
-        <button onclick="fecharModalExtrato()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
+        <button onclick="fecharModalExtrato()" class="text-slate-400 hover:text-white glass-input w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
       </div>
       
       <!-- Imagem de Pré-visualização -->
-      <div class="p-4 overflow-y-auto flex justify-center bg-slate-950/50">
-        <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-xl border border-slate-700 max-w-full shadow-lg">
+      <div class="p-4 overflow-y-auto flex justify-center bg-slate-950/60">
+        <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-2xl border border-white/10 max-w-full shadow-2xl">
       </div>
 
       <!-- Ações (Compartilhar e Baixar sem emojis) -->
-      <div class="p-4 border-t border-slate-700 bg-slate-900/50 flex flex-col sm:flex-row items-center gap-2 justify-end">
-        <button onclick="fecharModalExtrato()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+      <div class="p-4 border-t border-white/10 bg-slate-900/40 flex flex-col sm:flex-row items-center gap-2 justify-end">
+        <button onclick="fecharModalExtrato()" class="w-full sm:w-auto glass-input text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
           Fechar
         </button>
-        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-sky-900/30">
+        <button onclick="compartilharExtrato()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-sky-900/40 border border-sky-400/30">
           Compartilhar
         </button>
-        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+        <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-emerald-900/40 border border-emerald-400/30">
           Salvar no Dispositivo
         </button>
       </div>
@@ -558,11 +592,11 @@
       const val = percentualInput.value.trim();
       if (val !== '' && !isNaN(val) && parseFloat(val) >= 0) {
         btnSalvar.disabled = false;
-        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/30 active:scale-95';
+        btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30 active:scale-95';
         btnSalvar.textContent = 'Registrar Saque';
       } else {
         btnSalvar.disabled = true;
-        btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
+        btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
         btnSalvar.textContent = 'Defina a Comissão';
       }
     });
@@ -589,7 +623,7 @@
 
       correspondencias.forEach(nome => {
         const item = document.createElement('div');
-        item.className = 'p-3 text-sm text-slate-200 hover:bg-slate-700 cursor-pointer transition';
+        item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition';
         item.textContent = nome;
         item.onclick = () => {
           inputNome.value = nome;
@@ -716,7 +750,7 @@
       document.getElementById('valorSaque').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
-      btnSalvar.className = 'w-full bg-slate-700 text-slate-400 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
+      btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
       btnSalvar.textContent = 'Defina a Comissão';
       
       resetDataParaHoje();
@@ -845,7 +879,7 @@
 
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
-        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-700/50'}`;
+        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         itemTodas.textContent = 'Todas as pessoas';
         itemTodas.onclick = () => selecionarPessoaFiltro('');
         lista.appendChild(itemTodas);
@@ -853,7 +887,7 @@
 
       nomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
         const item = document.createElement('div');
-        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300 hover:bg-slate-700/50'}`;
+        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         item.textContent = nome;
         item.onclick = () => selecionarPessoaFiltro(nome);
         lista.appendChild(item);
@@ -864,6 +898,7 @@
       atualizarDropdownPessoas();
     }
 
+    // RETORNA OS SAQUES FILTRADOS E ORDENADOS POR ORDEM ALFABÉTICA
     function obterSaquesFiltradosAtuais() {
       return saques.filter(item => {
         const passaData = filtrarPorData(item);
@@ -871,7 +906,7 @@
         const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaPessoa && passaStatus;
-      });
+      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
     // GERAÇÃO DE EXTRATO COM PREVIEW NO MODAL (ORDENADO CRONOLOGICAMENTE POR DATA E HORA)
@@ -888,7 +923,7 @@
         return;
       }
 
-      // Ordenar estritamente por Data e Horário (do mais antigo para o mais recente)
+      // Ordenar estritamente por Data e Horário
       dadosExtrato.sort((a, b) => {
         const dataA = a.data || '';
         const dataB = b.data || '';
@@ -1051,9 +1086,9 @@
         const btn = document.getElementById(botoes[chave]);
         if (btn) {
           if (filtroAtual === chave) {
-            btn.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition';
+            btn.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
           } else {
-            btn.className = 'text-xs bg-slate-900 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium';
+            btn.className = 'text-xs glass-input text-slate-300 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
           }
         }
       });
@@ -1061,9 +1096,9 @@
       const btnCal = document.getElementById('btnToggleCalendario');
       if (btnCal) {
         if (filtroAtual === 'personalizado') {
-          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400 shadow-md transition';
+          btnCal.className = 'text-xs bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl border border-emerald-400/40 shadow-md transition';
         } else {
-          btnCal.className = 'text-xs bg-slate-900/90 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-700 transition font-medium';
+          btnCal.className = 'text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium';
         }
       }
 
@@ -1074,14 +1109,14 @@
       const subMobile = document.getElementById('subtituloStatusFilterMobile');
 
       if (apenasPendentes) {
-        cardPendente.className = 'bg-red-500/15 border-2 border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
+        cardPendente.className = 'glass-card border-2 border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-xl shadow-red-950/40 ring-2 ring-red-500/30';
         badgePendente.textContent = 'ATIVO';
         badgePendente.className = 'text-[9px] bg-red-500 text-white px-1 py-0.5 rounded font-bold animate-pulse';
         txtSubPendente.textContent = '🔍 toque para ver todos';
         subDesktop.textContent = '🔍 Exibindo Apenas Saques Pendentes';
         subMobile.textContent = 'Exibindo Pendentes';
       } else {
-        cardPendente.className = 'bg-slate-800 border border-red-500/40 hover:border-red-500 cursor-pointer rounded-2xl p-3.5 transition active:scale-95 shadow-md';
+        cardPendente.className = 'glass-card border-red-500/40 hover:border-red-500 cursor-pointer rounded-3xl p-3.5 transition active:scale-95 shadow-lg';
         badgePendente.textContent = 'FILTRAR';
         badgePendente.className = 'text-[9px] bg-red-500/20 text-red-400 border border-red-500/40 px-1 py-0.5 rounded font-bold';
         txtSubPendente.textContent = '👈 toque para ver pendentes';
@@ -1117,7 +1152,7 @@
 
         // Render Desktop
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-700/30 transition';
+        tr.className = 'hover:bg-slate-800/40 transition';
         tr.innerHTML = `
           <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
           <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
@@ -1137,9 +1172,9 @@
 
         // Render Mobile
         const card = document.createElement('div');
-        card.className = 'bg-slate-800 border border-slate-700/80 rounded-2xl p-3.5 space-y-2 shadow-md';
+        card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
         card.innerHTML = `
-          <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
+          <div class="flex justify-between items-start border-b border-white/10 pb-2">
             <div class="pr-2">
               <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
               <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
@@ -1149,20 +1184,20 @@
             </button>
           </div>
           <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
-            <div class="bg-slate-900/40 p-2 rounded-xl">
+            <div class="glass-input p-2 rounded-2xl">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
               <p class="font-bold text-sky-400 mt-0.5">R$ ${s.valor.toFixed(2)}</p>
             </div>
-            <div class="bg-slate-900/40 p-2 rounded-xl">
+            <div class="glass-input p-2 rounded-2xl">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
               <p class="font-medium text-amber-400 mt-0.5">R$ ${s.comissaoPessoa.toFixed(2)}</p>
             </div>
-            <div class="bg-slate-900/40 p-2 rounded-xl">
+            <div class="glass-input p-2 rounded-2xl">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
               <p class="font-bold text-emerald-400 mt-0.5">R$ ${s.lucroLiquidoSeu.toFixed(2)}</p>
             </div>
           </div>
-          <div class="flex justify-end pt-1 border-t border-slate-700/40">
+          <div class="flex justify-end pt-1 border-t border-white/10">
             <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir Registro</button>
           </div>
         `;
