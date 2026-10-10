@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=40">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=40">
-  <link rel="mask-icon" href="./favicon.svg?v=40" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=40">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=41">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=41">
+  <link rel="mask-icon" href="./favicon.svg?v=41" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=41">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -653,65 +653,6 @@
       }
     }
 
-    async function migrarDadosAntigosEGerarPessoas() {
-      if (!currentUser) return;
-      try {
-        const snapshotGeral = await db.collection('saques').get();
-        if (!snapshotGeral.empty) {
-          const batch = db.batch();
-          snapshotGeral.docs.forEach(doc => {
-            const docRefNovo = db.collection('users').doc(currentUser.uid).collection('saques').doc(doc.id);
-            batch.set(docRefNovo, doc.data());
-          });
-          await batch.commit();
-        }
-
-        const saquesSnap = await db.collection('users').doc(currentUser.uid).collection('saques').get();
-        const pessoasSnap = await db.collection('users').doc(currentUser.uid).collection('pessoas').get();
-
-        const nomesPessoasCadastradas = new Set(pessoasSnap.docs.map(doc => doc.data().nome.toLowerCase().trim()));
-
-        if (!saquesSnap.empty) {
-          const batchPessoas = db.batch();
-          let novasPessoasCount = 0;
-
-          saquesSnap.docs.forEach(doc => {
-            const dados = doc.data();
-            if (dados.nome) {
-              let nomeBruto = dados.nome.trim();
-              let nomeFormatado = nomeBruto;
-              let cpfExtraido = '';
-
-              if (nomeBruto.includes('-')) {
-                const partes = nomeBruto.split('-');
-                nomeFormatado = partes[0].trim();
-                cpfExtraido = partes.slice(1).join('-').trim();
-              }
-
-              const chaveBusca = nomeFormatado.toLowerCase();
-              if (!nomesPessoasCadastradas.has(chaveBusca) && nomeFormatado !== '') {
-                nomesPessoasCadastradas.add(chaveBusca);
-                const refNovaPessoa = db.collection('users').doc(currentUser.uid).collection('pessoas').doc();
-                batchPessoas.set(refNovaPessoa, {
-                  nome: nomeFormatado,
-                  cpf: cpfExtraido,
-                  ativo: true,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                novasPessoasCount++;
-              }
-            }
-          });
-
-          if (novasPessoasCount > 0) {
-            await batchPessoas.commit();
-          }
-        }
-      } catch (err) {
-        console.error('Erro na migração:', err);
-      }
-    }
-
     const percentualInput = document.getElementById('percentualComissao');
     const btnSalvar = document.getElementById('btnSalvar');
     const inputNome = document.getElementById('nomePessoa');
@@ -812,7 +753,6 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
-        await migrarDadosAntigosEGerarPessoas();
         await carregarRegrasUsuario();
         carregarDadosPessoas();
         carregarDados();
@@ -1073,9 +1013,13 @@
 
     async function togglePago(id, statusAtual) {
       if (!currentUser) return;
-      await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).update({
-        pago: !statusAtual
-      });
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).update({
+          pago: !statusAtual
+        });
+      } catch (err) {
+        console.error('Erro ao atualizar status de pagamento:', err);
+      }
     }
 
     async function deletar(id) {
