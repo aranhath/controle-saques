@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=42">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=42">
-  <link rel="mask-icon" href="./favicon.svg?v=42" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=42">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=43">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=43">
+  <link rel="mask-icon" href="./favicon.svg?v=43" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=43">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -322,9 +322,9 @@
     <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 md:grid-cols-5 gap-3 relative z-10">
       
-      <!-- HERO CARD: Seu Lucro Líquido Real -->
+      <!-- HERO CARD: Lucro Líquido -->
       <div class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl col-span-2 md:col-span-1 order-1 md:order-5 border-emerald-500/40 bg-gradient-to-b from-emerald-950/30 to-slate-900/80 flex flex-col items-center justify-center text-center space-y-1">
-        <span class="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Seu Lucro Líquido Real</span>
+        <span class="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Lucro Líquido</span>
         <p id="totalLucroLiquido" class="text-xl sm:text-2xl font-black text-emerald-400 pt-0.5 truncate max-w-full">R$ 0,00</p>
       </div>
 
@@ -350,9 +350,9 @@
         <p id="txtSubPendente" class="text-[8px] text-red-400/80">toque para ver</p>
       </div>
 
-      <!-- Já Pago aos CPFs -->
+      <!-- CPFs Pago -->
       <div class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-lg order-5 md:order-4 flex flex-col items-center justify-center text-center space-y-1">
-        <p class="text-[11px] text-slate-400 font-medium">Já Pago aos CPFs</p>
+        <p class="text-[11px] text-slate-400 font-medium">CPFs Pago</p>
         <p id="totalPagoPessoas" class="text-base sm:text-lg font-bold text-amber-400 truncate max-w-full">R$ 0,00</p>
       </div>
 
@@ -1154,7 +1154,7 @@
 
       } catch (err) {
         alert('Erro ao gerar imagem do extrato: ' + err.message);
-      } finally {
+      } font-medium
         btnGerar.innerHTML = textoOriginal;
         btnGerar.disabled = false;
       }
