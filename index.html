@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=44">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=44">
-  <link rel="mask-icon" href="./favicon.svg?v=44" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=44">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=45">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=45">
+  <link rel="mask-icon" href="./favicon.svg?v=45" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=45">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -153,6 +153,9 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <button onclick="togglePainelComissoes()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
+          ⚙️ Defina a Comissão
+        </button>
         <button onclick="togglePainelPessoas()" class="glass-input hover:bg-slate-800/80 text-sky-400 border border-sky-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
           👥 Cadastro
         </button>
@@ -162,6 +165,36 @@
         </button>
       </div>
     </header>
+
+    <!-- PAINEL CONFIGURAÇÃO DE COMISSÃO BRUTA -->
+    <section id="painelComissoes" class="hidden glass-card border-emerald-500/40 rounded-3xl p-3.5 md:p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">⚙️ Regras de Lucro Bruto do Sistema</h3>
+        <button onclick="togglePainelComissoes()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-3 py-1 rounded-xl text-xs transition">
+          ✕
+        </button>
+      </div>
+
+      <form id="formRegrasComissao" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Valor Limite para Taxa Fixa (R$)</label>
+          <input type="number" step="0.01" id="cfgValorLimite" required placeholder="Ex: 50.00" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Lucro Bruto Fixo (Até o limite) (R$)</label>
+          <input type="number" step="0.01" id="cfgLucroFixo" required placeholder="Ex: 5.00" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Lucro Bruto (%) (Acima do limite)</label>
+          <input type="number" step="0.1" id="cfgLucroPercentual" required placeholder="Ex: 10" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        </div>
+        <div class="sm:col-span-3 flex justify-end">
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition shadow-lg border border-emerald-400/30">
+            Salvar Regras
+          </button>
+        </div>
+      </form>
+    </section>
 
     <!-- PAINEL DE GESTÃO DE PESSOAS / CADASTROS -->
     <section id="painelPessoas" class="hidden glass-card border-sky-500/40 rounded-3xl p-3.5 md:p-5 shadow-2xl space-y-4">
@@ -227,7 +260,7 @@
     <!-- Formulário de Lançamento de Saque -->
     <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
-      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end" autocomplete="off">
+      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end" autocomplete="off">
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Data do Saque</label>
           <input type="date" id="dataSaque" required class="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
@@ -241,10 +274,6 @@
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Valor Saque (R$)</label>
           <input type="number" step="0.01" id="valorSaque" placeholder="0.00" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
-        </div>
-        <div class="w-full min-w-0">
-          <label class="flex items-end mb-1 h-5 text-xs font-medium text-emerald-400">Lucro Bruto Real (R$)</label>
-          <input type="number" step="0.01" id="lucroBrutoReal" placeholder="Ex: 5.00" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-emerald-300 font-semibold focus:outline-none border-emerald-500/40">
         </div>
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Comissão CPF (%)</label>
@@ -513,6 +542,13 @@
     let extratoDataUrlGlobal = '';
     let extratoNomeArquivoGlobal = '';
 
+    // Configuração Padrão do Sistema
+    let regraComissao = {
+      valorLimite: 50.00,
+      lucroFixo: 5.00,
+      lucroPercentual: 10.0
+    };
+
     function formatarMoeda(valor) {
       if (isNaN(valor) || valor === null || valor === undefined) return 'R$ 0,00';
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -532,6 +568,10 @@
 
     resetDataParaHoje();
 
+    function togglePainelComissoes() {
+      document.getElementById('painelComissoes').classList.toggle('hidden');
+    }
+
     function togglePainelPessoas() {
       document.getElementById('painelPessoas').classList.toggle('hidden');
     }
@@ -541,7 +581,6 @@
     }
 
     const percentualInput = document.getElementById('percentualComissao');
-    const lucroBrutoInput = document.getElementById('lucroBrutoReal');
     const valorSaqueInput = document.getElementById('valorSaque');
     const btnSalvar = document.getElementById('btnSalvar');
     const inputNome = document.getElementById('nomePessoa');
@@ -550,7 +589,6 @@
 
     function validarFormularioSaque() {
       const valPercentual = percentualInput.value.trim();
-      const valLucroBruto = lucroBrutoInput.value.trim();
       const valSaque = valorSaqueInput.value.trim();
       const valNome = inputNome.value.trim().toLowerCase();
 
@@ -568,7 +606,6 @@
       }
 
       const dadosValidos = valPercentual !== '' && !isNaN(valPercentual) && parseFloat(valPercentual) >= 0 &&
-                           valLucroBruto !== '' && !isNaN(valLucroBruto) &&
                            valSaque !== '' && !isNaN(valSaque) && pessoaValida;
 
       if (dadosValidos) {
@@ -583,7 +620,6 @@
     }
 
     percentualInput.addEventListener('input', validarFormularioSaque);
-    lucroBrutoInput.addEventListener('input', validarFormularioSaque);
     valorSaqueInput.addEventListener('input', validarFormularioSaque);
     inputNome.addEventListener('input', validarFormularioSaque);
 
@@ -645,6 +681,7 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
+        carregarRegrasComissao();
         carregarDadosPessoas();
         carregarDados();
       } else {
@@ -675,6 +712,39 @@
     function logout() {
       auth.signOut();
     }
+
+    async function carregarRegrasComissao() {
+      if (!currentUser) return;
+      try {
+        const doc = await db.collection('users').doc(currentUser.uid).collection('config').doc('regras').get();
+        if (doc.exists) {
+          regraComissao = { ...regraComissao, ...doc.data() };
+        }
+      } catch (err) {
+        console.error('Erro ao carregar regras:', err);
+      }
+      
+      document.getElementById('cfgValorLimite').value = regraComissao.valorLimite;
+      document.getElementById('cfgLucroFixo').value = regraComissao.lucroFixo;
+      document.getElementById('cfgLucroPercentual').value = regraComissao.lucroPercentual;
+    }
+
+    document.getElementById('formRegrasComissao').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const vLimite = parseFloat(document.getElementById('cfgValorLimite').value);
+      const lFixo = parseFloat(document.getElementById('cfgLucroFixo').value);
+      const lPerc = parseFloat(document.getElementById('cfgLucroPercentual').value);
+
+      if (isNaN(vLimite) || isNaN(lFixo) || isNaN(lPerc)) return;
+
+      regraComissao = { valorLimite: vLimite, lucroFixo: lFixo, lucroPercentual: lPerc };
+
+      await db.collection('users').doc(currentUser.uid).collection('config').doc('regras').set(regraComissao);
+      alert('Regras de Lucro Bruto atualizadas com sucesso!');
+      togglePainelComissoes();
+    });
 
     function carregarDadosPessoas() {
       if (!currentUser) return;
@@ -856,17 +926,24 @@
       const nomeInputEl = document.getElementById('nomePessoa');
       const nome = nomeInputEl.value.trim();
       const valor = parseFloat(document.getElementById('valorSaque').value);
-      const lucroBrutoReal = parseFloat(document.getElementById('lucroBrutoReal').value);
       const percentualVal = percentualInput.value.trim();
 
-      if (!data || !nome || isNaN(valor) || isNaN(lucroBrutoReal) || percentualVal === '') return;
+      if (!data || !nome || isNaN(valor) || percentualVal === '') return;
 
       const agora = new Date();
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+      // Cálculo Automático do Lucro Bruto com base nas regras salvas
+      let lucroBrutoSeu = 0;
+      if (valor <= regraComissao.valorLimite) {
+        lucroBrutoSeu = regraComissao.lucroFixo;
+      } else {
+        lucroBrutoSeu = valor * (regraComissao.lucroPercentual / 100);
+      }
+
       const percentual = parseFloat(percentualVal);
       const comissaoPessoa = valor * (percentual / 100);
-      const lucroLiquidoSeu = lucroBrutoReal - comissaoPessoa;
+      const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
 
       await db.collection('users').doc(currentUser.uid).collection('saques').add({
         data,
@@ -875,7 +952,7 @@
         valor,
         percentual,
         comissaoPessoa,
-        lucroBrutoSeu: lucroBrutoReal,
+        lucroBrutoSeu,
         lucroLiquidoSeu,
         pago: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -883,7 +960,6 @@
 
       nomeInputEl.value = '';
       document.getElementById('valorSaque').value = '';
-      document.getElementById('lucroBrutoReal').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
       btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
@@ -1279,7 +1355,19 @@
 
       saquesFiltrados.forEach(s => {
         totalVol += s.valor;
-        totalLucroLiq += s.lucroLiquidoSeu;
+
+        // Se o registro antigo não tiver o lucroBrutoSeu salvo, calcula com a regra atual
+        let lbSeu = s.lucroBrutoSeu;
+        if (lbSeu === undefined) {
+          if (s.valor <= regraComissao.valorLimite) {
+            lbSeu = regraComissao.lucroFixo;
+          } else {
+            lbSeu = s.valor * (regraComissao.lucroPercentual / 100);
+          }
+        }
+
+        const llSeu = s.lucroLiquidoSeu !== undefined ? s.lucroLiquidoSeu : (lbSeu - s.comissaoPessoa);
+        totalLucroLiq += llSeu;
 
         if (s.pago) {
           totalPago += s.comissaoPessoa;
@@ -1290,7 +1378,7 @@
         const dataFormatada = s.data.split('-').reverse().join('/');
         const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
         const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
-        const lucroBrutoExibicao = s.lucroBrutoSeu !== undefined ? formatarMoeda(s.lucroBrutoSeu) : '-';
+        const lucroBrutoExibicao = formatarMoeda(lbSeu);
 
         // Render Desktop
         const tr = document.createElement('tr');
@@ -1301,7 +1389,7 @@
           <td class="p-3.5 text-sky-400 font-semibold">${formatarMoeda(s.valor)}</td>
           <td class="p-3.5 text-slate-300 font-medium">${lucroBrutoExibicao}</td>
           <td class="p-3.5 text-amber-400 font-medium">${formatarMoeda(s.comissaoPessoa)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
-          <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(s.lucroLiquidoSeu)}</td>
+          <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(llSeu)}</td>
           <td class="p-3.5">
             <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
               ${s.pago ? 'Pago' : 'Pendente'}
@@ -1337,11 +1425,11 @@
             </div>
             <div class="glass-input p-2 rounded-2xl text-center">
               <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro Liq.</p>
-              <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(s.lucroLiquidoSeu)}</p>
+              <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(llSeu)}</p>
             </div>
           </div>
           <div class="flex justify-between items-center pt-1 border-t border-white/10 text-xs text-slate-400">
-            <span>Lucro Bruto Real: <strong class="text-slate-200">${lucroBrutoExibicao}</strong></span>
+            <span>Lucro Bruto: <strong class="text-slate-200">${lucroBrutoExibicao}</strong></span>
             <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir</button>
           </div>
         `;
