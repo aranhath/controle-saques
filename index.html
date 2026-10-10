@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=41">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=41">
-  <link rel="mask-icon" href="./favicon.svg?v=41" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=41">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=42">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=42">
+  <link rel="mask-icon" href="./favicon.svg?v=42" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=42">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -156,9 +156,6 @@
         <button onclick="togglePainelPessoas()" class="glass-input hover:bg-slate-800/80 text-sky-400 border border-sky-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
           👥 Cadastro
         </button>
-        <button onclick="togglePainelConfig()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
-          ⚙️ Regras
-        </button>
         <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
         <button onclick="logout()" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
           Sair
@@ -227,73 +224,34 @@
       </div>
     </section>
 
-    <!-- PAINEL DE CONFIGURAÇÃO DE REGRAS DE LUCRO -->
-    <section id="painelConfigRegras" class="hidden glass-card border-emerald-500/40 rounded-3xl p-4 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center border-b border-white/10 pb-3">
-        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">⚙️ Regras do Lucro Bruto</h3>
-        <button onclick="togglePainelConfig()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-2.5 py-1 rounded-lg text-xs transition">
-          ✕
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1">Valor Limite Saque Pequeno (R$)</label>
-          <input type="number" id="cfgLimiteValor" value="50" step="1" oninput="atualizarInterfaceConfig()" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
-        </div>
-
-        <div class="relative">
-          <label class="block text-slate-300 mb-1">Modo até o Valor Limite</label>
-          <button id="btnDropdownModo" onclick="toggleDropdownModo()" type="button" class="glass-input w-full rounded-xl p-2.5 text-slate-200 text-left flex justify-between items-center focus:outline-none">
-            <span id="labelDropdownModo">Valor Fixo (R$)</span>
-            <span class="text-slate-400 ml-2">▼</span>
-          </button>
-          <div id="menuDropdownModo" class="hidden absolute left-0 right-0 top-full mt-1 glass-dropdown rounded-xl shadow-xl z-50 divide-y divide-white/10">
-            <div onclick="selecionarModoAbaixo('fixo', 'Valor Fixo (R$)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Valor Fixo (R$)</div>
-            <div onclick="selecionarModoAbaixo('porcentagem', 'Porcentagem (%)')" class="p-3 hover:bg-white/10 cursor-pointer text-slate-200">Porcentagem (%)</div>
-          </div>
-        </div>
-
-        <div id="boxCfgValorAbaixo">
-          <label id="lblCfgValorAbaixo" class="block text-slate-300 mb-1">Lucro Fixo até R$ 50 (R$)</label>
-          <input type="number" id="cfgValAbaixo" value="5" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1">Lucro Acima do Limite (%)</label>
-          <input type="number" id="cfgPctAcima" value="10" step="0.5" class="glass-input w-full rounded-xl p-2.5 text-slate-100 focus:outline-none">
-        </div>
-      </div>
-
-      <div class="flex justify-end pt-2">
-        <button onclick="salvarConfigRegras()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs transition border border-emerald-400/30">Salvar Regras</button>
-      </div>
-    </section>
-
-    <!-- Formulário de Lançamento (Alinhado Perfeitamente) -->
+    <!-- Formulário de Lançamento de Saque -->
     <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
       <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
-      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end" autocomplete="off">
+      <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end" autocomplete="off">
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Data do Saque</label>
           <input type="date" id="dataSaque" required class="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="relative w-full min-w-0">
-          <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Nome / Titular do CPF</label>
+          <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Nome / Titular</label>
           <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
-          <p id="msgErroCadastroNome" class="text-[10px] text-red-400 mt-1 font-medium hidden">⚠️ Selecione uma pessoa cadastrada no sistema</p>
+          <p id="msgErroCadastroNome" class="text-[10px] text-red-400 mt-1 font-medium hidden">⚠️ Selecione uma pessoa cadastrada</p>
         </div>
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Valor Saque (R$)</label>
           <input type="number" step="0.01" id="valorSaque" placeholder="0.00" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="w-full min-w-0">
+          <label class="flex items-end mb-1 h-5 text-xs font-medium text-emerald-400">Lucro Bruto Real (R$)</label>
+          <input type="number" step="0.01" id="lucroBrutoReal" placeholder="Ex: 5.00" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-emerald-300 font-semibold focus:outline-none border-emerald-500/40">
+        </div>
+        <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Comissão CPF (%)</label>
           <input type="number" step="0.1" min="0" id="percentualComissao" placeholder="Ex: 2" autocomplete="off" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
         </div>
         <div class="flex items-end sm:col-span-2 md:col-span-1 w-full min-w-0">
-          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Defina a Comissão</button>
+          <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Preencha os dados</button>
         </div>
       </form>
     </section>
@@ -364,9 +322,9 @@
     <!-- Cards de Resumo -->
     <section class="grid grid-cols-2 md:grid-cols-5 gap-3 relative z-10">
       
-      <!-- HERO CARD: Seu Lucro Líquido -->
+      <!-- HERO CARD: Seu Lucro Líquido Real -->
       <div class="glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-xl col-span-2 md:col-span-1 order-1 md:order-5 border-emerald-500/40 bg-gradient-to-b from-emerald-950/30 to-slate-900/80 flex flex-col items-center justify-center text-center space-y-1">
-        <span class="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Seu Lucro Líquido</span>
+        <span class="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Seu Lucro Líquido Real</span>
         <p id="totalLucroLiquido" class="text-xl sm:text-2xl font-black text-emerald-400 pt-0.5 truncate max-w-full">R$ 0,00</p>
       </div>
 
@@ -413,6 +371,7 @@
               <th class="p-3.5">Titular CPF</th>
               <th class="p-3.5">Data & Hora</th>
               <th class="p-3.5">Valor Saque</th>
+              <th class="p-3.5">Lucro Bruto</th>
               <th class="p-3.5">Pagar Pessoa</th>
               <th class="p-3.5">Seu Lucro Líq.</th>
               <th class="p-3.5">Status Pgto</th>
@@ -554,13 +513,6 @@
     let extratoDataUrlGlobal = '';
     let extratoNomeArquivoGlobal = '';
 
-    let regrasLucro = {
-      limiteValor: 50,
-      modoAbaixo: 'fixo',
-      valAbaixo: 5,
-      pctAcima: 10
-    };
-
     function formatarMoeda(valor) {
       if (isNaN(valor) || valor === null || valor === undefined) return 'R$ 0,00';
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -580,80 +532,17 @@
 
     resetDataParaHoje();
 
-    function togglePainelConfig() {
-      document.getElementById('painelConfigRegras').classList.toggle('hidden');
-    }
-
     function togglePainelPessoas() {
       document.getElementById('painelPessoas').classList.toggle('hidden');
-    }
-
-    function toggleDropdownModo() {
-      document.getElementById('menuDropdownModo').classList.toggle('hidden');
     }
 
     function toggleCaixaDataCustomizada() {
       document.getElementById('caixaDataCustomizada').classList.toggle('hidden');
     }
 
-    function selecionarModoAbaixo(valor, texto) {
-      regrasLucro.modoAbaixo = valor;
-      document.getElementById('labelDropdownModo').textContent = texto;
-      document.getElementById('menuDropdownModo').classList.add('hidden');
-      atualizarInterfaceConfig();
-    }
-
-    function atualizarInterfaceConfig() {
-      const modo = regrasLucro.modoAbaixo;
-      const limite = document.getElementById('cfgLimiteValor').value || 50;
-      const lbl = document.getElementById('lblCfgValorAbaixo');
-
-      if (modo === 'fixo') {
-        lbl.textContent = `Lucro Fixo até R$ ${limite} (R$)`;
-      } else {
-        lbl.textContent = `Lucro em % até R$ ${limite} (%)`;
-      }
-    }
-
-    async function carregarRegrasUsuario() {
-      if (!currentUser) return;
-      try {
-        const docRef = await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').get();
-        if (docRef.exists) {
-          regrasLucro = { ...regrasLucro, ...docRef.data() };
-        }
-        document.getElementById('cfgLimiteValor').value = regrasLucro.limiteValor;
-        document.getElementById('labelDropdownModo').textContent = regrasLucro.modoAbaixo === 'fixo' ? 'Valor Fixo (R$)' : 'Porcentagem (%)';
-        document.getElementById('cfgValAbaixo').value = regrasLucro.valAbaixo;
-        document.getElementById('cfgPctAcima').value = regrasLucro.pctAcima;
-        atualizarInterfaceConfig();
-      } catch (err) {
-        console.error('Erro ao carregar regras:', err);
-      }
-    }
-
-    async function salvarConfigRegras() {
-      if (!currentUser) return;
-
-      const limiteVal = parseFloat(document.getElementById('cfgLimiteValor').value) || 50;
-      const valAbaixoVal = parseFloat(document.getElementById('cfgValAbaixo').value) || 5;
-      const pctAcimaVal = parseFloat(document.getElementById('cfgPctAcima').value) || 10;
-
-      regrasLucro.limiteValor = limiteVal;
-      regrasLucro.valAbaixo = valAbaixoVal;
-      regrasLucro.pctAcima = pctAcimaVal;
-
-      try {
-        await db.collection('users').doc(currentUser.uid).collection('configs').doc('regras').set(regrasLucro);
-        alert('Regras de cálculo salvas com sucesso!');
-        togglePainelConfig();
-        renderizar();
-      } catch (err) {
-        alert('Erro ao salvar regras: ' + err.message);
-      }
-    }
-
     const percentualInput = document.getElementById('percentualComissao');
+    const lucroBrutoInput = document.getElementById('lucroBrutoReal');
+    const valorSaqueInput = document.getElementById('valorSaque');
     const btnSalvar = document.getElementById('btnSalvar');
     const inputNome = document.getElementById('nomePessoa');
     const sugestoesBox = document.getElementById('sugestoesNomes');
@@ -661,6 +550,8 @@
 
     function validarFormularioSaque() {
       const valPercentual = percentualInput.value.trim();
+      const valLucroBruto = lucroBrutoInput.value.trim();
+      const valSaque = valorSaqueInput.value.trim();
       const valNome = inputNome.value.trim().toLowerCase();
 
       const pessoasAtivas = pessoas.filter(p => p.ativo !== false);
@@ -676,18 +567,24 @@
         msgErroCadastro.classList.add('hidden');
       }
 
-      if (valPercentual !== '' && !isNaN(valPercentual) && parseFloat(valPercentual) >= 0 && pessoaValida) {
+      const dadosValidos = valPercentual !== '' && !isNaN(valPercentual) && parseFloat(valPercentual) >= 0 &&
+                           valLucroBruto !== '' && !isNaN(valLucroBruto) &&
+                           valSaque !== '' && !isNaN(valSaque) && pessoaValida;
+
+      if (dadosValidos) {
         btnSalvar.disabled = false;
         btnSalvar.className = 'w-full bg-emerald-600 hover:bg-emerald-500 font-medium p-2.5 rounded-xl text-sm text-white transition shadow-lg shadow-emerald-900/40 border border-emerald-400/30 active:scale-95';
         btnSalvar.textContent = 'Registrar Saque';
       } else {
         btnSalvar.disabled = true;
         btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
-        btnSalvar.textContent = !pessoaValida && valNome !== '' ? 'Cadastro Necessário' : 'Defina a Comissão';
+        btnSalvar.textContent = !pessoaValida && valNome !== '' ? 'Cadastro Necessário' : 'Preencha os dados';
       }
     }
 
     percentualInput.addEventListener('input', validarFormularioSaque);
+    lucroBrutoInput.addEventListener('input', validarFormularioSaque);
+    valorSaqueInput.addEventListener('input', validarFormularioSaque);
     inputNome.addEventListener('input', validarFormularioSaque);
 
     inputNome.addEventListener('input', () => {
@@ -734,11 +631,6 @@
       if (menuDropdown && !menuDropdown.contains(e.target) && !btnDropdown.contains(e.target)) {
         menuDropdown.classList.add('hidden');
       }
-      const menuModo = document.getElementById('menuDropdownModo');
-      const btnModo = document.getElementById('btnDropdownModo');
-      if (menuModo && !menuModo.contains(e.target) && !btnModo.contains(e.target)) {
-        menuModo.classList.add('hidden');
-      }
     });
 
     auth.onAuthStateChanged(async user => {
@@ -753,7 +645,6 @@
         loginScreen.classList.add('hidden');
         mainDashboard.classList.remove('hidden');
         document.getElementById('userEmailTag').textContent = user.email;
-        await carregarRegrasUsuario();
         carregarDadosPessoas();
         carregarDados();
       } else {
@@ -957,15 +848,6 @@
       });
     }
 
-    function calcularLucroBrutoSeu(valor) {
-      const { limiteValor, modoAbaixo, valAbaixo, pctAcima } = regrasLucro;
-      if (valor <= limiteValor) {
-        return modoAbaixo === 'fixo' ? valAbaixo : valor * (valAbaixo / 100);
-      } else {
-        return valor * (pctAcima / 100);
-      }
-    }
-
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) return;
@@ -974,17 +856,17 @@
       const nomeInputEl = document.getElementById('nomePessoa');
       const nome = nomeInputEl.value.trim();
       const valor = parseFloat(document.getElementById('valorSaque').value);
+      const lucroBrutoReal = parseFloat(document.getElementById('lucroBrutoReal').value);
       const percentualVal = percentualInput.value.trim();
 
-      if (!data || !nome || isNaN(valor) || percentualVal === '') return;
+      if (!data || !nome || isNaN(valor) || isNaN(lucroBrutoReal) || percentualVal === '') return;
 
       const agora = new Date();
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
       const percentual = parseFloat(percentualVal);
       const comissaoPessoa = valor * (percentual / 100);
-      const lucroBrutoSeu = calcularLucroBrutoSeu(valor);
-      const lucroLiquidoSeu = lucroBrutoSeu - comissaoPessoa;
+      const lucroLiquidoSeu = lucroBrutoReal - comissaoPessoa;
 
       await db.collection('users').doc(currentUser.uid).collection('saques').add({
         data,
@@ -993,7 +875,7 @@
         valor,
         percentual,
         comissaoPessoa,
-        lucroBrutoSeu,
+        lucroBrutoSeu: lucroBrutoReal,
         lucroLiquidoSeu,
         pago: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1001,10 +883,11 @@
 
       nomeInputEl.value = '';
       document.getElementById('valorSaque').value = '';
+      document.getElementById('lucroBrutoReal').value = '';
       document.getElementById('percentualComissao').value = '';
       btnSalvar.disabled = true;
       btnSalvar.className = 'w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition';
-      btnSalvar.textContent = 'Defina a Comissão';
+      btnSalvar.textContent = 'Preencha os dados';
       
       resetDataParaHoje();
       validarFormularioSaque();
@@ -1407,6 +1290,7 @@
         const dataFormatada = s.data.split('-').reverse().join('/');
         const dataEHora = s.hora ? `${dataFormatada} às ${s.hora}` : dataFormatada;
         const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+        const lucroBrutoExibicao = s.lucroBrutoSeu !== undefined ? formatarMoeda(s.lucroBrutoSeu) : '-';
 
         // Render Desktop
         const tr = document.createElement('tr');
@@ -1415,6 +1299,7 @@
           <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
           <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
           <td class="p-3.5 text-sky-400 font-semibold">${formatarMoeda(s.valor)}</td>
+          <td class="p-3.5 text-slate-300 font-medium">${lucroBrutoExibicao}</td>
           <td class="p-3.5 text-amber-400 font-medium">${formatarMoeda(s.comissaoPessoa)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
           <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(s.lucroLiquidoSeu)}</td>
           <td class="p-3.5">
@@ -1451,12 +1336,13 @@
               <p class="font-medium text-amber-400 mt-0.5 truncate">${formatarMoeda(s.comissaoPessoa)}</p>
             </div>
             <div class="glass-input p-2 rounded-2xl text-center">
-              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro</p>
+              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro Liq.</p>
               <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(s.lucroLiquidoSeu)}</p>
             </div>
           </div>
-          <div class="flex justify-end pt-1 border-t border-white/10">
-            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir Registro</button>
+          <div class="flex justify-between items-center pt-1 border-t border-white/10 text-xs text-slate-400">
+            <span>Lucro Bruto Real: <strong class="text-slate-200">${lucroBrutoExibicao}</strong></span>
+            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir</button>
           </div>
         `;
         containerMobile.appendChild(card);
