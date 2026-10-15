@@ -13,10 +13,10 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- FAVICONS -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=45">
-  <link rel="apple-touch-icon" href="./favicon.svg?v=45">
-  <link rel="mask-icon" href="./favicon.svg?v=45" color="#10b981">
-  <link rel="shortcut icon" href="./favicon.svg?v=45">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=46">
+  <link rel="apple-touch-icon" href="./favicon.svg?v=46">
+  <link rel="mask-icon" href="./favicon.svg?v=46" color="#10b981">
+  <link rel="shortcut icon" href="./favicon.svg?v=46">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Biblioteca para converter HTML em Imagem PNG -->
@@ -744,6 +744,7 @@
       await db.collection('users').doc(currentUser.uid).collection('config').doc('regras').set(regraComissao);
       alert('Regras de Lucro Bruto atualizadas com sucesso!');
       togglePainelComissoes();
+      renderizar();
     });
 
     function carregarDadosPessoas() {
@@ -933,7 +934,7 @@
       const agora = new Date();
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-      // Cálculo Automático do Lucro Bruto com base nas regras salvas
+      // Cálculo Automático do Lucro Bruto
       let lucroBrutoSeu = 0;
       if (valor <= regraComissao.valorLimite) {
         lucroBrutoSeu = regraComissao.lucroFixo;
@@ -1356,7 +1357,7 @@
       saquesFiltrados.forEach(s => {
         totalVol += s.valor;
 
-        // Se o registro antigo não tiver o lucroBrutoSeu salvo, calcula com a regra atual
+        // Cálculo do Lucro Bruto do Saque
         let lbSeu = s.lucroBrutoSeu;
         if (lbSeu === undefined) {
           if (s.valor <= regraComissao.valorLimite) {
@@ -1366,7 +1367,10 @@
           }
         }
 
-        const llSeu = s.lucroLiquidoSeu !== undefined ? s.lucroLiquidoSeu : (lbSeu - s.comissaoPessoa);
+        // Lucro Líquido Real do Saque: Lucro Bruto - Comissão Pago ao CPF
+        const llSeu = lbSeu - s.comissaoPessoa;
+        
+        // SOMA ESTRITA DO LUCRO LÍQUIDO NO TOPO
         totalLucroLiq += llSeu;
 
         if (s.pago) {
