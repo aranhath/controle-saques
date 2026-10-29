@@ -19,8 +19,6 @@
   <link rel="shortcut icon" href="./favicon.svg?v=46">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Biblioteca para converter HTML em Imagem PNG -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     *, ::before, ::after {
@@ -33,27 +31,32 @@
 
     body {
       overflow-x: hidden !important;
-      background: radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.15), transparent 45%),
-                  radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.18), transparent 50%),
+      background: radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.12), transparent 45%),
+                  radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.15), transparent 50%),
                   linear-gradient(135deg, #060b13 0%, #0c1322 50%, #110d21 100%);
       background-attachment: fixed;
       background-color: #060b13 !important;
     }
 
-    /* Efeito Liquid Glass iOS Padrao */
-    .glass-card {
-      background: rgba(15, 23, 42, 0.65) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    /* Efeito Liquid Glass APENAS nos containers fixos/principais */
+    .glass-card-header {
+      background: rgba(15, 23, 42, 0.75) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
     }
 
+    /* Fallback otimizado de alto desempenho para listas/cards em massa */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25) !important;
+    }
+
     .glass-input {
-      background: rgba(10, 15, 29, 0.7) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      background: rgba(10, 15, 29, 0.85) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
     .glass-input:focus {
@@ -63,10 +66,8 @@
 
     /* Vidro Fosco Denso para Dropdowns */
     .glass-dropdown {
-      background: rgba(11, 17, 32, 0.92) !important;
-      backdrop-filter: blur(30px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      background: rgba(11, 17, 32, 0.96) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7) !important;
     }
 
@@ -109,7 +110,7 @@
 
   <!-- TELA DE LOGIN -->
   <div id="loginScreen" class="hidden flex min-h-[85vh] items-center justify-center p-2">
-    <div class="glass-card p-6 md:p-8 rounded-3xl w-full max-w-md shadow-2xl space-y-6">
+    <div class="glass-card-header p-6 md:p-8 rounded-3xl w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center flex flex-col items-center gap-3">
         <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/30 border border-emerald-400/40 flex items-center justify-center bg-slate-900/80">
           <img src="./favicon.svg" alt="Logo" class="w-10 h-10 object-contain">
@@ -139,7 +140,7 @@
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto space-y-4">
     
     <!-- Cabeçalho -->
-    <header class="glass-card rounded-3xl p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <header class="glass-card-header rounded-3xl p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-400/30 flex items-center justify-center bg-slate-900/80">
           <img src="./favicon.svg" alt="Logo" class="w-8 h-8 object-contain">
@@ -267,7 +268,7 @@
         </div>
         <div class="relative w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Nome / Titular</label>
-          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
+          <input type="text" id="nomePessoa" placeholder="Ex: João Silva" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required class="glass-input w-full rounded-xl p-2.5 text-sm text-slate-100 focus:outline-none">
           <div id="sugestoesNomes" class="hidden absolute left-0 right-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto divide-y divide-white/10"></div>
           <p id="msgErroCadastroNome" class="text-[10px] text-red-400 mt-1 font-medium hidden">⚠️ Selecione uma pessoa cadastrada</p>
         </div>
@@ -642,6 +643,7 @@
         return;
       }
 
+      const fragment = document.createDocumentFragment();
       correspondencias.forEach(p => {
         const item = document.createElement('div');
         item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition flex justify-between items-center';
@@ -652,9 +654,10 @@
           sugestoesBox.classList.add('hidden');
           validarFormularioSaque();
         };
-        sugestoesBox.appendChild(item);
+        fragment.appendChild(item);
       });
 
+      sugestoesBox.appendChild(fragment);
       sugestoesBox.classList.remove('hidden');
     });
 
@@ -874,6 +877,9 @@
         listaExibicao = pessoas.filter(p => p.ativo === false);
       }
 
+      const fragTbody = document.createDocumentFragment();
+      const fragMobile = document.createDocumentFragment();
+
       listaExibicao.forEach(p => {
         const isAtivo = p.ativo !== false;
 
@@ -895,7 +901,7 @@
             <button onclick="excluirPessoa('${p.id}')" class="text-red-400 hover:text-red-300 font-medium px-1.5 py-0.5">Excluir</button>
           </td>
         `;
-        tbody.appendChild(tr);
+        fragTbody.appendChild(tr);
 
         const card = document.createElement('div');
         card.className = 'glass-input rounded-2xl p-3 flex flex-col gap-2 border border-white/10';
@@ -915,8 +921,11 @@
             <button onclick="excluirPessoa('${p.id}')" class="text-red-400 font-medium">Excluir</button>
           </div>
         `;
-        containerMobile.appendChild(card);
+        fragMobile.appendChild(card);
       });
+
+      tbody.appendChild(fragTbody);
+      containerMobile.appendChild(fragMobile);
     }
 
     document.getElementById('saqueForm').addEventListener('submit', async (e) => {
@@ -1099,13 +1108,14 @@
       const todosNomesUnicos = [...new Set([...pessoasAtivas, ...nomesHistorico])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
       lista.innerHTML = '';
+      const fragment = document.createDocumentFragment();
 
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
         itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         itemTodas.textContent = 'Todas as pessoas';
         itemTodas.onclick = () => selecionarPessoaFiltro('');
-        lista.appendChild(itemTodas);
+        fragment.appendChild(itemTodas);
       }
 
       todosNomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
@@ -1113,8 +1123,10 @@
         item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         item.textContent = nome;
         item.onclick = () => selecionarPessoaFiltro(nome);
-        lista.appendChild(item);
+        fragment.appendChild(item);
       });
+
+      lista.appendChild(fragment);
     }
 
     function filtrarListaPessoasDropdown() {
@@ -1131,6 +1143,18 @@
       }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
+    // Carregamento dinâmico otimizado do Html2Canvas sob demanda
+    function carregarHtml2Canvas() {
+      return new Promise((resolve, reject) => {
+        if (window.html2canvas) return resolve();
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
     async function gerarImagemExtrato() {
       if (!pessoaSelecionadaFiltro) {
         alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
@@ -1144,76 +1168,79 @@
         return;
       }
 
-      dadosExtrato.sort((a, b) => {
-        const dataA = a.data || '';
-        const dataB = b.data || '';
-        if (dataA !== dataB) {
-          return dataA.localeCompare(dataB);
-        }
-        const horaA = a.hora || '00:00';
-        const horaB = b.hora || '00:00';
-        return horaA.localeCompare(horaB);
-      });
-
       const btnGerar = document.getElementById('btnGerarExtrato');
       const textoOriginal = btnGerar.innerHTML;
       btnGerar.innerHTML = 'Gerando...';
       btnGerar.disabled = true;
 
-      document.getElementById('extratoNomeTitular').textContent = pessoaSelecionadaFiltro;
-
-      const agora = new Date();
-      document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-
-      let textoPeriodo = 'Todos os Registros';
-      if (filtroAtual === 'hoje') textoPeriodo = `Hoje (${agora.toLocaleDateString('pt-BR')})`;
-      else if (filtroAtual === 'ontem') {
-        const ontem = new Date();
-        ontem.setDate(ontem.getDate() - 1);
-        textoPeriodo = `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
-      }
-      else if (filtroAtual === '7dias') textoPeriodo = 'Últimos 7 dias';
-      else if (filtroAtual === 'mes') textoPeriodo = `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
-      else if (filtroAtual === 'personalizado') {
-        const ini = document.getElementById('dataInicioFiltro').value;
-        const fim = document.getElementById('dataFimFiltro').value;
-        if (ini && fim) textoPeriodo = `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
-        else if (ini) textoPeriodo = `A partir de ${ini.split('-').reverse().join('/')}`;
-        else if (fim) textoPeriodo = `Até ${fim.split('-').reverse().join('/')}`;
-      }
-      document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
-
-      const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
-      tabelaCorpo.innerHTML = '';
-
-      let volTotal = 0;
-      let comissaoTotal = 0;
-
-      dadosExtrato.forEach(s => {
-        volTotal += s.valor;
-        comissaoTotal += s.comissaoPessoa;
-
-        const dtForm = s.data.split('-').reverse().join('/');
-        const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
-        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2.5 text-slate-300">${dtHr}</td>
-          <td class="p-2.5 font-semibold text-sky-400">${formatarMoeda(s.valor)}</td>
-          <td class="p-2.5 text-slate-400">${pctTexto}</td>
-          <td class="p-2.5 font-bold text-emerald-400 text-right">${formatarMoeda(s.comissaoPessoa)}</td>
-        `;
-        tabelaCorpo.appendChild(tr);
-      });
-
-      document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
-      document.getElementById('extratoVolumeTotal').textContent = formatarMoeda(volTotal);
-      document.getElementById('extratoTotalReceber').textContent = formatarMoeda(comissaoTotal);
-
-      const container = document.getElementById('extratoCard');
-      
       try {
+        await carregarHtml2Canvas();
+
+        dadosExtrato.sort((a, b) => {
+          const dataA = a.data || '';
+          const dataB = b.data || '';
+          if (dataA !== dataB) return dataA.localeCompare(dataB);
+          const horaA = a.hora || '00:00';
+          const horaB = b.hora || '00:00';
+          return horaA.localeCompare(horaB);
+        });
+
+        document.getElementById('extratoNomeTitular').textContent = pessoaSelecionadaFiltro;
+
+        const agora = new Date();
+        document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+        let textoPeriodo = 'Todos os Registros';
+        if (filtroAtual === 'hoje') textoPeriodo = `Hoje (${agora.toLocaleDateString('pt-BR')})`;
+        else if (filtroAtual === 'ontem') {
+          const ontem = new Date();
+          ontem.setDate(ontem.getDate() - 1);
+          textoPeriodo = `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
+        }
+        else if (filtroAtual === '7dias') textoPeriodo = 'Últimos 7 dias';
+        else if (filtroAtual === 'mes') textoPeriodo = `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
+        else if (filtroAtual === 'personalizado') {
+          const ini = document.getElementById('dataInicioFiltro').value;
+          const fim = document.getElementById('dataFimFiltro').value;
+          if (ini && fim) textoPeriodo = `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
+          else if (ini) textoPeriodo = `A partir de ${ini.split('-').reverse().join('/')}`;
+          else if (fim) textoPeriodo = `Até ${fim.split('-').reverse().join('/')}`;
+        }
+        document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
+
+        const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
+        tabelaCorpo.innerHTML = '';
+        const fragmentExtrato = document.createDocumentFragment();
+
+        let volTotal = 0;
+        let comissaoTotal = 0;
+
+        dadosExtrato.forEach(s => {
+          volTotal += s.valor;
+          comissaoTotal += s.comissaoPessoa;
+
+          const dtForm = s.data.split('-').reverse().join('/');
+          const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
+          const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-2.5 text-slate-300">${dtHr}</td>
+            <td class="p-2.5 font-semibold text-sky-400">${formatarMoeda(s.valor)}</td>
+            <td class="p-2.5 text-slate-400">${pctTexto}</td>
+            <td class="p-2.5 font-bold text-emerald-400 text-right">${formatarMoeda(s.comissaoPessoa)}</td>
+          `;
+          fragmentExtrato.appendChild(tr);
+        });
+
+        tabelaCorpo.appendChild(fragmentExtrato);
+
+        document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
+        document.getElementById('extratoVolumeTotal').textContent = formatarMoeda(volTotal);
+        document.getElementById('extratoTotalReceber').textContent = formatarMoeda(comissaoTotal);
+
+        const container = document.getElementById('extratoCard');
+        
         const canvas = await html2canvas(container, {
           backgroundColor: '#0f172a',
           scale: 2
@@ -1354,10 +1381,13 @@
       let totalPago = 0;
       let totalLucroLiq = 0;
 
+      const isMobile = window.innerWidth < 768;
+      const fragmentDesktop = isMobile ? null : document.createDocumentFragment();
+      const fragmentMobile = isMobile ? document.createDocumentFragment() : null;
+
       saquesFiltrados.forEach(s => {
         totalVol += s.valor;
 
-        // Cálculo do Lucro Bruto do Saque
         let lbSeu = s.lucroBrutoSeu;
         if (lbSeu === undefined) {
           if (s.valor <= regraComissao.valorLimite) {
@@ -1367,10 +1397,7 @@
           }
         }
 
-        // Lucro Líquido Real do Saque: Lucro Bruto - Comissão Pago ao CPF
         const llSeu = lbSeu - s.comissaoPessoa;
-        
-        // SOMA ESTRITA DO LUCRO LÍQUIDO NO TOPO
         totalLucroLiq += llSeu;
 
         if (s.pago) {
@@ -1384,61 +1411,66 @@
         const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
         const lucroBrutoExibicao = formatarMoeda(lbSeu);
 
-        // Render Desktop
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/40 transition';
-        tr.innerHTML = `
-          <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
-          <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
-          <td class="p-3.5 text-sky-400 font-semibold">${formatarMoeda(s.valor)}</td>
-          <td class="p-3.5 text-slate-300 font-medium">${lucroBrutoExibicao}</td>
-          <td class="p-3.5 text-amber-400 font-medium">${formatarMoeda(s.comissaoPessoa)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
-          <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(llSeu)}</td>
-          <td class="p-3.5">
-            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
-              ${s.pago ? 'Pago' : 'Pendente'}
-            </button>
-          </td>
-          <td class="p-3.5 text-center">
-            <button onclick="deletar('${s.id}')" class="text-red-400 hover:text-red-300 font-medium text-xs px-2 py-1">Excluir</button>
-          </td>
-        `;
-        tbodyDesktop.appendChild(tr);
-
-        // Render Mobile
-        const card = document.createElement('div');
-        card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
-        card.innerHTML = `
-          <div class="flex justify-between items-start border-b border-white/10 pb-2">
-            <div class="pr-2">
-              <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
-              <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
+        if (!isMobile) {
+          // Renderiza apenas Desktop
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-800/40 transition';
+          tr.innerHTML = `
+            <td class="p-3.5 font-medium text-slate-100">${s.nome}</td>
+            <td class="p-3.5 text-slate-400 text-xs">${dataEHora}</td>
+            <td class="p-3.5 text-sky-400 font-semibold">${formatarMoeda(s.valor)}</td>
+            <td class="p-3.5 text-slate-300 font-medium">${lucroBrutoExibicao}</td>
+            <td class="p-3.5 text-amber-400 font-medium">${formatarMoeda(s.comissaoPessoa)} <span class="text-xs text-slate-400">(${pctTexto})</span></td>
+            <td class="p-3.5 text-emerald-400 font-bold">${formatarMoeda(llSeu)}</td>
+            <td class="p-3.5">
+              <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold active:scale-95 transition ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                ${s.pago ? 'Pago' : 'Pendente'}
+              </button>
+            </td>
+            <td class="p-3.5 text-center">
+              <button onclick="deletar('${s.id}')" class="text-red-400 hover:text-red-300 font-medium text-xs px-2 py-1">Excluir</button>
+            </td>
+          `;
+          fragmentDesktop.appendChild(tr);
+        } else {
+          // Renderiza apenas Mobile
+          const card = document.createElement('div');
+          card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
+          card.innerHTML = `
+            <div class="flex justify-between items-start border-b border-white/10 pb-2">
+              <div class="pr-2">
+                <p class="font-bold text-slate-100 text-sm leading-tight">${s.nome}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">${dataEHora}</p>
+              </div>
+              <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-xl text-xs font-semibold active:scale-95 transition shrink-0 ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                ${s.pago ? 'Pago' : 'Pendente'}
+              </button>
             </div>
-            <button onclick="togglePago('${s.id}', ${s.pago})" class="px-2.5 py-1 rounded-xl text-xs font-semibold active:scale-95 transition shrink-0 ${s.pago ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
-              ${s.pago ? 'Pago' : 'Pendente'}
-            </button>
-          </div>
-          <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
-            <div class="glass-input p-2 rounded-2xl text-center">
-              <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
-              <p class="font-bold text-sky-400 mt-0.5 truncate">${formatarMoeda(s.valor)}</p>
+            <div class="grid grid-cols-3 gap-1.5 text-xs pt-1">
+              <div class="glass-input p-2 rounded-2xl text-center">
+                <p class="text-[9px] text-slate-400 uppercase font-semibold">Saque</p>
+                <p class="font-bold text-sky-400 mt-0.5 truncate">${formatarMoeda(s.valor)}</p>
+              </div>
+              <div class="glass-input p-2 rounded-2xl text-center">
+                <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
+                <p class="font-medium text-amber-400 mt-0.5 truncate">${formatarMoeda(s.comissaoPessoa)}</p>
+              </div>
+              <div class="glass-input p-2 rounded-2xl text-center">
+                <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro Liq.</p>
+                <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(llSeu)}</p>
+              </div>
             </div>
-            <div class="glass-input p-2 rounded-2xl text-center">
-              <p class="text-[9px] text-slate-400 uppercase font-semibold">Pagar</p>
-              <p class="font-medium text-amber-400 mt-0.5 truncate">${formatarMoeda(s.comissaoPessoa)}</p>
+            <div class="flex justify-between items-center pt-1 border-t border-white/10 text-xs text-slate-400">
+              <span>Lucro Bruto: <strong class="text-slate-200">${lucroBrutoExibicao}</strong></span>
+              <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir</button>
             </div>
-            <div class="glass-input p-2 rounded-2xl text-center">
-              <p class="text-[9px] text-slate-400 uppercase font-semibold">Lucro Liq.</p>
-              <p class="font-bold text-emerald-400 mt-0.5 truncate">${formatarMoeda(llSeu)}</p>
-            </div>
-          </div>
-          <div class="flex justify-between items-center pt-1 border-t border-white/10 text-xs text-slate-400">
-            <span>Lucro Bruto: <strong class="text-slate-200">${lucroBrutoExibicao}</strong></span>
-            <button onclick="deletar('${s.id}')" class="text-red-400 text-xs font-medium px-2 py-0.5 active:scale-95 transition">Excluir</button>
-          </div>
-        `;
-        containerMobile.appendChild(card);
+          `;
+          fragmentMobile.appendChild(card);
+        }
       });
+
+      if (!isMobile && fragmentDesktop) tbodyDesktop.appendChild(fragmentDesktop);
+      if (isMobile && fragmentMobile) containerMobile.appendChild(fragmentMobile);
 
       document.getElementById('totalQtd').textContent = saquesFiltrados.length;
       document.getElementById('totalVolume').textContent = formatarMoeda(totalVol);
@@ -1446,6 +1478,13 @@
       document.getElementById('totalPagoPessoas').textContent = formatarMoeda(totalPago);
       document.getElementById('totalLucroLiquido').textContent = formatarMoeda(totalLucroLiq);
     }
+
+    // Otimização de Resize para recalcular quando alternar de tamanho de tela
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => renderizar(), 150);
+    });
   </script>
 </body>
 </html>
