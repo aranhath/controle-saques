@@ -159,13 +159,16 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <button onclick="abrirModalConsulta()" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 px-3 py-2 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 shadow-sm">
+          🔍 Consulta
+        </button>
         <button onclick="togglePainelComissoes()" class="glass-input hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
-          ⚙️ Defina a Comissão
+          ⚙️ Comissão
         </button>
         <button onclick="togglePainelPessoas()" class="glass-input hover:bg-slate-800/80 text-sky-400 border border-sky-500/30 px-3 py-2 rounded-xl text-xs font-medium transition active:scale-95 flex items-center gap-1.5">
           👥 Cadastro
         </button>
-        <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[150px] md:max-w-none"></span>
+        <span id="userEmailTag" class="text-xs text-slate-300 glass-input px-3 py-2 rounded-xl truncate max-w-[140px] md:max-w-none"></span>
         <button onclick="logout()" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 text-xs px-3 py-2 rounded-xl font-semibold transition active:scale-95">
           Sair
         </button>
@@ -281,8 +284,13 @@
     </section>
 
     <!-- Formulário de Lançamento de Saque -->
-    <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30">
-      <h2 class="text-base font-bold text-slate-200 mb-3">Novo Lançamento de Saque</h2>
+    <section class="glass-card rounded-3xl p-4 md:p-5 shadow-xl relative z-30 space-y-3">
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-bold text-slate-200">Novo Lançamento de Saque</h2>
+        <button type="button" onclick="abrirModalConsulta()" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
+          🔍 Conferir lançamentos
+        </button>
+      </div>
       <form id="saqueForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end" autocomplete="off">
         <div class="w-full min-w-0">
           <label class="flex items-end mb-1 h-5 text-xs font-medium text-slate-300">Data do Saque</label>
@@ -306,6 +314,17 @@
           <button type="submit" id="btnSalvar" disabled class="w-full bg-slate-800/60 text-slate-400 border border-white/10 cursor-not-allowed font-medium p-2.5 rounded-xl text-sm transition">Preencha os dados</button>
         </div>
       </form>
+
+      <!-- FAIXA PASSIVA DE ÚLTIMO LANÇAMENTO REGISTRADO -->
+      <div id="bannerUltimoLancamento" class="hidden pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold shrink-0">ÚLTIMO SALVO</span>
+          <span id="txtUltimoLancamento" class="text-slate-200 font-medium truncate"></span>
+        </div>
+        <button id="btnDesfazerUltimo" type="button" class="text-[11px] text-red-400 hover:text-red-300 font-semibold px-2 py-0.5 rounded-lg glass-input border border-red-500/20 shrink-0 transition active:scale-95">
+          Desfazer
+        </button>
+      </div>
     </section>
 
     <!-- Barra de Filtros -->
@@ -325,6 +344,11 @@
           <!-- Botão Discreto de Calendário -->
           <button onclick="toggleCaixaDataCustomizada()" id="btnToggleCalendario" class="text-xs glass-input text-emerald-400 border-emerald-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">
             Data
+          </button>
+
+          <!-- Botão Alternar Ordenação -->
+          <button onclick="alternarOrdenacao()" id="btnOrdenacao" class="text-xs glass-input text-sky-300 border-sky-500/30 px-3 py-2 rounded-xl hover:bg-slate-800/80 transition font-medium">
+            Ordenar: Recentes
           </button>
         </div>
 
@@ -454,6 +478,51 @@
       <div id="listaCardsMobile" class="space-y-2.5"></div>
     </section>
 
+  </div>
+
+  <!-- MODAL / POPUP DA LUPA DE CONSULTA RÁPIDA -->
+  <div id="modalConsultaRapida" class="hidden fixed inset-0 bg-[#060b13]/85 backdrop-blur-xl z-[210] flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-emerald-500/40">
+      <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/60">
+        <h3 class="font-bold text-emerald-400 text-sm md:text-base flex items-center gap-2">🔍 Consulta Rápida de Lançamentos</h3>
+        <button onclick="fecharModalConsulta()" class="text-slate-400 hover:text-white glass-input w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
+      </div>
+
+      <div class="p-4 space-y-3 overflow-y-auto">
+        <!-- Atalhos de 1 toque -->
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="executarConsultaAtalho('ultimo')" class="text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl font-semibold transition active:scale-95">
+            Último saque
+          </button>
+          <button type="button" onclick="executarConsultaAtalho('ultimos5')" class="text-xs glass-input hover:bg-white/10 text-slate-200 px-3 py-1.5 rounded-xl font-medium transition active:scale-95">
+            Últimos 5
+          </button>
+          <button type="button" onclick="executarConsultaAtalho('resumo_hoje')" class="text-xs glass-input hover:bg-white/10 text-sky-300 border-sky-500/30 px-3 py-1.5 rounded-xl font-medium transition active:scale-95">
+            Resumo de hoje
+          </button>
+          <button type="button" onclick="executarConsultaAtalho('duplicados')" class="text-xs glass-input hover:bg-white/10 text-amber-300 border-amber-500/30 px-3 py-1.5 rounded-xl font-medium transition active:scale-95">
+            Verificar duplicados
+          </button>
+        </div>
+
+        <!-- Campo de Pergunta / Busca -->
+        <form id="formConsultaRapida" class="flex gap-2">
+          <input type="text" id="inputPerguntaConsulta" placeholder="Ex: último do João, 150, duplicados..." autocomplete="off" autocorrect="off" spellcheck="false" class="glass-input flex-1 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none">
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 shrink-0">
+            Buscar
+          </button>
+        </form>
+
+        <!-- Área de Resposta -->
+        <div id="resultadoConsultaBox" class="glass-input rounded-2xl p-3.5 space-y-2.5 text-xs text-slate-200 min-h-[120px]"></div>
+      </div>
+
+      <div class="p-3.5 border-t border-white/10 bg-slate-900/60 flex justify-end">
+        <button onclick="fecharModalConsulta()" class="glass-input text-slate-200 font-medium px-4 py-2 rounded-xl text-xs transition">
+          Fechar
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO INDIVIDUAL -->
@@ -600,7 +669,7 @@
     let pessoas = [];
     let filtroAtual = 'todos';
     let apenasPendentes = false;
-    // filtroEntidade: { tipo: 'todos' | 'pessoa' | 'equipe', valor: string, label: string }
+    let ordenacaoHistorico = 'recentes'; // 'recentes' ou 'alfabetica'
     let filtroEntidade = { tipo: 'todos', valor: '', label: 'Todas as pessoas' };
     let statusFiltroPessoaModal = 'ativas';
     let unsubscribeSnapshot = null;
@@ -640,6 +709,23 @@
       return `${ano}-${mes}-${dia}`;
     }
 
+    function obterTimestampSaque(s) {
+      if (s.createdAt && typeof s.createdAt.toMillis === 'function') {
+        return s.createdAt.toMillis();
+      }
+      if (s.createdAt && s.createdAt.seconds) {
+        return s.createdAt.seconds * 1000;
+      }
+      const dataStr = s.data || '1970-01-01';
+      const horaStr = s.hora || '00:00';
+      const parsed = Date.parse(`${dataStr}T${horaStr}:00`);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function obterSaquesOrdenadosPorRecencia() {
+      return [...saques].sort((a, b) => obterTimestampSaque(b) - obterTimestampSaque(a));
+    }
+
     function resetDataParaHoje() {
       document.getElementById('dataSaque').value = obterDataLocalHoje();
     }
@@ -657,6 +743,225 @@
     function toggleCaixaDataCustomizada() {
       document.getElementById('caixaDataCustomizada').classList.toggle('hidden');
     }
+
+    function alternarOrdenacao() {
+      ordenacaoHistorico = ordenacaoHistorico === 'recentes' ? 'alfabetica' : 'recentes';
+      const btn = document.getElementById('btnOrdenacao');
+      if (btn) {
+        btn.textContent = ordenacaoHistorico === 'recentes' ? 'Ordenar: Recentes' : 'Ordenar: A-Z';
+      }
+      renderizar();
+    }
+
+    function atualizarBannerUltimoLancamento() {
+      const banner = document.getElementById('bannerUltimoLancamento');
+      const txtEl = document.getElementById('txtUltimoLancamento');
+      const btnDesfazer = document.getElementById('btnDesfazerUltimo');
+      if (!banner || !txtEl || !btnDesfazer) return;
+
+      const ordenados = obterSaquesOrdenadosPorRecencia();
+      if (ordenados.length === 0) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      const ultimo = ordenados[0];
+      const dtForm = (ultimo.data || '').split('-').reverse().join('/');
+      const dtHr = ultimo.hora ? `${dtForm} às ${ultimo.hora}` : dtForm;
+
+      txtEl.textContent = `${ultimo.nome} — ${formatarMoeda(ultimo.valor)} (${dtHr})`;
+      btnDesfazer.onclick = () => deletar(ultimo.id);
+      banner.classList.remove('hidden');
+    }
+
+    // --- LÓGICA DA LUPA DE CONSULTA RÁPIDA ---
+    function abrirModalConsulta() {
+      document.getElementById('modalConsultaRapida').classList.remove('hidden');
+      executarConsultaAtalho('ultimo');
+      setTimeout(() => {
+        const input = document.getElementById('inputPerguntaConsulta');
+        if (input) input.focus();
+      }, 100);
+    }
+
+    function fecharModalConsulta() {
+      document.getElementById('modalConsultaRapida').classList.add('hidden');
+    }
+
+    function renderizarItemConsultaHtml(s, destaqueBadge = '') {
+      const dtForm = (s.data || '').split('-').reverse().join('/');
+      const dtHr = s.hora ? `${dtForm} às ${s.hora}` : dtForm;
+      const badgeHtml = destaqueBadge
+        ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">${destaqueBadge}</span>`
+        : '';
+
+      return `
+        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0 space-y-0.5">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              ${badgeHtml}
+              <p class="font-bold text-slate-100 truncate">${s.nome}</p>
+            </div>
+            <p class="text-[11px] text-slate-400">${dtHr} • Comissão: <span class="text-amber-400 font-semibold">${formatarMoeda(s.comissaoPessoa)}</span></p>
+          </div>
+          <div class="text-right shrink-0 flex items-center gap-2">
+            <span class="font-black text-sky-400 text-sm">${formatarMoeda(s.valor)}</span>
+            <button onclick="deletar('${s.id}', true)" class="text-[10px] text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-lg font-semibold">
+              Excluir
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function detectarDuplicadosHoje() {
+      const hojeStr = obterDataLocalHoje();
+      const saquesHoje = obterSaquesOrdenadosPorRecencia().filter(s => s.data === hojeStr);
+      const suspeitos = [];
+
+      for (let i = 0; i < saquesHoje.length; i++) {
+        for (let j = i + 1; j < saquesHoje.length; j++) {
+          const a = saquesHoje[i];
+          const b = saquesHoje[j];
+          if (a.nome === b.nome && Math.abs(a.valor - b.valor) < 0.01) {
+            const diffMin = Math.abs(obterTimestampSaque(a) - obterTimestampSaque(b)) / 60000;
+            if (diffMin <= 30) {
+              suspeitos.push({ maisRecente: a, anterior: b, diffMin: Math.round(diffMin) });
+            }
+          }
+        }
+      }
+      return suspeitos;
+    }
+
+    function executarConsultaAtalho(tipo) {
+      const box = document.getElementById('resultadoConsultaBox');
+      if (!box) return;
+
+      const ordenados = obterSaquesOrdenadosPorRecencia();
+      if (ordenados.length === 0) {
+        box.innerHTML = '<p class="text-slate-400 text-center py-6">Nenhum saque registrado no sistema ainda.</p>';
+        return;
+      }
+
+      if (tipo === 'ultimo') {
+        const u = ordenados[0];
+        box.innerHTML = `
+          <p class="text-emerald-400 font-bold">Último saque registrado no sistema:</p>
+          ${renderizarItemConsultaHtml(u, 'MAIS RECENTE')}
+        `;
+      } else if (tipo === 'ultimos5') {
+        const top5 = ordenados.slice(0, 5);
+        box.innerHTML = `
+          <p class="text-slate-300 font-bold">Últimos ${top5.length} lançamentos (do mais recente para o anterior):</p>
+          <div class="space-y-2">
+            ${top5.map((s, idx) => renderizarItemConsultaHtml(s, idx === 0 ? 'ÚLTIMO' : `#${idx + 1}`)).join('')}
+          </div>
+        `;
+      } else if (tipo === 'resumo_hoje') {
+        const hojeStr = obterDataLocalHoje();
+        const doDia = ordenados.filter(s => s.data === hojeStr);
+        const volHoje = doDia.reduce((acc, s) => acc + s.valor, 0);
+        const lucroHoje = doDia.reduce((acc, s) => {
+          const lb = s.lucroBrutoSeu !== undefined ? s.lucroBrutoSeu : (s.valor <= regraComissao.valorLimite ? regraComissao.lucroFixo : s.valor * (regraComissao.lucroPercentual / 100));
+          return acc + (lb - s.comissaoPessoa);
+        }, 0);
+
+        box.innerHTML = `
+          <p class="text-sky-400 font-bold">Resumo de Hoje (${hojeStr.split('-').reverse().join('/')}):</p>
+          <div class="grid grid-cols-3 gap-2 text-center pt-1">
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/10">
+              <p class="text-[10px] text-slate-400 uppercase">Saques Hoje</p>
+              <p class="text-base font-black text-slate-100 mt-0.5">${doDia.length}</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/10">
+              <p class="text-[10px] text-slate-400 uppercase">Volume</p>
+              <p class="text-sm font-bold text-sky-400 mt-0.5">${formatarMoeda(volHoje)}</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/10">
+              <p class="text-[10px] text-slate-400 uppercase">Lucro Líq.</p>
+              <p class="text-sm font-bold text-emerald-400 mt-0.5">${formatarMoeda(lucroHoje)}</p>
+            </div>
+          </div>
+          ${doDia.length > 0 ? `<div class="pt-2"><p class="text-[11px] text-slate-400 mb-1.5">Último lançamento de hoje:</p>${renderizarItemConsultaHtml(doDia[0], 'HOJE')}</div>` : ''}
+        `;
+      } else if (tipo === 'duplicados') {
+        const suspeitos = detectarDuplicadosHoje();
+        if (suspeitos.length === 0) {
+          box.innerHTML = '<p class="text-emerald-400 font-semibold text-center py-6">✅ Nenhum saque suspeito de duplicidade encontrado hoje.</p>';
+        } else {
+          box.innerHTML = `
+            <p class="text-amber-400 font-bold">⚠️ Encontrei ${suspeitos.length} possível(is) duplicidade(s) hoje:</p>
+            <div class="space-y-2">
+              ${suspeitos.map(dup => `
+                <div class="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/40 space-y-1.5">
+                  <p class="text-[11px] text-amber-300 font-semibold">Mesmo titular e valor com ${dup.diffMin} min de diferença:</p>
+                  ${renderizarItemConsultaHtml(dup.maisRecente, 'REPETIDO?')}
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+      }
+    }
+
+    document.getElementById('formConsultaRapida').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const raw = document.getElementById('inputPerguntaConsulta').value.trim();
+      const termo = raw.toLowerCase();
+      const box = document.getElementById('resultadoConsultaBox');
+
+      if (!termo) {
+        executarConsultaAtalho('ultimo');
+        return;
+      }
+
+      if (termo.includes('duplicad') || termo.includes('repetid')) {
+        executarConsultaAtalho('duplicados');
+        return;
+      }
+
+      if (termo.includes('resumo') || termo.includes('quantos hoje')) {
+        executarConsultaAtalho('resumo_hoje');
+        return;
+      }
+
+      if (termo.includes('ultimos 5') || termo.includes('últimos 5') || termo === '5') {
+        executarConsultaAtalho('ultimos5');
+        return;
+      }
+
+      // Remove palavras comuns de pergunta para extrair nome ou valor
+      const limpo = termo
+        .replace(/qual foi o|qual o|qual foi|ultimo saque|último saque|ultimo|último|saque|do|da|de|para|pra|valor/g, '')
+        .trim();
+
+      const busca = limpo || termo;
+      const ordenados = obterSaquesOrdenadosPorRecencia();
+
+      // Verifica se é busca por valor numérico
+      const valorNumerico = parseFloat(busca.replace(',', '.'));
+      let encontrados = [];
+
+      if (!isNaN(valorNumerico) && /^\d+([.,]\d+)?$/.test(busca)) {
+        encontrados = ordenados.filter(s => Math.abs(s.valor - valorNumerico) < 0.01);
+      } else {
+        encontrados = ordenados.filter(s => s.nome.toLowerCase().includes(busca));
+      }
+
+      if (encontrados.length === 0) {
+        box.innerHTML = `<p class="text-slate-400 text-center py-6">Nenhum saque encontrado para "<strong class="text-slate-200">${raw}</strong>".</p>`;
+        return;
+      }
+
+      const listaExibicao = encontrados.slice(0, 8);
+      box.innerHTML = `
+        <p class="text-emerald-400 font-bold">Encontrado(s) ${encontrados.length} registro(s) para "${raw}":</p>
+        <div class="space-y-2">
+          ${listaExibicao.map((s, idx) => renderizarItemConsultaHtml(s, idx === 0 ? 'ÚLTIMO DESTE FILTRO' : '')).join('')}
+        </div>
+      `;
+    });
 
     const percentualInput = document.getElementById('percentualComissao');
     const valorSaqueInput = document.getElementById('valorSaque');
@@ -872,7 +1177,11 @@
       unsubscribeSnapshot = db.collection('users').doc(currentUser.uid).collection('saques')
         .onSnapshot(snapshot => {
           saques = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          atualizarBannerUltimoLancamento();
           renderizar();
+          if (!document.getElementById('modalConsultaRapida').classList.contains('hidden')) {
+            executarConsultaAtalho('ultimo');
+          }
         });
     }
 
@@ -966,7 +1275,6 @@
     async function excluirPessoa(id) {
       if (!currentUser) return;
       if (confirm('Tem certeza que deseja excluir esta pessoa do cadastro? (Os saques já registrados continuarão salvos no histórico).')) {
-        // Desvincula subordinados caso seja um responsável
         const subordinados = pessoas.filter(p => p.responsavelId === id);
         if (subordinados.length > 0) {
           const batch = db.batch();
@@ -1084,7 +1392,21 @@
 
       if (!data || !nome || isNaN(valor) || percentualVal === '') return;
 
+      // Verificação preventiva de duplicidade recente (mesma pessoa, data e valor em até 15 minutos)
       const agora = new Date();
+      const agoraMs = agora.getTime();
+      const duplicadoRecente = saques.find(s => {
+        if (s.nome !== nome || s.data !== data || Math.abs(s.valor - valor) >= 0.01) return false;
+        const diffMin = Math.abs(agoraMs - obterTimestampSaque(s)) / 60000;
+        return diffMin <= 15;
+      });
+
+      if (duplicadoRecente) {
+        const horaAnt = duplicadoRecente.hora || 'agora há pouco';
+        const confirmarDup = confirm(`⚠️ ATENÇÃO — POSSÍVEL DUPLICIDADE:\n\nVocê já lançou ${formatarMoeda(valor)} para ${nome} hoje às ${horaAnt}.\n\nDeseja realmente lançar este saque novamente?`);
+        if (!confirmarDup) return;
+      }
+
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
       let lucroBrutoSeu = 0;
@@ -1165,10 +1487,13 @@
       }
     }
 
-    async function deletar(id) {
+    async function deletar(id, atualizarConsulta = false) {
       if (!currentUser) return;
       if (confirm('Tem certeza que deseja excluir este registro?')) {
         await db.collection('users').doc(currentUser.uid).collection('saques').doc(id).delete();
+        if (atualizarConsulta) {
+          setTimeout(() => executarConsultaAtalho('ultimo'), 200);
+        }
       }
     }
 
@@ -1271,7 +1596,6 @@
       renderizar();
     }
 
-    // Retorna o conjunto de nomes válidos (no formato salvo nos saques) para uma equipe
     function obterNomesMembrosEquipe(responsavelId) {
       const membros = pessoas.filter(p => p.id === responsavelId || p.responsavelId === responsavelId);
       const nomesPermitidos = new Set();
@@ -1295,7 +1619,6 @@
       lista.innerHTML = '';
       const fragment = document.createDocumentFragment();
 
-      // Opção "Todas as pessoas"
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
         const ativo = filtroEntidade.tipo === 'todos';
@@ -1305,7 +1628,6 @@
         fragment.appendChild(itemTodas);
       }
 
-      // Seção de Equipes / Responsáveis
       const responsaveis = pessoas.filter(p => p.isResponsavel === true && p.ativo !== false);
       const responsaveisFiltrados = responsaveis.filter(r => 
         r.nome.toLowerCase().includes(termo) || `equipe: ${r.nome.toLowerCase()}`.includes(termo)
@@ -1328,7 +1650,6 @@
         });
       }
 
-      // Seção Individual
       const nomesFiltrados = todosNomesUnicos.filter(n => n.toLowerCase().includes(termo));
       if (nomesFiltrados.length > 0) {
         if (responsaveisFiltrados.length > 0) {
@@ -1361,7 +1682,7 @@
         nomesEquipeSet = obterNomesMembrosEquipe(filtroEntidade.valor);
       }
 
-      return saques.filter(item => {
+      const filtrados = saques.filter(item => {
         const passaData = filtrarPorData(item);
         let passaEntidade = true;
 
@@ -1374,7 +1695,12 @@
         const passaStatus = apenasPendentes ? !item.pago : true;
 
         return passaData && passaEntidade && passaStatus;
-      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      });
+
+      if (ordenacaoHistorico === 'alfabetica') {
+        return filtrados.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      }
+      return filtrados.sort((a, b) => obterTimestampSaque(b) - obterTimestampSaque(a));
     }
 
     // Carregamento dinâmico otimizado do Html2Canvas sob demanda
@@ -1421,7 +1747,6 @@
       return 'Todos os Registros';
     }
 
-    // Função reutilizável para renderizar o canvas do extrato individual exatamente no visual original
     async function renderizarCanvasExtratoIndividual(nomeTitular, listaSaquesPessoa, textoPeriodo) {
       const dadosOrdenados = [...listaSaquesPessoa].sort((a, b) => {
         const dataA = a.data || '';
@@ -1544,7 +1869,6 @@
         const zip = new JSZip();
         const textoPeriodo = obterTextoPeriodoAtual();
 
-        // Agrupa os saques por pessoa (mantendo o nome exato do registro)
         const gruposPorPessoa = {};
         dadosEquipe.forEach(s => {
           if (!gruposPorPessoa[s.nome]) gruposPorPessoa[s.nome] = [];
@@ -1578,7 +1902,6 @@
         equipeZipUrlGlobal = URL.createObjectURL(zipBlob);
         equipeZipNomeArquivoGlobal = `extratos_equipe_${nomeLider.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.zip`;
 
-        // Preenche o Modal de Confirmação da Equipe
         document.getElementById('modalEquipeNomeLider').textContent = nomeLider;
         document.getElementById('modalEquipeValorTotal').textContent = formatarMoeda(somaGeralEquipe);
         document.getElementById('modalEquipeQtdComprovantes').textContent = `${resumoMembros.length} comprovante(s) individual(is) gerado(s) no ZIP`;
@@ -1693,7 +2016,6 @@
 
       const saquesFiltrados = obterSaquesFiltradosAtuais();
 
-      // Controle de exibição dos botões de ação do filtro
       const btnGerarExtrato = document.getElementById('btnGerarExtrato');
       const btnGerarExtratosEquipe = document.getElementById('btnGerarExtratosEquipe');
       const btnDarBaixaEquipe = document.getElementById('btnDarBaixaEquipe');
