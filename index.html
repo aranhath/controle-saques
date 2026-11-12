@@ -93,6 +93,11 @@
       filter: invert(0.8);
       cursor: pointer;
     }
+
+    select option {
+      background-color: #0b1120;
+      color: #f1f5f9;
+    }
   </style>
 
   <!-- Firebase SDKs -->
@@ -200,30 +205,46 @@
     <!-- PAINEL DE GESTÃO DE PESSOAS / CADASTROS -->
     <section id="painelPessoas" class="hidden glass-card border-sky-500/40 rounded-3xl p-3.5 md:p-5 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-white/10 pb-3">
-        <h3 class="text-sm font-bold text-sky-400 flex items-center gap-2">👥 Cadastro e Gestão de Pessoas</h3>
+        <h3 class="text-sm font-bold text-sky-400 flex items-center gap-2">👥 Cadastro e Gestão de Pessoas / Equipes</h3>
         <button onclick="togglePainelPessoas()" class="bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold px-3 py-1 rounded-xl text-xs transition">
           ✕
         </button>
       </div>
 
       <!-- Formulário de Nova Pessoa / Edição -->
-      <form id="formPessoa" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <form id="formPessoa" class="space-y-3">
         <input type="hidden" id="idPessoaEditando">
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular</label>
-          <input type="text" id="cadNomePessoa" required placeholder="Ex: João Silva" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Nome / Titular</label>
+            <input type="text" id="cadNomePessoa" required placeholder="Ex: João Silva" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">CPF (Opcional)</label>
+            <input type="text" id="cadCpfPessoa" placeholder="Ex: 12345678900" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Responsável pelo Repasse (Opcional)</label>
+            <select id="cadResponsavelId" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
+              <option value="">Nenhum (Pagamento Direto)</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">CPF (Opcional)</label>
-          <input type="text" id="cadCpfPessoa" placeholder="Ex: 12345678900" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none">
-        </div>
-        <div class="flex items-end gap-2 pt-1 sm:pt-0">
-          <button type="submit" id="btnSalvarPessoa" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold p-2.5 rounded-xl text-xs transition shadow-lg border border-sky-400/30">
-            Salvar Cadastro
-          </button>
-          <button type="button" id="btnCancelarEditPessoa" onclick="cancelarEdicaoPessoa()" class="hidden glass-input text-slate-300 p-2.5 rounded-xl text-xs hover:bg-slate-800 transition">
-            Cancelar
-          </button>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <label class="inline-flex items-center gap-2.5 cursor-pointer select-none glass-input px-3.5 py-2 rounded-xl border border-purple-500/30">
+            <input type="checkbox" id="cadIsResponsavel" class="w-4 h-4 accent-purple-500 rounded cursor-pointer">
+            <span class="text-xs font-semibold text-purple-300">É responsável por uma equipe? (Recebe repasse de subordinados)</span>
+          </label>
+
+          <div class="flex items-center gap-2">
+            <button type="submit" id="btnSalvarPessoa" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition shadow-lg border border-sky-400/30">
+              Salvar Cadastro
+            </button>
+            <button type="button" id="btnCancelarEditPessoa" onclick="cancelarEdicaoPessoa()" class="hidden glass-input text-slate-300 px-3 py-2.5 rounded-xl text-xs hover:bg-slate-800 transition">
+              Cancelar
+            </button>
+          </div>
         </div>
       </form>
 
@@ -245,6 +266,7 @@
               <tr>
                 <th class="p-2.5">Nome</th>
                 <th class="p-2.5">CPF</th>
+                <th class="p-2.5">Equipe / Vínculo</th>
                 <th class="p-2.5">Status</th>
                 <th class="p-2.5 text-right">Ações</th>
               </tr>
@@ -306,7 +328,7 @@
           </button>
         </div>
 
-        <!-- Filtro por Nome/Titular -->
+        <!-- Filtro por Nome/Titular ou Equipe -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
           <div class="relative w-full md:w-64">
             <button id="btnFiltroPessoa" onclick="toggleDropdownPessoa()" type="button" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-left text-slate-200 flex items-center justify-between hover:border-white/20 focus:outline-none">
@@ -316,15 +338,25 @@
 
             <div id="dropdownPessoasMenu" class="hidden absolute right-0 left-0 top-full mt-1.5 w-full glass-dropdown rounded-2xl shadow-2xl z-50 overflow-hidden">
               <div class="p-2 border-b border-white/10">
-                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
+                <input type="text" id="buscaPessoaFiltro" oninput="filtrarListaPessoasDropdown()" placeholder="Buscar pessoa ou equipe..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="glass-input w-full rounded-lg p-2 text-xs text-slate-100 focus:outline-none">
               </div>
-              <div id="listaPessoasDropdown" class="max-h-52 overflow-y-auto divide-y divide-white/10"></div>
+              <div id="listaPessoasDropdown" class="max-h-60 overflow-y-auto divide-y divide-white/10"></div>
             </div>
           </div>
 
-          <!-- BOTÃO GERAR EXTRATO -->
+          <!-- BOTÃO DAR BAIXA NA EQUIPE -->
+          <button id="btnDarBaixaEquipe" onclick="darBaixaEquipe()" class="hidden bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-amber-900/40 border border-amber-400/30 flex items-center justify-center shrink-0">
+            Dar baixa na equipe
+          </button>
+
+          <!-- BOTÃO GERAR EXTRATO INDIVIDUAL -->
           <button id="btnGerarExtrato" onclick="gerarImagemExtrato()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-emerald-900/40 border border-emerald-400/30 flex items-center justify-center shrink-0">
             Gerar extrato
+          </button>
+
+          <!-- BOTÃO GERAR EXTRATOS DA EQUIPE (ZIP) -->
+          <button id="btnGerarExtratosEquipe" onclick="gerarExtratosEquipeZip()" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95 shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center justify-center shrink-0">
+            Gerar Extratos da Equipe
           </button>
         </div>
 
@@ -424,21 +456,18 @@
 
   </div>
 
-  <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO -->
+  <!-- MODAL / POPUP DE PRÉ-VISUALIZAÇÃO DO EXTRATO INDIVIDUAL -->
   <div id="modalExtrato" class="hidden fixed inset-0 bg-[#060b13]/80 backdrop-blur-xl z-[200] flex items-center justify-center p-3 sm:p-4">
     <div class="glass-card rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-      <!-- Cabeçalho do Modal -->
       <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-100 text-sm md:text-base">Extrato Gerado</h3>
         <button onclick="fecharModalExtrato()" class="text-slate-400 hover:text-white glass-input w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
       </div>
       
-      <!-- Imagem de Pré-visualização -->
       <div class="p-4 overflow-y-auto flex justify-center bg-slate-950/60">
         <img id="imgPreviewExtrato" src="" alt="Extrato Gerado" class="rounded-2xl border border-white/10 max-w-full shadow-2xl">
       </div>
 
-      <!-- Ações -->
       <div class="p-4 border-t border-white/10 bg-slate-900/40 flex flex-col sm:flex-row items-center gap-2 justify-end">
         <button onclick="fecharModalExtrato()" class="w-full sm:w-auto glass-input text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
           Fechar
@@ -448,6 +477,42 @@
         </button>
         <button onclick="baixarExtrato()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-emerald-900/40 border border-emerald-400/30">
           Salvar no Dispositivo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL / POPUP DE EXTRATOS DA EQUIPE (ZIP + TOTAL GERAL) -->
+  <div id="modalExtratoEquipe" class="hidden fixed inset-0 bg-[#060b13]/85 backdrop-blur-xl z-[200] flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-purple-500/40">
+      <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/60">
+        <h3 class="font-bold text-purple-300 text-sm md:text-base flex items-center gap-2">📦 Pacote de Extratos da Equipe</h3>
+        <button onclick="fecharModalExtratoEquipe()" class="text-slate-400 hover:text-white glass-input w-8 h-8 rounded-xl font-bold flex items-center justify-center transition">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <div class="bg-gradient-to-br from-purple-950/50 via-slate-900 to-slate-900 border border-purple-500/40 rounded-2xl p-4 text-center space-y-1.5 shadow-xl">
+          <p class="text-[11px] uppercase tracking-wider font-bold text-purple-300">Total Geral a Transferir para</p>
+          <p id="modalEquipeNomeLider" class="text-base font-bold text-slate-100"></p>
+          <p id="modalEquipeValorTotal" class="text-3xl font-black text-emerald-400 pt-1"></p>
+          <p id="modalEquipeQtdComprovantes" class="text-xs text-slate-400 pt-1"></p>
+        </div>
+
+        <div class="space-y-1.5">
+          <p class="text-xs font-semibold text-slate-300">Comprovantes incluídos no arquivo ZIP:</p>
+          <div id="modalEquipeListaMembros" class="glass-input rounded-2xl divide-y divide-white/10 max-h-48 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-white/10 bg-slate-900/60 flex flex-col sm:flex-row items-center gap-2 justify-end">
+        <button onclick="fecharModalExtratoEquipe()" class="w-full sm:w-auto glass-input text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+          Fechar
+        </button>
+        <button onclick="compartilharExtratoEquipeZip()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-sky-900/40 border border-sky-400/30">
+          Compartilhar ZIP
+        </button>
+        <button onclick="baixarExtratoEquipeZip()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center shadow-lg shadow-purple-900/40 border border-purple-400/30">
+          Baixar Arquivo ZIP
         </button>
       </div>
     </div>
@@ -535,13 +600,21 @@
     let pessoas = [];
     let filtroAtual = 'todos';
     let apenasPendentes = false;
-    let pessoaSelecionadaFiltro = '';
+    // filtroEntidade: { tipo: 'todos' | 'pessoa' | 'equipe', valor: string, label: string }
+    let filtroEntidade = { tipo: 'todos', valor: '', label: 'Todas as pessoas' };
     let statusFiltroPessoaModal = 'ativas';
     let unsubscribeSnapshot = null;
     let unsubscribePessoas = null;
+
+    // Globais do Extrato Individual
     let extratoBlobGlobal = null;
     let extratoDataUrlGlobal = '';
     let extratoNomeArquivoGlobal = '';
+
+    // Globais do Extrato da Equipe (ZIP)
+    let equipeZipBlobGlobal = null;
+    let equipeZipUrlGlobal = '';
+    let equipeZipNomeArquivoGlobal = '';
 
     // Configuração Padrão do Sistema
     let regraComissao = {
@@ -553,6 +626,10 @@
     function formatarMoeda(valor) {
       if (isNaN(valor) || valor === null || valor === undefined) return 'R$ 0,00';
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatarNomeExibicaoPessoa(p) {
+      return p.cpf ? `${p.nome} - ${p.cpf}` : p.nome;
     }
 
     function obterDataLocalHoje() {
@@ -647,7 +724,7 @@
       correspondencias.forEach(p => {
         const item = document.createElement('div');
         item.className = 'p-3 text-sm text-slate-100 hover:bg-white/10 cursor-pointer transition flex justify-between items-center';
-        const textoExibicao = p.cpf ? `${p.nome} - ${p.cpf}` : p.nome;
+        const textoExibicao = formatarNomeExibicaoPessoa(p);
         item.textContent = textoExibicao;
         item.onclick = () => {
           inputNome.value = textoExibicao;
@@ -750,6 +827,28 @@
       renderizar();
     });
 
+    function atualizarSelectResponsaveis() {
+      const select = document.getElementById('cadResponsavelId');
+      if (!select) return;
+
+      const idEditando = document.getElementById('idPessoaEditando').value;
+      const valorAtual = select.value;
+
+      select.innerHTML = '<option value="">Nenhum (Pagamento Direto)</option>';
+      const responsaveis = pessoas.filter(p => p.isResponsavel === true && p.id !== idEditando);
+
+      responsaveis.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = r.nome;
+        select.appendChild(opt);
+      });
+
+      if (valorAtual && responsaveis.some(r => r.id === valorAtual)) {
+        select.value = valorAtual;
+      }
+    }
+
     function carregarDadosPessoas() {
       if (!currentUser) return;
       if (unsubscribePessoas) unsubscribePessoas();
@@ -758,9 +857,11 @@
         .onSnapshot(snapshot => {
           pessoas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           pessoas.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+          atualizarSelectResponsaveis();
           renderizarTabelaPessoasModal();
           atualizarDropdownPessoas();
           validarFormularioSaque();
+          renderizar();
         });
     }
 
@@ -782,16 +883,20 @@
       const id = document.getElementById('idPessoaEditando').value;
       const nome = document.getElementById('cadNomePessoa').value.trim();
       const cpf = document.getElementById('cadCpfPessoa').value.trim();
+      const responsavelId = document.getElementById('cadResponsavelId').value || '';
+      const isResponsavel = document.getElementById('cadIsResponsavel').checked;
 
       if (!nome) return;
 
       if (id) {
         const pessoaAntiga = pessoas.find(p => p.id === id);
-        const nomeAntigoForm = pessoaAntiga ? (pessoaAntiga.cpf ? `${pessoaAntiga.nome} - ${pessoaAntiga.cpf}` : pessoaAntiga.nome) : '';
+        const nomeAntigoForm = pessoaAntiga ? formatarNomeExibicaoPessoa(pessoaAntiga) : '';
 
         await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).update({
           nome,
-          cpf
+          cpf,
+          responsavelId,
+          isResponsavel
         });
 
         const novoNomeForm = cpf ? `${nome} - ${cpf}` : nome;
@@ -812,12 +917,16 @@
         await db.collection('users').doc(currentUser.uid).collection('pessoas').add({
           nome,
           cpf,
+          responsavelId,
+          isResponsavel,
           ativo: true,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         document.getElementById('cadNomePessoa').value = '';
         document.getElementById('cadCpfPessoa').value = '';
+        document.getElementById('cadResponsavelId').value = '';
+        document.getElementById('cadIsResponsavel').checked = false;
       }
     });
 
@@ -826,8 +935,12 @@
       if (!p) return;
 
       document.getElementById('idPessoaEditando').value = p.id;
+      atualizarSelectResponsaveis();
+
       document.getElementById('cadNomePessoa').value = p.nome;
       document.getElementById('cadCpfPessoa').value = p.cpf || '';
+      document.getElementById('cadResponsavelId').value = p.responsavelId || '';
+      document.getElementById('cadIsResponsavel').checked = p.isResponsavel === true;
       document.getElementById('btnSalvarPessoa').textContent = 'Atualizar Cadastro';
       document.getElementById('btnCancelarEditPessoa').classList.remove('hidden');
     }
@@ -836,8 +949,11 @@
       document.getElementById('idPessoaEditando').value = '';
       document.getElementById('cadNomePessoa').value = '';
       document.getElementById('cadCpfPessoa').value = '';
+      document.getElementById('cadResponsavelId').value = '';
+      document.getElementById('cadIsResponsavel').checked = false;
       document.getElementById('btnSalvarPessoa').textContent = 'Salvar Cadastro';
       document.getElementById('btnCancelarEditPessoa').classList.add('hidden');
+      atualizarSelectResponsaveis();
     }
 
     async function toggleAtivoPessoa(id, statusAtual) {
@@ -850,6 +966,16 @@
     async function excluirPessoa(id) {
       if (!currentUser) return;
       if (confirm('Tem certeza que deseja excluir esta pessoa do cadastro? (Os saques já registrados continuarão salvos no histórico).')) {
+        // Desvincula subordinados caso seja um responsável
+        const subordinados = pessoas.filter(p => p.responsavelId === id);
+        if (subordinados.length > 0) {
+          const batch = db.batch();
+          subordinados.forEach(sub => {
+            const ref = db.collection('users').doc(currentUser.uid).collection('pessoas').doc(sub.id);
+            batch.update(ref, { responsavelId: '' });
+          });
+          await batch.commit();
+        }
         await db.collection('users').doc(currentUser.uid).collection('pessoas').doc(id).delete();
       }
     }
@@ -860,6 +986,21 @@
       document.getElementById('btnFiltroPessoasOcultas').className = status === 'ocultas' ? 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-sky-600 text-white font-medium text-[11px]' : 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl glass-input text-slate-400 font-medium text-[11px]';
       document.getElementById('btnFiltroPessoasTodas').className = status === 'todas' ? 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-sky-600 text-white font-medium text-[11px]' : 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl glass-input text-slate-400 font-medium text-[11px]';
       renderizarTabelaPessoasModal();
+    }
+
+    function obterBadgesVinculoPessoa(p) {
+      let badges = [];
+      if (p.isResponsavel) {
+        const qtdSubs = pessoas.filter(sub => sub.responsavelId === p.id).length;
+        badges.push(`<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Líder (${qtdSubs})</span>`);
+      }
+      if (p.responsavelId) {
+        const lider = pessoas.find(r => r.id === p.responsavelId);
+        if (lider) {
+          badges.push(`<span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30">Equipe: ${lider.nome}</span>`);
+        }
+      }
+      return badges.length > 0 ? badges.join(' ') : '<span class="text-slate-500 text-[11px]">Direto</span>';
     }
 
     function renderizarTabelaPessoasModal() {
@@ -882,12 +1023,14 @@
 
       listaExibicao.forEach(p => {
         const isAtivo = p.ativo !== false;
+        const badgesHtml = obterBadgesVinculoPessoa(p);
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-white/5 transition';
         tr.innerHTML = `
           <td class="p-2.5 font-medium text-slate-100">${p.nome}</td>
           <td class="p-2.5 text-slate-400">${p.cpf || '-'}</td>
+          <td class="p-2.5 space-x-1">${badgesHtml}</td>
           <td class="p-2.5">
             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isAtivo ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700/60 text-slate-400 border border-slate-600/30'}">
               ${isAtivo ? 'Ativo' : 'Oculto'}
@@ -906,12 +1049,13 @@
         const card = document.createElement('div');
         card.className = 'glass-input rounded-2xl p-3 flex flex-col gap-2 border border-white/10';
         card.innerHTML = `
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-start gap-2">
             <div>
               <p class="font-bold text-slate-100 text-xs">${p.nome}</p>
               <p class="text-[10px] text-slate-400 mt-0.5">CPF: ${p.cpf || 'Não informado'}</p>
+              <div class="mt-1.5 flex flex-wrap gap-1">${badgesHtml}</div>
             </div>
-            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold ${isAtivo ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700/60 text-slate-400 border border-slate-600/30'}">
+            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold shrink-0 ${isAtivo ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700/60 text-slate-400 border border-slate-600/30'}">
               ${isAtivo ? 'Ativo' : 'Oculto'}
             </span>
           </div>
@@ -943,7 +1087,6 @@
       const agora = new Date();
       const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-      // Cálculo Automático do Lucro Bruto
       let lucroBrutoSeu = 0;
       if (valor <= regraComissao.valorLimite) {
         lucroBrutoSeu = regraComissao.lucroFixo;
@@ -988,6 +1131,37 @@
         });
       } catch (err) {
         console.error('Erro ao atualizar status de pagamento:', err);
+      }
+    }
+
+    async function darBaixaEquipe() {
+      if (!currentUser || filtroEntidade.tipo !== 'equipe') return;
+
+      const saquesFiltrados = obterSaquesFiltradosAtuais();
+      const pendentesEquipe = saquesFiltrados.filter(s => !s.pago);
+
+      if (pendentesEquipe.length === 0) {
+        alert('Não há saques pendentes para esta equipe no período selecionado.');
+        return;
+      }
+
+      const totalRepasse = pendentesEquipe.reduce((acc, s) => acc + s.comissaoPessoa, 0);
+      const lider = pessoas.find(p => p.id === filtroEntidade.valor);
+      const nomeLider = lider ? lider.nome : 'o responsável';
+
+      if (!confirm(`Confirmar pagamento de ${formatarMoeda(totalRepasse)} (${pendentesEquipe.length} saques) para ${nomeLider}?\n\nTodos os saques pendentes exibidos serão marcados como PAGO.`)) {
+        return;
+      }
+
+      try {
+        const batch = db.batch();
+        pendentesEquipe.forEach(s => {
+          const ref = db.collection('users').doc(currentUser.uid).collection('saques').doc(s.id);
+          batch.update(ref, { pago: true });
+        });
+        await batch.commit();
+      } catch (err) {
+        alert('Erro ao dar baixa na equipe: ' + err.message);
       }
     }
 
@@ -1090,11 +1264,22 @@
       }
     }
 
-    function selecionarPessoaFiltro(nome) {
-      pessoaSelecionadaFiltro = nome;
-      document.getElementById('labelFiltroPessoa').textContent = nome ? nome : 'Todas as pessoas';
+    function selecionarEntidadeFiltro(tipo, valor, label) {
+      filtroEntidade = { tipo, valor, label };
+      document.getElementById('labelFiltroPessoa').textContent = label;
       document.getElementById('dropdownPessoasMenu').classList.add('hidden');
       renderizar();
+    }
+
+    // Retorna o conjunto de nomes válidos (no formato salvo nos saques) para uma equipe
+    function obterNomesMembrosEquipe(responsavelId) {
+      const membros = pessoas.filter(p => p.id === responsavelId || p.responsavelId === responsavelId);
+      const nomesPermitidos = new Set();
+      membros.forEach(m => {
+        nomesPermitidos.add(formatarNomeExibicaoPessoa(m));
+        nomesPermitidos.add(m.nome);
+      });
+      return nomesPermitidos;
     }
 
     function atualizarDropdownPessoas() {
@@ -1103,28 +1288,65 @@
 
       const termo = (document.getElementById('buscaPessoaFiltro').value || '').toLowerCase();
       
-      const pessoasAtivas = pessoas.filter(p => p.ativo !== false).map(p => p.cpf ? `${p.nome} - ${p.cpf}` : p.nome);
+      const pessoasAtivas = pessoas.filter(p => p.ativo !== false).map(p => formatarNomeExibicaoPessoa(p));
       const nomesHistorico = saques.map(s => s.nome);
       const todosNomesUnicos = [...new Set([...pessoasAtivas, ...nomesHistorico])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
       lista.innerHTML = '';
       const fragment = document.createDocumentFragment();
 
+      // Opção "Todas as pessoas"
       if (!termo || 'todas as pessoas'.includes(termo)) {
         const itemTodas = document.createElement('div');
-        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === '' ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
+        const ativo = filtroEntidade.tipo === 'todos';
+        itemTodas.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${ativo ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
         itemTodas.textContent = 'Todas as pessoas';
-        itemTodas.onclick = () => selecionarPessoaFiltro('');
+        itemTodas.onclick = () => selecionarEntidadeFiltro('todos', '', 'Todas as pessoas');
         fragment.appendChild(itemTodas);
       }
 
-      todosNomesUnicos.filter(n => n.toLowerCase().includes(termo)).forEach(nome => {
-        const item = document.createElement('div');
-        item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${pessoaSelecionadaFiltro === nome ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
-        item.textContent = nome;
-        item.onclick = () => selecionarPessoaFiltro(nome);
-        fragment.appendChild(item);
-      });
+      // Seção de Equipes / Responsáveis
+      const responsaveis = pessoas.filter(p => p.isResponsavel === true && p.ativo !== false);
+      const responsaveisFiltrados = responsaveis.filter(r => 
+        r.nome.toLowerCase().includes(termo) || `equipe: ${r.nome.toLowerCase()}`.includes(termo)
+      );
+
+      if (responsaveisFiltrados.length > 0) {
+        const headerEquipes = document.createElement('div');
+        headerEquipes.className = 'px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-purple-300 bg-purple-950/30';
+        headerEquipes.textContent = 'Equipes / Responsáveis';
+        fragment.appendChild(headerEquipes);
+
+        responsaveisFiltrados.forEach(r => {
+          const labelEq = `👥 Equipe: ${r.nome}`;
+          const ativo = filtroEntidade.tipo === 'equipe' && filtroEntidade.valor === r.id;
+          const itemEq = document.createElement('div');
+          itemEq.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${ativo ? 'bg-purple-500/25 text-purple-300 font-bold' : 'text-purple-200 hover:bg-purple-500/15'}`;
+          itemEq.textContent = labelEq;
+          itemEq.onclick = () => selecionarEntidadeFiltro('equipe', r.id, labelEq);
+          fragment.appendChild(itemEq);
+        });
+      }
+
+      // Seção Individual
+      const nomesFiltrados = todosNomesUnicos.filter(n => n.toLowerCase().includes(termo));
+      if (nomesFiltrados.length > 0) {
+        if (responsaveisFiltrados.length > 0) {
+          const headerIndiv = document.createElement('div');
+          headerIndiv.className = 'px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/50';
+          headerIndiv.textContent = 'Individual';
+          fragment.appendChild(headerIndiv);
+        }
+
+        nomesFiltrados.forEach(nome => {
+          const ativo = filtroEntidade.tipo === 'pessoa' && filtroEntidade.valor === nome;
+          const item = document.createElement('div');
+          item.className = `p-3 text-xs cursor-pointer transition flex items-center justify-between ${ativo ? 'bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-slate-100 hover:bg-white/10'}`;
+          item.textContent = nome;
+          item.onclick = () => selecionarEntidadeFiltro('pessoa', nome, nome);
+          fragment.appendChild(item);
+        });
+      }
 
       lista.appendChild(fragment);
     }
@@ -1134,12 +1356,24 @@
     }
 
     function obterSaquesFiltradosAtuais() {
+      let nomesEquipeSet = null;
+      if (filtroEntidade.tipo === 'equipe') {
+        nomesEquipeSet = obterNomesMembrosEquipe(filtroEntidade.valor);
+      }
+
       return saques.filter(item => {
         const passaData = filtrarPorData(item);
-        const passaPessoa = pessoaSelecionadaFiltro ? item.nome === pessoaSelecionadaFiltro : true;
+        let passaEntidade = true;
+
+        if (filtroEntidade.tipo === 'pessoa') {
+          passaEntidade = item.nome === filtroEntidade.valor;
+        } else if (filtroEntidade.tipo === 'equipe' && nomesEquipeSet) {
+          passaEntidade = nomesEquipeSet.has(item.nome);
+        }
+
         const passaStatus = apenasPendentes ? !item.pago : true;
 
-        return passaData && passaPessoa && passaStatus;
+        return passaData && passaEntidade && passaStatus;
       }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
 
@@ -1155,13 +1389,102 @@
       });
     }
 
+    // Carregamento dinâmico otimizado do JSZip sob demanda
+    function carregarJSZip() {
+      return new Promise((resolve, reject) => {
+        if (window.JSZip) return resolve();
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    function obterTextoPeriodoAtual() {
+      const agora = new Date();
+      if (filtroAtual === 'hoje') return `Hoje (${agora.toLocaleDateString('pt-BR')})`;
+      if (filtroAtual === 'ontem') {
+        const ontem = new Date();
+        ontem.setDate(ontem.getDate() - 1);
+        return `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
+      }
+      if (filtroAtual === '7dias') return 'Últimos 7 dias';
+      if (filtroAtual === 'mes') return `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
+      if (filtroAtual === 'personalizado') {
+        const ini = document.getElementById('dataInicioFiltro').value;
+        const fim = document.getElementById('dataFimFiltro').value;
+        if (ini && fim) return `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
+        if (ini) return `A partir de ${ini.split('-').reverse().join('/')}`;
+        if (fim) return `Até ${fim.split('-').reverse().join('/')}`;
+      }
+      return 'Todos os Registros';
+    }
+
+    // Função reutilizável para renderizar o canvas do extrato individual exatamente no visual original
+    async function renderizarCanvasExtratoIndividual(nomeTitular, listaSaquesPessoa, textoPeriodo) {
+      const dadosOrdenados = [...listaSaquesPessoa].sort((a, b) => {
+        const dataA = a.data || '';
+        const dataB = b.data || '';
+        if (dataA !== dataB) return dataA.localeCompare(dataB);
+        const horaA = a.hora || '00:00';
+        const horaB = b.hora || '00:00';
+        return horaA.localeCompare(horaB);
+      });
+
+      document.getElementById('extratoNomeTitular').textContent = nomeTitular;
+
+      const agora = new Date();
+      document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
+
+      const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
+      tabelaCorpo.innerHTML = '';
+      const fragmentExtrato = document.createDocumentFragment();
+
+      let volTotal = 0;
+      let comissaoTotal = 0;
+
+      dadosOrdenados.forEach(s => {
+        volTotal += s.valor;
+        comissaoTotal += s.comissaoPessoa;
+
+        const dtForm = s.data.split('-').reverse().join('/');
+        const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
+        const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2.5 text-slate-300">${dtHr}</td>
+          <td class="p-2.5 font-semibold text-sky-400">${formatarMoeda(s.valor)}</td>
+          <td class="p-2.5 text-slate-400">${pctTexto}</td>
+          <td class="p-2.5 font-bold text-emerald-400 text-right">${formatarMoeda(s.comissaoPessoa)}</td>
+        `;
+        fragmentExtrato.appendChild(tr);
+      });
+
+      tabelaCorpo.appendChild(fragmentExtrato);
+
+      document.getElementById('extratoQtdSaques').textContent = `${dadosOrdenados.length} saque(s)`;
+      document.getElementById('extratoVolumeTotal').textContent = formatarMoeda(volTotal);
+      document.getElementById('extratoTotalReceber').textContent = formatarMoeda(comissaoTotal);
+
+      const container = document.getElementById('extratoCard');
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#0f172a',
+        scale: 2
+      });
+
+      return { canvas, comissaoTotal, qtdSaques: dadosOrdenados.length };
+    }
+
     async function gerarImagemExtrato() {
-      if (!pessoaSelecionadaFiltro) {
+      if (filtroEntidade.tipo !== 'pessoa' || !filtroEntidade.valor) {
         alert('Por favor, selecione uma pessoa específica no filtro primeiro.');
         return;
       }
 
-      let dadosExtrato = obterSaquesFiltradosAtuais();
+      const dadosExtrato = obterSaquesFiltradosAtuais();
 
       if (dadosExtrato.length === 0) {
         alert('Não há registros de saques para esta pessoa no período selecionado.');
@@ -1176,78 +1499,11 @@
       try {
         await carregarHtml2Canvas();
 
-        dadosExtrato.sort((a, b) => {
-          const dataA = a.data || '';
-          const dataB = b.data || '';
-          if (dataA !== dataB) return dataA.localeCompare(dataB);
-          const horaA = a.hora || '00:00';
-          const horaB = b.hora || '00:00';
-          return horaA.localeCompare(horaB);
-        });
-
-        document.getElementById('extratoNomeTitular').textContent = pessoaSelecionadaFiltro;
-
-        const agora = new Date();
-        document.getElementById('extratoDataEmissao').textContent = `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-
-        let textoPeriodo = 'Todos os Registros';
-        if (filtroAtual === 'hoje') textoPeriodo = `Hoje (${agora.toLocaleDateString('pt-BR')})`;
-        else if (filtroAtual === 'ontem') {
-          const ontem = new Date();
-          ontem.setDate(ontem.getDate() - 1);
-          textoPeriodo = `Ontem (${ontem.toLocaleDateString('pt-BR')})`;
-        }
-        else if (filtroAtual === '7dias') textoPeriodo = 'Últimos 7 dias';
-        else if (filtroAtual === 'mes') textoPeriodo = `Mês Atual (${agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })})`;
-        else if (filtroAtual === 'personalizado') {
-          const ini = document.getElementById('dataInicioFiltro').value;
-          const fim = document.getElementById('dataFimFiltro').value;
-          if (ini && fim) textoPeriodo = `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}`;
-          else if (ini) textoPeriodo = `A partir de ${ini.split('-').reverse().join('/')}`;
-          else if (fim) textoPeriodo = `Até ${fim.split('-').reverse().join('/')}`;
-        }
-        document.getElementById('extratoPeriodoTexto').textContent = textoPeriodo;
-
-        const tabelaCorpo = document.getElementById('extratoTabelaCorpo');
-        tabelaCorpo.innerHTML = '';
-        const fragmentExtrato = document.createDocumentFragment();
-
-        let volTotal = 0;
-        let comissaoTotal = 0;
-
-        dadosExtrato.forEach(s => {
-          volTotal += s.valor;
-          comissaoTotal += s.comissaoPessoa;
-
-          const dtForm = s.data.split('-').reverse().join('/');
-          const dtHr = s.hora ? `${dtForm} ${s.hora}` : dtForm;
-          const pctTexto = s.percentual !== undefined ? `${s.percentual}%` : '2%';
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="p-2.5 text-slate-300">${dtHr}</td>
-            <td class="p-2.5 font-semibold text-sky-400">${formatarMoeda(s.valor)}</td>
-            <td class="p-2.5 text-slate-400">${pctTexto}</td>
-            <td class="p-2.5 font-bold text-emerald-400 text-right">${formatarMoeda(s.comissaoPessoa)}</td>
-          `;
-          fragmentExtrato.appendChild(tr);
-        });
-
-        tabelaCorpo.appendChild(fragmentExtrato);
-
-        document.getElementById('extratoQtdSaques').textContent = `${dadosExtrato.length} saque(s)`;
-        document.getElementById('extratoVolumeTotal').textContent = formatarMoeda(volTotal);
-        document.getElementById('extratoTotalReceber').textContent = formatarMoeda(comissaoTotal);
-
-        const container = document.getElementById('extratoCard');
-        
-        const canvas = await html2canvas(container, {
-          backgroundColor: '#0f172a',
-          scale: 2
-        });
+        const textoPeriodo = obterTextoPeriodoAtual();
+        const { canvas } = await renderizarCanvasExtratoIndividual(filtroEntidade.valor, dadosExtrato, textoPeriodo);
 
         extratoDataUrlGlobal = canvas.toDataURL('image/png');
-        extratoNomeArquivoGlobal = `extrato_${pessoaSelecionadaFiltro.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
+        extratoNomeArquivoGlobal = `extrato_${filtroEntidade.valor.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.png`;
 
         canvas.toBlob(blob => {
           extratoBlobGlobal = blob;
@@ -1264,8 +1520,103 @@
       }
     }
 
+    async function gerarExtratosEquipeZip() {
+      if (filtroEntidade.tipo !== 'equipe' || !filtroEntidade.valor) return;
+
+      const dadosEquipe = obterSaquesFiltradosAtuais();
+
+      if (dadosEquipe.length === 0) {
+        alert('Não há registros de saques para esta equipe no período selecionado.');
+        return;
+      }
+
+      const lider = pessoas.find(p => p.id === filtroEntidade.valor);
+      const nomeLider = lider ? lider.nome : 'Equipe';
+
+      const btnZip = document.getElementById('btnGerarExtratosEquipe');
+      const textoOriginal = btnZip.innerHTML;
+      btnZip.innerHTML = 'Gerando ZIP...';
+      btnZip.disabled = true;
+
+      try {
+        await Promise.all([carregarHtml2Canvas(), carregarJSZip()]);
+
+        const zip = new JSZip();
+        const textoPeriodo = obterTextoPeriodoAtual();
+
+        // Agrupa os saques por pessoa (mantendo o nome exato do registro)
+        const gruposPorPessoa = {};
+        dadosEquipe.forEach(s => {
+          if (!gruposPorPessoa[s.nome]) gruposPorPessoa[s.nome] = [];
+          gruposPorPessoa[s.nome].push(s);
+        });
+
+        const nomesOrdenados = Object.keys(gruposPorPessoa).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        let somaGeralEquipe = 0;
+        const resumoMembros = [];
+
+        for (const nomeMembro of nomesOrdenados) {
+          const saquesMembro = gruposPorPessoa[nomeMembro];
+          const { canvas, comissaoTotal, qtdSaques } = await renderizarCanvasExtratoIndividual(nomeMembro, saquesMembro, textoPeriodo);
+
+          somaGeralEquipe += comissaoTotal;
+          resumoMembros.push({
+            nome: nomeMembro,
+            qtd: qtdSaques,
+            valor: comissaoTotal
+          });
+
+          const blobImagem = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          const nomeArquivoPng = `extrato_${nomeMembro.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
+          zip.file(nomeArquivoPng, blobImagem);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        if (equipeZipUrlGlobal) URL.revokeObjectURL(equipeZipUrlGlobal);
+
+        equipeZipBlobGlobal = zipBlob;
+        equipeZipUrlGlobal = URL.createObjectURL(zipBlob);
+        equipeZipNomeArquivoGlobal = `extratos_equipe_${nomeLider.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${obterDataLocalHoje()}.zip`;
+
+        // Preenche o Modal de Confirmação da Equipe
+        document.getElementById('modalEquipeNomeLider').textContent = nomeLider;
+        document.getElementById('modalEquipeValorTotal').textContent = formatarMoeda(somaGeralEquipe);
+        document.getElementById('modalEquipeQtdComprovantes').textContent = `${resumoMembros.length} comprovante(s) individual(is) gerado(s) no ZIP`;
+
+        const listaContainer = document.getElementById('modalEquipeListaMembros');
+        listaContainer.innerHTML = '';
+        const fragLista = document.createDocumentFragment();
+
+        resumoMembros.forEach(m => {
+          const row = document.createElement('div');
+          row.className = 'p-2.5 flex justify-between items-center gap-2';
+          row.innerHTML = `
+            <div class="truncate">
+              <p class="font-semibold text-slate-100 truncate">${m.nome}</p>
+              <p class="text-[10px] text-slate-400">${m.qtd} saque(s)</p>
+            </div>
+            <span class="font-bold text-emerald-400 shrink-0">${formatarMoeda(m.valor)}</span>
+          `;
+          fragLista.appendChild(row);
+        });
+
+        listaContainer.appendChild(fragLista);
+        document.getElementById('modalExtratoEquipe').classList.remove('hidden');
+
+      } catch (err) {
+        alert('Erro ao gerar pacote ZIP da equipe: ' + err.message);
+      } finally {
+        btnZip.innerHTML = textoOriginal;
+        btnZip.disabled = false;
+      }
+    }
+
     function fecharModalExtrato() {
       document.getElementById('modalExtrato').classList.add('hidden');
+    }
+
+    function fecharModalExtratoEquipe() {
+      document.getElementById('modalExtratoEquipe').classList.add('hidden');
     }
 
     async function compartilharExtrato() {
@@ -1302,6 +1653,34 @@
       link.click();
     }
 
+    async function compartilharExtratoEquipeZip() {
+      if (!equipeZipBlobGlobal) return;
+
+      const file = new File([equipeZipBlobGlobal], equipeZipNomeArquivoGlobal, { type: 'application/zip' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: '',
+            text: ''
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') console.error('Erro ao compartilhar ZIP:', err);
+        }
+      } else {
+        baixarExtratoEquipeZip();
+      }
+    }
+
+    function baixarExtratoEquipeZip() {
+      if (!equipeZipUrlGlobal) return;
+      const link = document.createElement('a');
+      link.download = equipeZipNomeArquivoGlobal;
+      link.href = equipeZipUrlGlobal;
+      link.click();
+    }
+
     function renderizar() {
       const menuBusca = document.getElementById('buscaPessoaFiltro');
       const comFocoNaBusca = document.activeElement === menuBusca;
@@ -1312,11 +1691,30 @@
         document.getElementById('dropdownPessoasMenu').classList.remove('hidden');
       }
 
+      const saquesFiltrados = obterSaquesFiltradosAtuais();
+
+      // Controle de exibição dos botões de ação do filtro
       const btnGerarExtrato = document.getElementById('btnGerarExtrato');
-      if (pessoaSelecionadaFiltro) {
+      const btnGerarExtratosEquipe = document.getElementById('btnGerarExtratosEquipe');
+      const btnDarBaixaEquipe = document.getElementById('btnDarBaixaEquipe');
+
+      if (filtroEntidade.tipo === 'pessoa' && filtroEntidade.valor) {
         btnGerarExtrato.classList.remove('hidden');
+        btnGerarExtratosEquipe.classList.add('hidden');
+        btnDarBaixaEquipe.classList.add('hidden');
+      } else if (filtroEntidade.tipo === 'equipe' && filtroEntidade.valor) {
+        btnGerarExtrato.classList.add('hidden');
+        btnGerarExtratosEquipe.classList.remove('hidden');
+        const temPendente = saquesFiltrados.some(s => !s.pago);
+        if (temPendente) {
+          btnDarBaixaEquipe.classList.remove('hidden');
+        } else {
+          btnDarBaixaEquipe.classList.add('hidden');
+        }
       } else {
         btnGerarExtrato.classList.add('hidden');
+        btnGerarExtratosEquipe.classList.add('hidden');
+        btnDarBaixaEquipe.classList.add('hidden');
       }
 
       const botoes = {
@@ -1369,8 +1767,6 @@
         subMobile.textContent = '';
       }
 
-      const saquesFiltrados = obterSaquesFiltradosAtuais();
-
       const tbodyDesktop = document.getElementById('tabelaCorpoDesktop');
       const containerMobile = document.getElementById('listaCardsMobile');
       tbodyDesktop.innerHTML = '';
@@ -1412,7 +1808,6 @@
         const lucroBrutoExibicao = formatarMoeda(lbSeu);
 
         if (!isMobile) {
-          // Renderiza apenas Desktop
           const tr = document.createElement('tr');
           tr.className = 'hover:bg-slate-800/40 transition';
           tr.innerHTML = `
@@ -1433,7 +1828,6 @@
           `;
           fragmentDesktop.appendChild(tr);
         } else {
-          // Renderiza apenas Mobile
           const card = document.createElement('div');
           card.className = 'glass-card rounded-3xl p-3.5 space-y-2 shadow-lg';
           card.innerHTML = `
@@ -1479,7 +1873,6 @@
       document.getElementById('totalLucroLiquido').textContent = formatarMoeda(totalLucroLiq);
     }
 
-    // Otimização de Resize para recalcular quando alternar de tamanho de tela
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
